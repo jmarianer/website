@@ -2,11 +2,7 @@
 ---
 @charset "utf-8";
 
-@import "syntax-highlighting";
-
-body {
-  font-family: Helvetica, Arial, sans-serif;
-}
+@import "syntax-highlighting", "bootstrap.min";
 
 h1, h2 {
   font-weight: 500;
