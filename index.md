@@ -16,6 +16,7 @@ Side projects
 - I enjoy solving crossword puzzles with family members around the word, so I made a [collaborative crossword app](#). This was written in Node.js and deployed with Heroku; the source code is on [Github](#).
 - I am working on a [list of questions to ask at job interviews](#) from the candidate's side.
 - In an effort to learn Haskell, I am working through [Project Euler in Haskell](#).
+- I use this very site to experiment with technologies such as [Jekyll](#), [SASS](#) and [bootstrap.css](#). The source code for this site is on [GitHub](#), and it is served using [GitHub Pages](#).
 
 Likes
 -----
@@ -30,6 +31,6 @@ Dislikes
 - XML
 - Seriously, XML
 - Open office plans
-- Politics (both office and US)
+- Dysfunctional office politics
 - [Nasal demons](#)
 - Did I mention XML?
