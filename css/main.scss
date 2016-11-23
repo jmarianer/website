@@ -5,10 +5,10 @@
 @import "syntax-highlighting", "bootstrap.min";
 
 h1, h2 {
-  font-weight: 500;
+  font-weight: 400;
+  font-variant: small-caps;
 }
 
 h2 {
-  font-variant: small-caps;
   text-transform: lowercase;
 }

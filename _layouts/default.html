@@ -12,8 +12,13 @@
     <link rel="canonical" href="{{ page.url | replace:'index.html','' | prepend: site.url }}">
   </head>
   <body>
-    <div>
+    <div class="col-md-2"></div>
+    <div class="col-md-4 hidden-xs hidden-sm">
+      Background image for desktop goes here.
+    </div>
+    <div class="content col-md-4">
       {{ content }}
     </div>
+    <div class="col-md-2"></div>
   </body>
 </html>
