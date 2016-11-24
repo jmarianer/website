@@ -4,7 +4,6 @@ permalink: /
 Joey Marianer
 =============
 <span class="visible-xs visible-sm">
-...
 </span>
 
 Welcome to my home on the Interwebz! I'm a software engineer, former SRE and current dabbler in the dark arts of UI design. I currently work for Microsoft as a software engineer attempting to bring SRE-like practices to my team.
