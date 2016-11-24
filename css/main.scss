@@ -4,10 +4,18 @@
 
 @import "syntax-highlighting", "bootstrap.min";
 
+html, body {
+  height: 100%;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+}
+
 #bootstrap-override {
   background: rgb(218, 167, 122); // alt: #13E4E4;
   color: rgb(37, 18, 2); // alt: #973900;
   font-size: 16px;
+  font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
 
   h1, h2 {
     font-weight: 400;
@@ -26,4 +34,17 @@
   .pink {
     color: #E82BB6;
   }
+}
+
+.side-image {
+  height: 100%;
+  background: url(/desktop_image.jpg);
+  background-size: 100%;
+  background-repeat: no-repeat;
+  background-position-y: center;
+}
+
+.content {
+  height: 100%;
+  overflow: scroll;
 }

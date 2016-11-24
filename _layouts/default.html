@@ -12,13 +12,13 @@
     <link rel="canonical" href="{{ page.url | replace:'index.html','' | prepend: site.url }}">
   </head>
   <body id="bootstrap-override">
-    <div class="col-md-2"></div>
-    <div class="col-md-4 hidden-xs hidden-sm">
-      Background image for desktop goes here.
+    <div class="col-md-6 hidden-xs hidden-sm side-image"></div>
+    <div class="content col-md-6">
+      <!-- A bit of abuse of Bootstrap: the internal divs' width is relative to the outer div's, so the numbers are twice what they "should be". -->
+      <div class="col-md-8">
+        {{ content }}
+      </div>
+      <div class="col-md-4"></div>
     </div>
-    <div class="content col-md-4">
-      {{ content }}
-    </div>
-    <div class="col-md-2"></div>
   </body>
 </html>
