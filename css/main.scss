@@ -4,11 +4,26 @@
 
 @import "syntax-highlighting", "bootstrap.min";
 
-h1, h2 {
-  font-weight: 400;
-  font-variant: small-caps;
-}
+#bootstrap-override {
+  background: rgb(218, 167, 122); // alt: #13E4E4;
+  color: rgb(37, 18, 2); // alt: #973900;
+  font-size: 16px;
 
-h2 {
-  text-transform: lowercase;
+  h1, h2 {
+    font-weight: 400;
+    font-variant: small-caps;
+  }
+
+  h2 {
+    text-transform: lowercase;
+  }
+
+
+  a {
+    color: rgb(165, 59, 58); // alt: #CA8814;
+  }
+
+  .pink {
+    color: #E82BB6;
+  }
 }

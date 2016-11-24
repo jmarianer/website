@@ -24,7 +24,7 @@ Likes
 - Language lawyering
 - [The Cloud](https://xkcd.com/908/)
 - Walking as a form of exercise (I try to do three miles a day)
-- The color pink.
+- The color <span class="pink">pink</span>.
 
 Dislikes
 --------
