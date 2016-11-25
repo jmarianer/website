@@ -30,7 +30,7 @@ Side projects
 - I enjoy solving crossword puzzles with family members around the word, so I made a [collaborative crossword app](#). This was written in Node.js and deployed with Heroku; the source code is on [Github](#).
 - I am working on a [list of questions to ask at job interviews](#) from the candidate's side.
 - In an effort to learn Haskell, I am working through [Project Euler in Haskell](#).
-- I use this very site to experiment with technologies such as [Jekyll](#), [SASS](#) and [bootstrap.css](#). The source code for this site is on [GitHub](#), and it is served using [GitHub Pages](#).
+- I use this very site to experiment with technologies such as [Jekyll](https://jekyllrb.com/), [SASS](http://sass-lang.com/) and [bootstrap.css](http://getbootstrap.com/). The source code for this site is on [GitHub](https://github.com/jmarianer/website/tree/gh-pages), and it is served using [GitHub Pages](https://pages.github.com/).
 
 Likes
 -----
@@ -38,21 +38,23 @@ Likes
 - Language lawyering
 - [The Cloud](https://xkcd.com/908/)
 - Walking as a form of exercise (I try to do three miles a day)
-- [`vim`](#)
+- [`vim`](http://www.vim.org)
+- Travel (I think I may be the last person in America who still enjoys going to the airport)
 - The color <span class="pink">pink</span>.
 
 Dislikes
 --------
 - XML
 - Seriously, XML
-- Open office plans
+- Open office plans (*please don't contact me about employment if you want me to work in one*)
 - Dysfunctional office politics
-- [Nasal demons](#)
+- [Nasal demons](http://www.catb.org/jargon/html/N/nasal-demons.html) (but I love arguing about them)
 - Did I mention XML?
 
 Links
 -----
-- [Resume](#)
-- [Developer Story](#) on Stack Overflow
-- [LinkedIn](#)
+- [Resume](https://docs.google.com/document/d/1EHy0hI-4FevTn2Hz495xuqm4nI13VU4GVD8xkdWlDS8/edit?usp=sharing)
+- [Developer Story](http://stackoverflow.com/story/joeym) on Stack Overflow
 - [Email me](mailto:me@joeym.org)
+
+`:wq`
