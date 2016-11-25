@@ -8,11 +8,21 @@ Joey Marianer
 
 Welcome to my home on the Interwebz! Sparse, I know, but I'm a man of few words.
 
-I have been a professional software developer since high-school (I am now in my thirties) in a variety of roles – backend, frontend and even some low-level hardware stuff. I am always on the lookout for interesting new opportunities. While my interests have varied over the years, I currently find myself interested primarily in frontend and UX work.
+I have been a professional software developer since high-school (I am now in my
+thirties) in a variety of roles – backend, frontend and even some low-level
+hardware stuff. I have a bachelor's degree in math and CS, and I took
+graduate-level courses but never finished my degree. Learning cool stuff is
+nice, but fighting the bureaucracy in academia was not.
 
-My most recent employer was Google. Google enjoys open office plans, which I could live with (even though I hate them); but they also enjoy continuously shrinking the amount of space per person, up tp the point that I got fed up. My current employer is Microsoft, who offered me a private office (with a door!). **Please don't contact me about employment unless you're willing to offer me the same.**
+It turns out one can learn stuff without fighting with academia. My favorite
+thing to learn was how to be a site reliability engineer at Google.  I'm
+currently working for Microsoft, attempting to apply some of what I learned to
+a team inside Bing.
 
-My bachelor's degree is in math and CS. I took graduate-level courses but never finished my degree. Learning cool stuff is nice, but fighting the bureaucracy in academia was not.
+I am, of course, always on the lookout for interesting new opportunities. While
+my interests have varied over the years, I currently find myself interested
+primarily in frontend and UX work... but anything interesting and outside of
+the norm is at least worth considering.
 
 Side projects
 -------------
