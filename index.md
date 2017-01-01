@@ -26,12 +26,10 @@ the norm is at least worth considering.
 
 Side projects
 -------------
-(Struck through lines describe projects which are not yet public)
-
-- <del>I recently took an introductory course in UI design and built a small [portfolio](#).</del>
 - I enjoy solving crossword puzzles with family members around the word, so I made a [collaborative crossword app](http://crosswords.joeym.org/create/English). This was written in Node.js and deployed with Heroku; the source code is on [Github](https://github.com/jmarianer/crossword).
 - In an effort to learn Haskell, I am working through [Project Euler in Haskell](https://github.com/jmarianer/euler-haskell).
 - I use this very site to experiment with technologies such as [Jekyll](https://jekyllrb.com/), [SASS](http://sass-lang.com/) and [bootstrap.css](http://getbootstrap.com/). The source code for this site is on [GitHub](https://github.com/jmarianer/website/tree/gh-pages), and it is served using [GitHub Pages](https://pages.github.com/).
+- I am making my first [attempt at blogging](/blog).
 
 Likes
 -----

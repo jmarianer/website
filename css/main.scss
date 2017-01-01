@@ -59,3 +59,21 @@ html, body {
   height: 100%;
   overflow: scroll;
 }
+
+.post-list {
+  li {
+    a {
+      font-size: 19px;
+    }
+
+    span {
+      font-size: smaller;
+      font-style: oblique;
+    }
+  }
+
+  ul {
+    list-style: none;
+    padding: 0px;
+  }
+}
