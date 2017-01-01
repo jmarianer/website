@@ -22,6 +22,10 @@ html, body {
     font-variant: small-caps;
   }
 
+  h1 {
+    font-size: 48px;
+  }
+
   h2 {
     text-transform: lowercase;
   }
@@ -44,10 +48,11 @@ html, body {
 
 .side-image {
   height: 100%;
-  background: url(/desktop_image.png);
+  background: url(/desktop_image.jpg);
   background-size: 100%;
   background-repeat: no-repeat;
-  background-position-y: center;
+  background-position-y: top;
+  background-color: #081023;
 }
 
 .content {

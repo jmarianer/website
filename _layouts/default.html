@@ -14,11 +14,11 @@
   <body id="bootstrap-override">
     <a class="col-md-6 hidden-xs hidden-sm side-image" href="/"></a>
     <div class="content col-md-6">
-      <!-- A bit of abuse of Bootstrap: the internal divs' width is relative to the outer div's, so the numbers are twice what they "should be". -->
-      <div class="col-md-8">
+      <!-- A bit of abuse of Bootstrap: the internal divs' width is relative to the outer div's, so the widths are half what they "should be". The extra layer of divs is used to make sure the scrollbar is all the way to the right of the screen. -->
+      <div class="col-md-1"></div>
+      <div class="col-md-10">
         {{ content }}
       </div>
-      <div class="col-md-4"></div>
     </div>
   </body>
 </html>
