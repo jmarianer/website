@@ -41,8 +41,22 @@ html, body {
 
   code {
     color: inherit;
-    background: inherit;
-    padding: inherit;
+    background: transparent;
+    padding: 0px;
+  }
+
+  pre {
+    border: 1px solid rgba(0,0,0,0.2);
+    border-radius: 10px;
+    background: rgba(0,0,0,0.1);
+  }
+
+  .c, .c1 {
+    color: green;
+    // Typographical pet peeve: it's not italic, it's slanted Roman, aka
+    // "oblique".  The default here is "italic" which does the exact same
+    // thing, so this is just me being nitpicky as usual.
+    font-style: oblique;
   }
 }
 
@@ -75,5 +89,32 @@ html, body {
   ul {
     list-style: none;
     padding: 0px;
+  }
+}
+
+.post-navigation {
+  display: flex;
+  flex-direction: row;
+
+  a, div {
+    flex: 1 0 0px;
+  }
+
+  a {
+    &:first-child {
+      text-align: left;
+
+      &:before {
+        content: "\ab  "
+      }
+    }
+
+    &:last-child {
+      text-align: right;
+
+      &:after {
+        content: " \bb"
+      }
+    }
   }
 }
