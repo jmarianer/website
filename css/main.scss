@@ -60,18 +60,27 @@ html, body {
   }
 }
 
-.side-image {
-  height: 100%;
-  background: url(/desktop_image.jpg);
+.sidebar {
   background-size: 100%;
   background-repeat: no-repeat;
   background-position-y: top;
   background-color: #081023;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  a img {
+    border-radius: 100px;
+    width: 350px;
+  }
+
+  a svg * {
+    fill: #828282;
+  }
 }
 
 .content {
-  height: 100%;
-  overflow: scroll;
+  overflow-y: scroll;
 }
 
 .post-list {
@@ -116,5 +125,30 @@ html, body {
         content: " \bb"
       }
     }
+  }
+}
+
+@media (max-width: 991px) {
+  .sidebar {
+    padding-bottom: 10px;
+
+    a img {
+      display: none;
+    }
+  }
+
+  .post-list li span {
+    display: none;
+  }
+}
+
+@media (min-width: 992px) {
+  .sidebar {
+    height: 100%;
+    padding-top: 100px;
+  }
+
+  .content {
+    height: 100%;
   }
 }

@@ -3,9 +3,6 @@ permalink: /
 ---
 Joey Marianer
 =============
-<span class="visible-xs visible-sm">
-</span>
-
 Welcome to my home on the Interwebz! Sparse, I know, but I'm a man of few words.
 
 I have been a professional software developer since high-school (I am now in my
