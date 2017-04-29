@@ -1,9 +1,6 @@
 title: Joey Marianer
 email: me@joeym.org
-description: >
-  Write an awesome description for your new site here. You can edit this
-  line in _config.yml. It will appear in your document head meta (for
-  Google search results) and in your feed.xml site description.
+description: "Joey Marianer: Software developer, UI enthusiast, tinkerer, homeowner, pedant."
 url: "http://joeym.org"
 markdown: kramdown
 gems:
