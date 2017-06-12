@@ -19,9 +19,9 @@ classified locations). If I'm going to be spending 40 or more hours a week in a
 chair for the foreseeable future, I'd like to know what I'm getting myself
 into.  Everyone's limits may be different; mine is that [my private office has
 to have a door](on-private-offices), but even if you're comfortable in an open
-office environment, you probably want to make see what the noise levels are
-like, if the decor is depressing, and who else is in your area. Walking around
-the office space for five minutes should do the trick.
+office environment, you probably want to see what the noise levels are like, if
+the decor is depressing, and who else is in your area. Walking around the
+office space for five minutes should do the trick.
 
 2. Are there expected to be any changes to the office environment in the coming
    months/years?
