@@ -13,7 +13,7 @@ Nor have I interviewed any prospective software engineers in my career.
 I've known enough people who did, though, to be able to say with relative
 confidence that they aren't looking to judge the candidate with that question.
 They use their regular interview question to find out if the candidate can
-do the job, but but at the end they genuinely want to help the job seeker find
+do the job, but at the end they genuinely want to help the job seeker find
 out more about the job &ndash; at least if the candidate wasn't a complete dud.
 ([Joel](https://www.joelonsoftware.com/2006/10/25/the-guerrilla-guide-to-interviewing-version-30/)
 has stated that he even tries to sell the company on candidates he intends to
