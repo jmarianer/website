@@ -36,7 +36,7 @@ any, so I didn't care.
 git config --unset-all remote.origin.fetch
 # Add (only) "master" and "joeym/*". We can add any shared branches here, too.
 git config --add remote.origin.fetch +refs/heads/master:refs/remotes/origin/master
-git config --add remote.origin.fetch +refs/heads/romari/*:refs/remotes/origin/romari/*
+git config --add remote.origin.fetch +refs/heads/joeym/*:refs/remotes/origin/joeym/*
 ```
 
 `git gc` still won't clean anything up in the current situation, because we
@@ -53,7 +53,7 @@ git for-each-ref --format "%(refname)" refs/remotes/origin | xargs -n1 git updat
     git fetch
 
 If we have recently fetched, this won't add any new objects, but it will
-recreate the `remotes/origin/master` and `remotes/origin/joeym/*` branches.
+recreate the `remotes/origin/master` and `remotes/origin/joeym/*` refs.
 
 Now, all the large objects in joesmith's branch are unreferenced. A simple
 

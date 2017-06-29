@@ -21,7 +21,7 @@ git remote add origin https://path.to/my/repo
 # Now repeat the steps from last time:
 git config --unset-all remote.origin.fetch
 git config --add remote.origin.fetch +refs/heads/master:refs/remotes/origin/master
-git config --add remote.origin.fetch +refs/heads/romari/*:refs/remotes/origin/romari/*
+git config --add remote.origin.fetch +refs/heads/joeym/*:refs/remotes/origin/joeym/*
 git fetch
 ```
 
