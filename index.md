@@ -49,7 +49,7 @@ Dislikes
 
 Links
 -----
-- [Resume](https://docs.google.com/document/d/1EHy0hI-4FevTn2Hz495xuqm4nI13VU4GVD8xkdWlDS8/edit?usp=sharing)
+- [Resume](/resume)
 - [GitHub profile](https://github.com/jmarianer)
 - [Developer Story](http://stackoverflow.com/story/joeym) on Stack Overflow
 - [Email me](mailto:me@joeym.org)
