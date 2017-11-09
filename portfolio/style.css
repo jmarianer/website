@@ -8,26 +8,34 @@
   background-size: contain;
 }
 
-.portfolio-grid {
+.portfolio-grid .item {
   display: grid;
   grid-template-columns: 300px auto;
-}
-
-@media only screen and (max-width: 500px) {
-  .portfolio-grid {
-    grid-template-columns: auto;
-  }
+  grid-template-rows: 2em auto;
+  grid-template-areas: "a b" "a c";
 }
 
 .portfolio-grid .description {
+  grid-area: c;
 }
 
 .portfolio-grid .image {
   width: 300px;
+  grid-area: a;
 }
 
 .portfolio-grid .title {
   font-weight: bold;
   font-variant: small-caps;
   font-size: 1.4em;
+  grid-area: b;
 }
+
+@media only screen and (max-width: 500px) {
+  .portfolio-grid .item {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 2em;
+  }
+}
+
