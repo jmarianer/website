@@ -43,13 +43,15 @@ body {
   width: 100%;
 }
 
-.menu li {
+.menu a {
   font-size: 18px;
   padding: 10px 10px;
   margin-right: 20px;
+  text-decoration: none;
+  color: inherit;
 }
 
-.menu li:hover {
+.menu a:hover {
   background-color: black;
   color: #eae1d0;
 }
@@ -70,4 +72,64 @@ h1 {
 
 p {
   margin: 0px;
+}
+
+.horizontal-box {
+  display: flex;
+  margin-top: 30px;
+  flex-direction: row;
+}
+
+.it-happened {
+  flex: 33%;
+  font-size: 14px;
+  padding: 20px;
+}
+
+.it-happened h1 {
+  margin: 0px;
+  font-weight: bold;
+  font-size: 20px;
+  text-align: center;
+}
+
+.it-happened h2 {
+  margin: 0px;
+  font-size: 16px;
+  margin-top: 20px;
+  font-weight: normal;
+}
+
+.get-involved {
+  flex: 66%;
+  background-color: #55b1fb;
+  border-radius: 20px;
+  padding: 30px;
+  display: flex;
+  flex-direction: column;
+}
+
+.get-involved h1 {
+  font-size: 24px;
+  font-family: "PT Sans Caption";
+  margin: 0px;
+  font-weight: bold;
+}
+
+.get-involved p {
+  margin-top: 10px;
+}
+
+.get-involved a {
+  color: #eae1d0;
+  padding: 10px;
+  border: 1px solid #eae1d0;
+  text-decoration: none;
+  align-self: center;
+  margin-top: 10px;
+}
+
+.get-involved a:hover {
+  background-color: #eae1d0;
+  color: #55b1fb;
 }
