@@ -27,6 +27,7 @@ Side projects
 - In an effort to learn Haskell, I am working through [Project Euler in Haskell](https://github.com/jmarianer/euler-haskell).
 - I use this very site to experiment with technologies such as [Jekyll](https://jekyllrb.com/), [SASS](http://sass-lang.com/) and [bootstrap.css](http://getbootstrap.com/). The source code for this site is on [GitHub](https://github.com/jmarianer/website/tree/gh-pages), and it is served using [GitHub Pages](https://pages.github.com/).
 - I am making my first [attempt at blogging](/blog).
+- I have been designing and implementing stuff in HTML for fun (I actually like CSS, despite all the negativity I keep seeing around the Internet). I have a small [portfolio](/portfolio).
 
 Likes
 -----
