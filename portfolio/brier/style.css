@@ -23,6 +23,7 @@ body {
 
 .content > * {
   padding-left: 40px;
+  padding-right: 40px;
 }
 
 .header-image {
@@ -83,7 +84,7 @@ p {
 .it-happened {
   flex: 33%;
   font-size: 14px;
-  padding: 20px;
+  padding-right: 20px;
 }
 
 .it-happened h1 {
@@ -109,11 +110,15 @@ p {
   flex-direction: column;
 }
 
-.get-involved h1 {
+.get-involved h1, .headlines h1 {
   font-size: 24px;
   font-family: "PT Sans Caption";
   margin: 0px;
   font-weight: bold;
+}
+
+.headlines p + h1 {
+  margin-top: 15px;
 }
 
 .get-involved p {
@@ -132,4 +137,15 @@ p {
 .get-involved a:hover {
   background-color: #eae1d0;
   color: #55b1fb;
+}
+
+.headlines {
+  flex: 50%;
+  margin-right: 40px;
+}
+
+.footer {
+  font-size: 10px;
+  margin-top: 10px;
+  margin-bottom: 20px;
 }
