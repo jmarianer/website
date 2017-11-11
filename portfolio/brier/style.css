@@ -75,10 +75,14 @@ p {
   margin: 0px;
 }
 
-.horizontal-box {
+.horizontal-box, .get-involved-container {
   display: flex;
   margin-top: 30px;
   flex-direction: row;
+}
+
+.get-involved-container {
+  flex-direction: row-reverse;
 }
 
 .it-happened {
@@ -151,4 +155,45 @@ p {
   position: sticky;
   bottom: 0px;
   background-color: #eae1d0;
+}
+
+@media only screen and (max-width: 1024px) {
+  .content {
+    width: 100%;
+  }
+
+  .horizontal-box, .get-involved-container {
+    display: inline;
+  }
+
+  .it-happened {
+    font-size: inherit;
+  }
+
+  .it-happened h1 {
+    font-weight: bold;
+    font-size: 24px;
+    text-align: inherit;
+  }
+
+  .it-happened h2 {
+    font-size: 20px;
+    font-weight: normal;
+  }
+}
+
+@media only screen and (max-width: 483px) {
+  .header-image {
+    width: 100%;
+    background-size: contain;
+    background-repeat: no-repeat;
+  }
+
+  .menu {
+    display: none;
+  }
+
+  .footer {
+    position: static;
+  }
 }
