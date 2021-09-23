@@ -1,0 +1,2 @@
+bundle exec jekyll b
+gsutil cp -r _site/* gs://joeym-org-main-website
