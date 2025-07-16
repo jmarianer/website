@@ -7,7 +7,7 @@ resource "google_compute_global_address" "joeym-org-ip" {
 }
 
 resource "google_compute_global_forwarding_rule" "forwarding-rule" {
-  name = "joeym-org"
+  name = "joeym-org-http"
   target = google_compute_target_http_proxy.http-proxy.self_link
   ip_address = google_compute_global_address.joeym-org-ip.self_link
   ip_protocol = "TCP"
@@ -15,8 +15,18 @@ resource "google_compute_global_forwarding_rule" "forwarding-rule" {
 }
 
 resource "google_compute_target_http_proxy" "http-proxy" {
-  name    = "joeym-org"
-  url_map = google_compute_url_map.url-map.id
+  name    = "joeym-org-http"
+  url_map = google_compute_url_map.http-redirect-map.id
+}
+
+resource "google_compute_url_map" "http-redirect-map" {
+  name = "joeym-org-http-redirect"
+
+  default_url_redirect {
+    https_redirect = true
+    redirect_response_code = "MOVED_PERMANENTLY_DEFAULT"
+    strip_query = true
+  }
 }
 
 resource "google_compute_global_forwarding_rule" "forwarding-rule-https" {
@@ -49,7 +59,6 @@ resource "google_compute_url_map" "url-map" {
     hosts        = ["joeym.org"]
     path_matcher = "allpaths"
   }
-
 
   path_matcher {
     name            = "allpaths"
