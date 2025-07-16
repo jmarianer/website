@@ -1,2 +1,10 @@
-bundle exec jekyll b
+# Install
+gem install bundler
+bundle install
+
+# Serve
+bundle exec jekyll serve
+
+# Deploy
+bundle exec jekyll build
 gsutil cp -r _site/* gs://joeym-org-main-website
