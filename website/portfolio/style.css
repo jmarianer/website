@@ -13,6 +13,7 @@
   grid-template-columns: 300px auto;
   grid-template-rows: 2em auto;
   grid-template-areas: "a b" "a c";
+  margin-bottom: 3rem;
 }
 
 .portfolio-grid .description {

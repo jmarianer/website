@@ -6,10 +6,29 @@ permalink: /portfolio/
 <link rel="stylesheet" href="style.css" />
 <div class="portfolio-grid">
   <div class="item">
+    <div class="title">Factorio item viewer</div>
+    <div class="image"><img src="factorio.png" width="200px" /></div>
+    <div class="description">
+      I was watching a YouTube video about Factorio Space Exploration, and I
+      wanted to be able to see the tech tree. This evolved into extracting all
+      the item icons, recipes and even some animations. The backend (icon and
+      animation extraction) is written in Python with a tiny bit of Lua glue
+      code. The front end is React. The source code is on <a
+      href="https://github.com/jmarianer/factorio-tech-tree">GitHub</a>.
+    </div>
+  </div>
+
+  <div class="item">
     <div class="title">Brier town homepage</div>
     <div class="image"><span class="brier-image"></span></div>
     <div class="description">
-      As part of my <a href="http://trydesignlab.com">DesignLab</a> course, I reimagined the <a href="http://www.ci.brier.wa.us/">homepage for my town</a> with a more modern look. I have made available a <a href="brier/Brier Wireframe.png">wireframe</a>, some <a href="brier/Brier V2.png">intermediate</a> <a href="brier/Brier V5.png">versions</a>, and the <a href="brier/Brier V6.png">final design</a>. I have also rendered the <a href="brier/brier.html">front page in HTML</a>.
+      As part of my <a href="http://trydesignlab.com">DesignLab</a> course, I
+      reimagined the <a href="http://www.ci.brier.wa.us/">homepage for my
+      town</a> with a more modern look. I have made available a <a
+      href="brier/Brier Wireframe.png">wireframe</a>, some <a href="brier/Brier
+      V2.png">intermediate</a> <a href="brier/Brier V5.png">versions</a>, and
+      the <a href="brier/Brier V6.png">final design</a>. I have also rendered
+      the <a href="brier/brier.html">front page in HTML</a>.
     </div>
   </div>
 
@@ -17,15 +36,15 @@ permalink: /portfolio/
     <div class="title">Collaborative crossword app</div>
     <div class="image"><img src="crossword.png" /></div>
     <div class="description">
-      I made this app to help my family solve crosswords collaboratively across multiple timezones. Since there is only one user (myself) who creates crosswords, the <a href="http://crosswords.joeym.org/create/English">create workflow</a> is not as nice as it could be. The <a href="http://crosswords.joeym.org/puzzle/5a00c4a65a28b7001c9a31f7">solving page</a> is used by multiple people (where "multiple" is defined as "five"), so it is somewhat nicer. The source code is on <a href="https://github.com/jmarianer/crossword">GitHub</a>.
-    </div>
-  </div>
-  
-  <div class="item">
-    <div class="title">Bricks puzzle solver</div>
-    <div class="image"><img src="bricks.png" height="200px" /></div>
-    <div class="description">
-      As an exercise in functional programming, I wrote a solver for <a href="https://play.google.com/store/apps/details?id=com.fiveminlab.brickscape&hl=en">Brickscape</a>. The UI is written in Elm and compiled to JavaScript. The server, including the solver, is written in Haskell. Links: <a href="http://bricks-demo.joeym.org/">Live version</a>, <a href="https://github.com/jmarianer/bricks-demo">GitHub</a>.
+      I made this app to help my family solve crosswords collaboratively across
+      multiple timezones. Since there is only one user (myself) who creates
+      crosswords, the <a
+      href="FIXME">create workflow</a> is
+      not as nice as it could be. The <a
+      href="FIXME">solving
+      page</a> is used by multiple people (where "multiple" is defined as
+      "five"), so it is somewhat nicer. The source code is on <a
+      href="https://github.com/jmarianer/crossword">GitHub</a>.
     </div>
   </div>
   
@@ -33,8 +52,25 @@ permalink: /portfolio/
     <div class="title">Universal Paperclips in Elm</div>
     <div class="image"><img src="paperclips.png" width="200px" /></div>
     <div class="description">
-      After wasting a weekend on <a href="http://www.decisionproblem.com/paperclips/">Universal Paperclips</a>, I decided to write a clone in Elm. 
-      Links: <a href="http://paperclips.joeym.org/">Live version</a>, <a href="https://github.com/jmarianer/paperclips">GitHub</a>.
+      After wasting a weekend on <a
+      href="http://www.decisionproblem.com/paperclips/">Universal
+      Paperclips</a>, and in my Elm-fueled frenzy, I decided to write a clone in
+      Elm. The source code is on <a
+      href="https://github.com/jmarianer/paperclips">GitHub</a>.
+    </div>
+  </div>
+  
+  <div class="item">
+    <div class="title">Bricks puzzle solver</div>
+    <div class="image"><img src="bricks.png" height="200px" /></div>
+    <div class="description">
+      As an exercise in functional programming, I wrote a solver for <a
+      href="https://brickscape.5minlab.com">Brickscape</a>. The UI is written in
+      Elm and compiled to JavaScript. The server, including the solver, is
+      written in Haskell. The source code is on <a
+      href="https://github.com/jmarianer/bricks-demo">GitHub</a>. It doesn't
+      look nice because the main aim was to write a decent solver in Haskell,
+      not the UI.
     </div>
   </div>
 </div>
