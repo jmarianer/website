@@ -1,0 +1,9 @@
+# Install
+npm install
+
+# Serve
+npm start
+
+# Deploy
+npm run build
+gsutil -m cp -r _site/* gs://crosswords-joeym-org
