@@ -1,0 +1,125 @@
+body {
+  align-items: center;
+  background: linear-gradient(135deg, #f5f1e8 0%, #e8dcc6 100%);
+  display: flex;
+  flex-direction: column;
+  font-family: 'Arial', sans-serif;
+  margin: 0;
+  min-height: 100vh;
+  box-sizing: border-box;
+}
+
+#root {
+  display: flex;
+  padding: 40px 20px;
+  flex-direction: column;
+  align-items: center;
+  background-color: white;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+  box-sizing: border-box;
+  min-height: 100vh;
+  min-width: 50vw;
+}
+
+h1 {
+  color: #2c3e50;
+  margin-bottom: 100px;
+  letter-spacing: 1px;
+}
+
+.crossword-holder {
+  border: 3px solid #2c3e50;
+  border-radius: 12px;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+.crossword {
+  border-collapse: collapse;
+  position: relative;
+
+  td {
+    border: 1px solid black;
+    height: 40px;
+    text-align: center;
+    width: 40px;
+    position: relative;
+
+    .number {
+      font-size: 0.5em;
+      position: absolute;
+      top: 1px;
+    }
+  }
+
+  .black {
+    background-color: black;
+  }
+
+  .outside {
+    border: 0px;
+  }
+
+  .empty {
+    background-color: white;
+  }
+
+  .active-word {
+    background-color: #b3d0ff;
+  }
+
+  .active {
+    background-color: #4a90e2;
+  }
+
+  .word-boundary-down {
+    border-bottom-width: 3px;
+  }
+
+  .word-boundary-across {
+    [dir='rtl'] {
+      border-left-width: 3px;
+    }
+
+    [dir='ltr'] {
+      border-right-width: 3px;
+    }
+  }
+}
+
+.create-interface {
+  display: flex;
+  width: 100%;
+
+  .input-section {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+
+    .instructions {
+      padding-bottom: 10px;
+    }
+    
+    textarea {
+      font-family: monospace;
+      border-radius: 4px;
+    }
+  }
+
+  .preview-section {
+    flex: 1;
+    align-items: center;
+    display: flex;
+    flex-direction: column;
+    
+    td {
+      height: 20px;
+      width: 20px;
+    }
+  }
+}
+
+.create-button {
+  margin-top: 20px;
+  width: 100%;
+  padding: 10px;
+}
