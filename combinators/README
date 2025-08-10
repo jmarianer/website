@@ -5,4 +5,5 @@ npm install
 npm start
 
 # Deploy
-(not yet...)
+npm run build
+gsutil -m cp -r dist/* gs://combinators-joeym-org

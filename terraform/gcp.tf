@@ -47,7 +47,7 @@ resource "google_compute_managed_ssl_certificate" "ssl_cert" {
   name = "joeym-org-cert"
 
   managed {
-    domains = ["joeym.org", "crosswords.joeym.org"]
+    domains = ["joeym.org", "crosswords.joeym.org", "combinators.joeym.org"]
   }
 }
 
@@ -63,6 +63,11 @@ resource "google_compute_url_map" "url-map" {
   host_rule {
     hosts        = ["crosswords.joeym.org"]
     path_matcher = "crosswords"
+  }
+
+  host_rule {
+    hosts        = ["combinators.joeym.org"]
+    path_matcher = "combinators"
   }
 
   path_matcher {
@@ -83,10 +88,11 @@ resource "google_compute_url_map" "url-map" {
   path_matcher {
     name            = "crosswords"
     default_service = google_compute_backend_bucket.crosswords-backend-bucket.id
+  }
 
-    # path_rule {
-    #   paths = ["/*"]
-    # }
+  path_matcher {
+    name            = "combinators"
+    default_service = google_compute_backend_bucket.combinators-backend-bucket.id
   }
 }
 
@@ -102,6 +108,12 @@ resource "google_compute_backend_bucket" "crosswords-backend-bucket" {
   enable_cdn  = true
 }
 
+resource "google_compute_backend_bucket" "combinators-backend-bucket" {
+  name        = "combinators-joeym-org"
+  bucket_name = google_storage_bucket.combinators-bucket.name
+  enable_cdn  = true
+}
+
 resource "google_storage_bucket" "bucket" {
   name = "joeym-org-main-website"
   location = "US"
@@ -109,6 +121,16 @@ resource "google_storage_bucket" "bucket" {
 
 resource "google_storage_bucket" "crosswords_bucket" {
   name = "crosswords-joeym-org"
+  location = "US"
+
+  website {
+    main_page_suffix = "index.html"
+    not_found_page   = "index.html"
+  }
+}
+
+resource "google_storage_bucket" "combinators-bucket" {
+  name = "combinators-joeym-org"
   location = "US"
 
   website {
