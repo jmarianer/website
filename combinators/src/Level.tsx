@@ -51,9 +51,7 @@ function tryIt(expr1: CombinatorExpression, expr2: CombinatorExpression, basicCo
 }
 
 function combinatorDescriptor(c: string) {
-  const {name, argCount, template} = allBasicCombinators[c];
-
-  const argNames = 'abcdefghijklmnopqrstuvwxyz'.slice(0, argCount);
+  const {name, argNames, template} = allBasicCombinators[c];
   return <span>{name}{argNames} ⇒ {template}</span>;
 }
 

@@ -1,19 +1,19 @@
 import { CombinatorExpression, Application, Combinator, parseExpression, Variable } from "./combinators";
 
 export interface BasicCombinator {
-  argCount: number;
+  argNames: string
   template: string;
   name: string;
 }
 
 export const allBasicCombinators: Record<string, BasicCombinator> = {
-  S: { argCount: 3, template: 'ac(bc)', name: 'S' },
-  K: { argCount: 2, template: 'a', name: 'K' },
-  I: { argCount: 1, template: 'a', name: 'I' },
-  M: { argCount: 1, template: 'aa', name: 'M' },
-  B: { argCount: 3, template: 'a(bc)', name: 'B' },
-  C: { argCount: 3, template: 'acb', name: 'C' },
-  W: { argCount: 2, template: 'abb', name: 'W' },
+  S: { argNames: 'xyz', template: 'xz(yz)', name: 'S' },
+  K: { argNames: 'xy', template: 'x', name: 'K' },
+  I: { argNames: 'x', template: 'x', name: 'I' },
+  M: { argNames: 'x', template: 'xx', name: 'M' },
+  B: { argNames: 'xyz', template: 'x(yz)', name: 'B' },
+  C: { argNames: 'xyz', template: 'xzy', name: 'C' },
+  W: { argNames: 'xy', template: 'xyy', name: 'W' },
 };
 
 export function reduceOnce(e: CombinatorExpression, basicCombinators: Record<string, BasicCombinator>): CombinatorExpression | false {
@@ -23,10 +23,14 @@ export function reduceOnce(e: CombinatorExpression, basicCombinators: Record<str
 
   const [func, ...args] = getArgs(e);
   if (func instanceof Combinator && func.value in basicCombinators) {
-    const {argCount, template} = basicCombinators[func.value];
-    if (args.length === argCount) {
+    const {argNames, template} = basicCombinators[func.value];
+    if (args.length === argNames.length) {
       const s = parseExpression(template);
-      return substitute(s, args);
+      const substitutions: Record<string, CombinatorExpression> = {};
+      for (let i = 0; i < argNames.length; ++i) {
+        substitutions[argNames[i]] = args[i];
+      }
+      return substitute(s, substitutions);
     }
   }
 
@@ -53,13 +57,12 @@ function getArgs(e: CombinatorExpression): CombinatorExpression[] {
   return args;
 }
 
-function substitute(expr: CombinatorExpression, values: CombinatorExpression[]): CombinatorExpression {
+function substitute(expr: CombinatorExpression, substitutions: Record<string, CombinatorExpression>): CombinatorExpression {
   if (expr instanceof Variable) {
-    const varIndex = expr.value.charCodeAt(0) - 'a'.charCodeAt(0);
-    return values[varIndex];
+    return substitutions[expr.value];
   }
   if (expr instanceof Application) {
-    return new Application(substitute(expr.left, values), substitute(expr.right, values));
+    return new Application(substitute(expr.left, substitutions), substitute(expr.right, substitutions));
   }
   return expr;
 }
