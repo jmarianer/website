@@ -23,4 +23,11 @@ export const levels: Level[] = [
     f2: e => new Application(e, e),
     allowedCombinators: 'MB',
   },
+  {
+    title: 'Level 3',
+    goal: 'Construct an expression θ such that θa = θ for all a',
+    f1: e => e,
+    f2: e => new Application(e, new Variable('a')),
+    allowedCombinators: 'MBK',
+  },
 ]

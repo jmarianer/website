@@ -1,6 +1,6 @@
 import { CombinatorExpression, Application, Combinator, parseExpression, Variable } from "./combinators";
 
-interface BasicCombinator {
+export interface BasicCombinator {
   argCount: number;
   template: string;
   name: string;

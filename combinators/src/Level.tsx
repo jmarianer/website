@@ -1,8 +1,9 @@
 import { useState } from 'react'
 import { CombinatorExpression, parseExpression } from './combinators';
-import { allBasicCombinators, reduce } from "./reduce";
+import { allBasicCombinators, reduce, type BasicCombinator } from "./reduce";
 import { levels } from './levels';
 import { useParams } from 'react-router';
+import { pick, reverse } from 'lodash';
 
 function ShowReductions({ r }: { r: CombinatorExpression[] }) {
   if (!r.length) {
@@ -18,10 +19,10 @@ function ShowReductions({ r }: { r: CombinatorExpression[] }) {
   return <div>{ret}</div>;
 }
 
-function tryIt(expr1: CombinatorExpression, expr2: CombinatorExpression) {
+function tryIt(expr1: CombinatorExpression, expr2: CombinatorExpression, basicCombinators: Record<string, BasicCombinator>) {
   try {
-    const reductions1 = reduce(expr1, allBasicCombinators);
-    const reductions2 = reduce(expr2, allBasicCombinators);
+    const reductions1 = reduce(expr1, basicCombinators);
+    const reductions2 = reduce(expr2, basicCombinators);
 
     const set1 = new Set(reductions1.map(e => e.toString()));
     const set2 = new Set(reductions2.map(e => e.toString()));
@@ -30,12 +31,18 @@ function tryIt(expr1: CombinatorExpression, expr2: CombinatorExpression) {
     if (win) {
       reductions1.length = reductions1.findIndex(e => set2.has(e.toString())) + 1;
       const common = reductions1[reductions1.length-1].toString();
-      reductions2.length = reductions2.findIndex(e => e.toString() === common) + 1;
+      reductions2.length = reductions2.findIndex(e => e.toString() === common);
+
+      const reductions = [...reductions1, ...reverse(reductions2)];
+
+      return <div className='win'>
+        <ShowReductions r={reductions} />
+      </div>
     }
 
-    return <div className={win ? 'win' : 'lose'}>
-      <ShowReductions key={1} r={reductions1} />
-      <ShowReductions key={2} r={reductions2} />
+    return <div className='lose'>
+      <ShowReductions r={reductions1} />
+      <ShowReductions r={reductions2} />
     </div>;
   }
   catch (e) {
@@ -43,9 +50,16 @@ function tryIt(expr1: CombinatorExpression, expr2: CombinatorExpression) {
   }
 }
 
+function combinatorDescriptor(c: string) {
+  const {name, argCount, template} = allBasicCombinators[c];
+
+  const argNames = 'abcdefghijklmnopqrstuvwxyz'.slice(0, argCount);
+  return <span>{name}{argNames} ⇒ {template}</span>;
+}
+
 export function Level() {
   const {id} = useParams();
-  const {goal, f1, f2, title } = levels[parseInt(id!, 10) - 1];
+  const {goal, f1, f2, title, allowedCombinators } = levels[parseInt(id!, 10) - 1];
 
   const [exprString, setExprString] = useState('');
   let [results, setResults] = useState(<></>);
@@ -58,10 +72,15 @@ export function Level() {
         <input value={exprString} onChange={e => setExprString(e.target.value)} />
         <button onClick={() => {
           const inputExpr = parseExpression(exprString);
-          setResults(tryIt(f1(inputExpr), f2(inputExpr)));
+          setResults(tryIt(f1(inputExpr), f2(inputExpr), pick(allBasicCombinators, allowedCombinators.split(''))));
         }}>Try it!</button>
       </span>
       {results}
+      <div className='spacer' />
+      <div className='allowed'>
+        <h1>Allowed combinators</h1>
+        {allowedCombinators.split('').map(c => combinatorDescriptor(c))}
+      </div>
     </>
   );
 }
