@@ -1,5 +1,6 @@
 import { useState } from 'react'
-import { CombinatorExpression, defaultCombinators, parseExpression, reduceOnce } from './combinators';
+import { CombinatorExpression, parseExpression } from './combinators';
+import { allBasicCombinators, reduceOnce } from "./reduce";
 
 function App() {
   const [exprString, setExprString] = useState('Kxy');
@@ -17,7 +18,7 @@ function App() {
     let reducedExpr = expr;
     while (reducedExpr && reductions.length < 50) {
       reductions.push(reducedExpr.toString(false));
-      reducedExpr = reduceOnce(reducedExpr, defaultCombinators);
+      reducedExpr = reduceOnce(reducedExpr, allBasicCombinators);
     }
   }
 
@@ -31,7 +32,7 @@ function App() {
         Original expression: {exprString}<br />
         All parens: {expr.toString()}<br />
         No parens: {expr.toString(false)}<br />
-        Reduce once: {reduceOnce(expr, defaultCombinators).toString(false)}<br />
+        Reduce once: {reduceOnce(expr, allBasicCombinators).toString(false)}<br />
         All reductions: {reductions.map(r => <>{r}<br/></>)}
       </>}
     </>
