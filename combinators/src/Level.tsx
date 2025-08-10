@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { CombinatorExpression, parseExpression } from './combinators';
 import { allBasicCombinators, reduce, substitute, type BasicCombinator } from "./reduce";
 import { levels } from './levels';
-import { useParams } from 'react-router';
+import { Link, useParams } from 'react-router';
 import { pick, reverse } from 'lodash';
 import { showAllowedCombinators, ShowReductions } from './utils';
 
@@ -44,8 +44,9 @@ function tryIt(inputExpr: CombinatorExpression, source: string, target: string, 
 }
 
 export function Level() {
-  const {id} = useParams();
-  const {goal, source, target, title, allowedCombinators: allowedCombinatorNames } = levels[parseInt(id!, 10) - 1];
+  const {id: stringId} = useParams();
+  const id = parseInt(stringId!, 10);
+  const {goal, source, target, title, allowedCombinators: allowedCombinatorNames } = levels[id - 1];
   const allowedCombinators = pick(allBasicCombinators, allowedCombinatorNames.split(''));
 
   const [exprString, setExprString] = useState('');
@@ -53,14 +54,34 @@ export function Level() {
 
   return (
     <>
+      <div className="nextPrev">
+        <Link to={`/level/${id-1}`}>
+          Previous level
+        </Link>
+        <div className='spacer' />
+        <Link to={`/level/${id+1}`}>
+          Next level
+        </Link>
+      </div>
       <h1>{title}</h1>
       <div className='goal'>{goal}</div>
       <span className='mainInput'>
-        <input value={exprString} onChange={e => setExprString(e.target.value)} />
-        <button onClick={() => {
-          const inputExpr = parseExpression(exprString);
-          setResults(tryIt(inputExpr, source, target, allowedCombinators));
-        }}>Try it!</button>
+        <form
+          onSubmit={e => {
+            e.preventDefault();
+            const inputExpr = parseExpression(exprString);
+            setResults(tryIt(inputExpr, source, target, allowedCombinators));
+          }}
+          style={{ display: 'flex', width: '100%' }}
+        >
+          <input
+            value={exprString}
+            onChange={e => setExprString(e.target.value)}
+          />
+          <button type="submit">
+            Try it!
+          </button>
+        </form>
       </span>
       {results}
       <div className='spacer' />

@@ -10,6 +10,7 @@ body {
 }
 
 #root {
+  position: relative;
   display: flex;
   padding: 40px 20px;
   flex-direction: column;
@@ -79,5 +80,21 @@ body {
   span {
     font-family: monospace;
     font-size: 2rex;
+  }
+}
+
+.nextPrev {
+  position: absolute;
+  display: flex;
+  width: 100%;
+  top: 0;
+
+  a {
+    display: block;
+    border-radius: 15px;
+    background-color: #f5f1e8;
+    margin: 15px;
+    padding: 15px;
+    text-decoration: none;
   }
 }
