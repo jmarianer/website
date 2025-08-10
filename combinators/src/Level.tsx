@@ -74,6 +74,7 @@ export function Level() {
           }}
           style={{ display: 'flex', width: '100%' }}
         >
+          <span>θ =&nbsp;</span>
           <input
             value={exprString}
             onChange={e => setExprString(e.target.value)}

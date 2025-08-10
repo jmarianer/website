@@ -19,10 +19,11 @@ body {
   box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
   box-sizing: border-box;
   min-height: 100vh;
-  min-width: 50vw;
+  width: 50vw;
 }
 
 .goal {
+  align-self: flex-start;
   font-style: italic;
 }
 
@@ -30,10 +31,16 @@ body {
   display: flex;
   width: 100%;
 
+  span {
+    align-self: center;
+    font-family: monospace;
+    font-size: 2rex;
+  }
+
   input {
     font-size: 2rex;
     flex-grow: 1;
-    padding: 0.75em 1.5em;
+    padding: 0.75em 1ex;
     box-sizing: border-box;
     font-family: monospace;
     letter-spacing: 0.1em;
