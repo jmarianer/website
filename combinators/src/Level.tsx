@@ -4,20 +4,7 @@ import { allBasicCombinators, reduce, type BasicCombinator } from "./reduce";
 import { levels } from './levels';
 import { useParams } from 'react-router';
 import { pick, reverse } from 'lodash';
-
-function ShowReductions({ r }: { r: CombinatorExpression[] }) {
-  if (!r.length) {
-    return <></>;
-  }
-  let i = 0;
-  let ret = [<div key={i++}>{r[0].toString(false)}</div>];
-  for (const e of r.slice(1)) {
-    ret.push(<div key={i++}>⇓</div>)
-    ret.push(<div key={i++}>{e.toString(false)}</div>);
-  }
-
-  return <div>{ret}</div>;
-}
+import { showAllowedCombinators, ShowReductions } from './utils';
 
 function tryIt(expr1: CombinatorExpression, expr2: CombinatorExpression, basicCombinators: Record<string, BasicCombinator>) {
   try {
@@ -50,14 +37,10 @@ function tryIt(expr1: CombinatorExpression, expr2: CombinatorExpression, basicCo
   }
 }
 
-function combinatorDescriptor(c: string) {
-  const {name, argNames, template} = allBasicCombinators[c];
-  return <span>{name}{argNames} ⇒ {template}</span>;
-}
-
 export function Level() {
   const {id} = useParams();
-  const {goal, f1, f2, title, allowedCombinators } = levels[parseInt(id!, 10) - 1];
+  const {goal, f1, f2, title, allowedCombinators: allowedCombinatorNames } = levels[parseInt(id!, 10) - 1];
+  const allowedCombinators = pick(allBasicCombinators, allowedCombinatorNames.split(''));
 
   const [exprString, setExprString] = useState('');
   let [results, setResults] = useState(<></>);
@@ -70,15 +53,12 @@ export function Level() {
         <input value={exprString} onChange={e => setExprString(e.target.value)} />
         <button onClick={() => {
           const inputExpr = parseExpression(exprString);
-          setResults(tryIt(f1(inputExpr), f2(inputExpr), pick(allBasicCombinators, allowedCombinators.split(''))));
+          setResults(tryIt(f1(inputExpr), f2(inputExpr), allowedCombinators));
         }}>Try it!</button>
       </span>
       {results}
       <div className='spacer' />
-      <div className='allowed'>
-        <h1>Allowed combinators</h1>
-        {allowedCombinators.split('').map(c => combinatorDescriptor(c))}
-      </div>
+      {showAllowedCombinators(allowedCombinators)}
     </>
   );
 }

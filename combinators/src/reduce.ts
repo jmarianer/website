@@ -16,7 +16,7 @@ export const allBasicCombinators: Record<string, BasicCombinator> = {
   W: { argNames: 'xy', template: 'xyy', name: 'W' },
 };
 
-export function reduceOnce(e: CombinatorExpression, basicCombinators: Record<string, BasicCombinator>): CombinatorExpression | false {
+function reduceOnce(e: CombinatorExpression, basicCombinators: Record<string, BasicCombinator>): CombinatorExpression | false {
   if (!(e instanceof Application)) {
     return false;
   }
