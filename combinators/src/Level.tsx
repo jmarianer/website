@@ -1,26 +1,32 @@
 import { useState } from 'react'
 import { CombinatorExpression, parseExpression } from './combinators';
-import { allBasicCombinators, reduce, type BasicCombinator } from "./reduce";
+import { allBasicCombinators, reduce, substitute, type BasicCombinator } from "./reduce";
 import { levels } from './levels';
 import { useParams } from 'react-router';
 import { pick, reverse } from 'lodash';
 import { showAllowedCombinators, ShowReductions } from './utils';
 
-function tryIt(expr1: CombinatorExpression, expr2: CombinatorExpression, basicCombinators: Record<string, BasicCombinator>) {
-  try {
-    const reductions1 = reduce(expr1, basicCombinators);
-    const reductions2 = reduce(expr2, basicCombinators);
+function tryIt(inputExpr: CombinatorExpression, source: string, target: string, basicCombinators: Record<string, BasicCombinator>) {
+  function munge(expr: string): CombinatorExpression[] {
+    const newExpr = parseExpression(expr);
+    console.log(substitute(newExpr, {'θ': inputExpr}));
+    return [newExpr, ...reduce(substitute(newExpr, {'θ': inputExpr}), basicCombinators)];
+  }
 
-    const set1 = new Set(reductions1.map(e => e.toString()));
-    const set2 = new Set(reductions2.map(e => e.toString()));
+  try {
+    const sourceReductions = munge(source);
+    const targetReductions = munge(target);
+
+    const set1 = new Set(sourceReductions.map(e => e.toString()));
+    const set2 = new Set(targetReductions.map(e => e.toString()));
     const win = set1.intersection(set2).size > 0;
 
     if (win) {
-      reductions1.length = reductions1.findIndex(e => set2.has(e.toString())) + 1;
-      const common = reductions1[reductions1.length-1].toString();
-      reductions2.length = reductions2.findIndex(e => e.toString() === common);
+      sourceReductions.length = sourceReductions.findIndex(e => set2.has(e.toString())) + 1;
+      const common = sourceReductions[sourceReductions.length-1].toString();
+      targetReductions.length = targetReductions.findIndex(e => e.toString() === common);
 
-      const reductions = [...reductions1, ...reverse(reductions2)];
+      const reductions = [...sourceReductions, ...reverse(targetReductions)];
 
       return <div className='win'>
         <ShowReductions r={reductions} />
@@ -28,8 +34,8 @@ function tryIt(expr1: CombinatorExpression, expr2: CombinatorExpression, basicCo
     }
 
     return <div className='lose'>
-      <ShowReductions r={reductions1} />
-      <ShowReductions r={reductions2} />
+      <ShowReductions r={sourceReductions} />
+      <ShowReductions r={targetReductions} />
     </div>;
   }
   catch (e) {
@@ -39,7 +45,7 @@ function tryIt(expr1: CombinatorExpression, expr2: CombinatorExpression, basicCo
 
 export function Level() {
   const {id} = useParams();
-  const {goal, f1, f2, title, allowedCombinators: allowedCombinatorNames } = levels[parseInt(id!, 10) - 1];
+  const {goal, source, target, title, allowedCombinators: allowedCombinatorNames } = levels[parseInt(id!, 10) - 1];
   const allowedCombinators = pick(allBasicCombinators, allowedCombinatorNames.split(''));
 
   const [exprString, setExprString] = useState('');
@@ -53,7 +59,7 @@ export function Level() {
         <input value={exprString} onChange={e => setExprString(e.target.value)} />
         <button onClick={() => {
           const inputExpr = parseExpression(exprString);
-          setResults(tryIt(f1(inputExpr), f2(inputExpr), allowedCombinators));
+          setResults(tryIt(inputExpr, source, target, allowedCombinators));
         }}>Try it!</button>
       </span>
       {results}

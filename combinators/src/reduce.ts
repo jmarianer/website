@@ -57,8 +57,8 @@ function getArgs(e: CombinatorExpression): CombinatorExpression[] {
   return args;
 }
 
-function substitute(expr: CombinatorExpression, substitutions: Record<string, CombinatorExpression>): CombinatorExpression {
-  if (expr instanceof Variable) {
+export function substitute(expr: CombinatorExpression, substitutions: Record<string, CombinatorExpression>): CombinatorExpression {
+  if (expr instanceof Variable && expr.value in substitutions) {
     return substitutions[expr.value];
   }
   if (expr instanceof Application) {

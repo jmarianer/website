@@ -49,7 +49,7 @@ export function parseExpression(input: string): CombinatorExpression {
       return out;
     } else if (char.match(/[A-Z]/)) {
       return new Combinator(char);
-    } else if (char.match(/[a-z]/)) {
+    } else if (char.match(/[a-zα-ω]/)) {
       return new Variable(char);
     } else {
       throw new Error(`Unexpected character: ${char}`);
