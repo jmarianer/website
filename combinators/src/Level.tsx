@@ -55,25 +55,24 @@ export function Level() {
   return (
     <>
       <div className="nextPrev">
-        <Link to={`/level/${id-1}`}>
+        <Link to={`/level/${id - 1}`} style={id > 1 ? {} : {visibility: 'hidden'}}>
           Previous level
         </Link>
         <div className='spacer' />
-        <Link to={`/level/${id+1}`}>
+        <Link to="/">Home</Link>
+        <div className='spacer' />
+        <Link to={`/level/${id + 1}`} style={id < levels.length ? {} : {visibility: 'hidden'}}>
           Next level
         </Link>
       </div>
       <h1>{title}</h1>
       <div className='levelDescription'>{description}</div>
       <span className='mainInput'>
-        <form
-          onSubmit={e => {
-            e.preventDefault();
-            const inputExpr = parseExpression(exprString);
-            setResults(tryIt(inputExpr, source, target, allowedCombinators));
-          }}
-          style={{ display: 'flex', width: '100%' }}
-        >
+        <form onSubmit={e => {
+          e.preventDefault();
+          const inputExpr = parseExpression(exprString);
+          setResults(tryIt(inputExpr, source, target, allowedCombinators));
+        }}>
           <span>θ =&nbsp;</span>
           <input
             value={exprString}

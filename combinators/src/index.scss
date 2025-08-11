@@ -12,7 +12,7 @@ body {
 #root {
   position: relative;
   display: flex;
-  padding: 40px 20px;
+  padding: 0px 20px 40px;
   flex-direction: column;
   align-items: center;
   background-color: white;
@@ -25,6 +25,11 @@ body {
 .levelDescription {
   align-self: flex-start;
   font-style: italic;
+}
+
+form {
+  display: flex;
+  width: 100%
 }
 
 .mainInput {
@@ -94,7 +99,6 @@ body {
   h1 {
     font-size: larger;
     padding: 0;
-    margin: 0;
     padding-bottom: 10px;
   }
 
@@ -105,10 +109,8 @@ body {
 }
 
 .nextPrev {
-  position: absolute;
   display: flex;
   width: 100%;
-  top: 0;
 
   a {
     display: block;
@@ -117,5 +119,24 @@ body {
     margin: 15px;
     padding: 15px;
     text-decoration: none;
+  }
+}
+
+.levels {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  width: 100%;
+
+  > * {
+    background-color: beige;
+    border-radius: 15px;
+    text-align: center;
+    padding: 15px;
+    margin: 15px;
+  }
+
+  .practice {
+    grid-column-start: 1;
+    grid-column-end: 6;
   }
 }
