@@ -10,7 +10,7 @@ export const allBasicCombinators: Record<string, BasicCombinator> = {
   S: { argNames: 'xyz', template: 'xz(yz)', name: 'S' },
   K: { argNames: 'xy', template: 'x', name: 'K' },
   I: { argNames: 'x', template: 'x', name: 'I' },
-  M: { argNames: 'x', template: 'xx', name: 'M' },
+  U: { argNames: 'x', template: 'xx', name: 'U' },
   B: { argNames: 'xyz', template: 'x(yz)', name: 'B' },
   C: { argNames: 'xyz', template: 'xzy', name: 'C' },
   W: { argNames: 'xy', template: 'xyy', name: 'W' },
