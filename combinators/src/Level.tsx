@@ -9,8 +9,7 @@ import { showAllowedCombinators, ShowReductions } from './utils';
 function tryIt(inputExpr: CombinatorExpression, source: string, target: string, basicCombinators: Record<string, BasicCombinator>) {
   function munge(expr: string): CombinatorExpression[] {
     const newExpr = parseExpression(expr);
-    console.log(substitute(newExpr, {'θ': inputExpr}));
-    return [newExpr, ...reduce(substitute(newExpr, {'θ': inputExpr}), basicCombinators)];
+    return reduce(substitute(newExpr, {'θ': inputExpr}), basicCombinators);
   }
 
   try {
@@ -26,16 +25,17 @@ function tryIt(inputExpr: CombinatorExpression, source: string, target: string, 
       const common = sourceReductions[sourceReductions.length-1].toString();
       targetReductions.length = targetReductions.findIndex(e => e.toString() === common);
 
-      const reductions = [...sourceReductions, ...reverse(targetReductions)];
+      const reductions = [...sourceReductions, ...reverse(targetReductions), target];
 
       return <div className='win'>
-        <ShowReductions r={reductions} />
+        <span>Success!</span>
+        <ShowReductions start={source} r={reductions} />
       </div>
     }
 
     return <div className='lose'>
-      <ShowReductions r={sourceReductions} />
-      <ShowReductions r={targetReductions} />
+      <ShowReductions start={source} r={sourceReductions} />
+      <ShowReductions start={target} r={targetReductions} />
     </div>;
   }
   catch (e) {
@@ -46,7 +46,7 @@ function tryIt(inputExpr: CombinatorExpression, source: string, target: string, 
 export function Level() {
   const {id: stringId} = useParams();
   const id = parseInt(stringId!, 10);
-  const {goal, source, target, title, allowedCombinators: allowedCombinatorNames } = levels[id - 1];
+  const {description, source, target, title, allowedCombinators: allowedCombinatorNames } = levels[id - 1];
   const allowedCombinators = pick(allBasicCombinators, allowedCombinatorNames.split(''));
 
   const [exprString, setExprString] = useState('');
@@ -64,7 +64,7 @@ export function Level() {
         </Link>
       </div>
       <h1>{title}</h1>
-      <div className='goal'>{goal}</div>
+      <div className='levelDescription'>{description}</div>
       <span className='mainInput'>
         <form
           onSubmit={e => {
@@ -84,6 +84,7 @@ export function Level() {
           </button>
         </form>
       </span>
+      <div className='goal'>Goal: <span>{source}={target}</span></div>
       {results}
       <div className='spacer' />
       {showAllowedCombinators(allowedCombinators)}

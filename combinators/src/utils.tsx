@@ -8,17 +8,17 @@ export function showAllowedCombinators(allowedCombinators: Record<string, BasicC
   </div>;
 }
 
-export function ShowReductions({ r }: { r: CombinatorExpression[]; }) {
-  if (!r.length) {
-    return <></>;
-  }
-  let i = 0;
-  let ret = [<div key={i++}>{r[0].toString(false)}</div>];
-  for (const e of r.slice(1)) {
-    ret.push(<div key={i++}>⇓</div>);
-    ret.push(<div key={i++}>{e.toString(false)}</div>);
-  }
-
-  return <div>{ret}</div>;
+export function ShowReductions({ start, r }: { start: CombinatorExpression, r: CombinatorExpression[]; }) {
+  return <table className='reductions'>
+    <tbody>
+      {r.map((e, i) => (
+        <tr key={i}>
+          <td>{i === 0 && start.toString(false)}</td>
+          <td>=</td>
+          <td>{e.toString(false)}</td>
+        </tr>
+      ))}
+    </tbody>
+  </table>;
 }
 

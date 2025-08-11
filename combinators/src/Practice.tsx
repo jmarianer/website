@@ -15,8 +15,8 @@ function Practice() {
         <input value={exprString} onChange={e => setExprString(e.target.value)} />
         <button onClick={() => {
           const inputExpr = parseExpression(exprString);
-          const reductions1 = reduce(inputExpr, allBasicCombinators);
-          setResults(<div className='win'><ShowReductions r={reductions1} /></div>);
+          const reductions = reduce(inputExpr, allBasicCombinators).slice(1);
+          setResults(<div className='win'><ShowReductions start={inputExpr} r={reductions} /></div>);
         }}>Try it!</button>
       </span>
       {results}
