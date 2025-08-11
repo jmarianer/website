@@ -55,15 +55,17 @@ export function Level() {
   return (
     <>
       <div className="nextPrev">
-        <Link to={`/level/${id - 1}`} style={id > 1 ? {} : {visibility: 'hidden'}}>
-          Previous level
-        </Link>
-        <div className='spacer' />
-        <Link to="/">Home</Link>
-        <div className='spacer' />
-        <Link to={`/level/${id + 1}`} style={id < levels.length ? {} : {visibility: 'hidden'}}>
-          Next level
-        </Link>
+        {id > 1 &&
+          <Link to={`/level/${id - 1}`} className='prev'>
+            Previous level
+          </Link>
+        }
+        <Link to="/" className='home'>Home</Link>
+        {id < levels.length &&
+          <Link to={`/level/${id + 1}`} className='next'>
+            Next level
+          </Link>
+        }
       </div>
       <h1>{title}</h1>
       <div className='levelDescription'>{description}</div>

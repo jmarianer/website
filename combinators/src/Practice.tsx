@@ -11,9 +11,7 @@ function Practice() {
   return (
     <>
       <div className="nextPrev">
-        <div className='spacer' />
-        <Link to="/">Home</Link>
-        <div className='spacer' />
+        <Link to="/" className='home'>Home</Link>
       </div>
       <h1>Practice</h1>
       <div className='goal'>Enter any expression here to see how it reduces</div>

@@ -109,16 +109,32 @@ form {
 }
 
 .nextPrev {
-  display: flex;
+  display: grid;
   width: 100%;
+  grid-template-columns: repeat(3, 1fr);
 
-  a {
+  * {
     display: block;
     border-radius: 15px;
     background-color: #f5f1e8;
     margin: 15px;
     padding: 15px;
     text-decoration: none;
+  }
+
+  .prev {
+    justify-self: start;
+    grid-column: 1;
+  }
+
+  .home {
+    justify-self: center;
+    grid-column: 2;
+  }
+
+  .next {
+    justify-self: end;
+    grid-column: 3;
   }
 }
 
