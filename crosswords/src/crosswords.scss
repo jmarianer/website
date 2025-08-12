@@ -45,7 +45,7 @@ h1 {
     position: relative;
 
     .number {
-      font-size: 0.5em;
+      font-size: 0.75rem;
       position: absolute;
       top: 1px;
     }
@@ -76,13 +76,7 @@ h1 {
   }
 
   .word-boundary-across {
-    [dir='rtl'] {
-      border-left-width: 3px;
-    }
-
-    [dir='ltr'] {
-      border-right-width: 3px;
-    }
+    border-right-width: 3px;
   }
 }
 

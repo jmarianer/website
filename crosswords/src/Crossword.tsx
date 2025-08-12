@@ -14,6 +14,8 @@ export function Crossword() {
   const [position, setPosition] = useState<Position | undefined>(undefined);
   const [currentClue, setCurrentClue] = useState<Clue | undefined>(undefined);
 
+  const cell = position ? crossword?.cells[position.row][position.col] : null;
+
   function setSolution(key: string) {
     if (!position || !crossword) {
       return;
@@ -61,7 +63,14 @@ export function Crossword() {
     }
 
     const key = e.key;
-    if (key.length === 1) {
+    if (key === ' ') {
+      if (currentClue?.direction === ClueDirection.across) {
+        set(child(dbRef, `cells/${position.row}/${position.col}/wordBoundaryAcross`), !cell?.wordBoundaryAcross);
+      } else {
+        set(child(dbRef, `cells/${position.row}/${position.col}/wordBoundaryDown`), !cell?.wordBoundaryDown);
+      }
+    }
+    else if (key.length === 1) {
       setSolution(key.toUpperCase());
       if (currentClue?.direction === ClueDirection.across) {
         move(0, 1);
@@ -83,7 +92,7 @@ export function Crossword() {
       } else {
         move(-1, 0);
       }
-    } else if (key === 'Tab') {
+    } else if (key === 'Tab' || key === 'Enter') {
       if (currentClue) {
         e.preventDefault();
 
