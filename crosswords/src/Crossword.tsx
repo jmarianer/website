@@ -117,7 +117,11 @@ export function Crossword() {
         clue={currentClue}
         onClick={cell => {
           setPosition(cell.position);
-          setCurrentClue(cell.clues[0]);
+          if (cell.clues.length > 1 && currentClue?.equals(cell.clues[0])) {
+            setCurrentClue(cell.clues[1]);
+          } else {
+            setCurrentClue(cell.clues[0]);
+          }
         }} />
     </div>
   </>
