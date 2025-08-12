@@ -1,15 +1,14 @@
-import { Cell, CellType, ClueDirection, Position, Puzzle } from "./types";
+import { Cell, CellType, Clue, Position, Puzzle } from "./types";
 import './crosswords.scss';
 
 type Props = {
   crossword: Puzzle;
   position?: Position;
-  clueNumber?: number;
-  clueDirection?: ClueDirection;
+  clue: Clue | undefined;
   onClick?: (cell: Cell) => void;
 }
 
-export function RenderCrossword({crossword, position, clueNumber, clueDirection, onClick}: Props) {
+export function RenderCrossword({crossword, position, clue, onClick}: Props) {
   function RenderCell(cell: Cell) {
     if (cell.type === CellType.black) {
       return <td className='black' />;
@@ -30,7 +29,7 @@ export function RenderCrossword({crossword, position, clueNumber, clueDirection,
       classList.push('active');
     }
 
-    if (cell.clues?.some((clue) => clue.clueNumber === clueNumber && clue.direction === clueDirection)) {
+    if (cell.clues?.some(it => clue?.equals(it))) {
       classList.push('active-word')
     }
 

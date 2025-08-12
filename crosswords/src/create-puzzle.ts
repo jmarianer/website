@@ -94,13 +94,7 @@ export function createPuzzle(templateStr: string) {
         break;
       }
       
-      if (!currentCell.clues) {
-        currentCell.clues = [];
-      }
-      currentCell.clues.push({
-        clueNumber: clue.clueNumber,
-        direction: clue.direction,
-      });
+      currentCell.clues.push(clue);
 
       // if (--wordLengths[0] === 0 && wordLengths.length > 1) {
       //   if (clue.direction === ClueDirection.across) {

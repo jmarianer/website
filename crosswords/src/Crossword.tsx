@@ -2,16 +2,16 @@ import { child, onValue, ref, set } from "firebase/database";
 import { useParams } from "react-router"
 import { database } from "./database";
 import { useEffect, useMemo, useState } from "react";
-import { Position, Puzzle, ClueDirection, CellType } from "./types";
+import { Position, Puzzle, ClueDirection, Clue } from "./types";
 import { RenderCrossword } from "./RenderCrossword";
+import { cast } from '@deepkit/type';
 
 export function Crossword() {
   const {id} = useParams();
   const dbRef = useMemo(() => ref(database, `crosswords/${id}`), [id]);
   const [crossword, setCrossword] = useState<Puzzle | null>(null);
   const [position, setPosition] = useState<Position | undefined>(undefined);
-  const [currentClueNumber, setCurrentClueNumber] = useState<number | undefined>(undefined);
-  const [currentClueDirection, setCurrentClueDirection] = useState<ClueDirection | undefined>(undefined);
+  const [currentClue, setCurrentClue] = useState<Clue | undefined>(undefined);
 
   function setSolution(key: string) {
     if (!position || !crossword) {
@@ -39,17 +39,16 @@ export function Crossword() {
       }
 
       const cell = crossword.cells[row][col];
-      if (cell.type === CellType.empty) {
+      if (cell.isFillable()) {
         setPosition(new Position(row, col));
 
         let clue;
-        if (cell.clues?.some(clue => clue.direction === currentClueDirection)) {
-          clue = cell.clues.filter(clue => clue.direction === currentClueDirection)[0];
+        if (cell.clues?.some(clue => clue.direction === currentClue?.direction)) {
+          clue = cell.clues.filter(clue => clue.direction === currentClue?.direction)[0];
         } else {
           clue = cell.clues?.[0];
         }
-        setCurrentClueNumber(clue?.clueNumber);
-        setCurrentClueDirection(clue?.direction);
+        setCurrentClue(clue);
         return;
       }
     }
@@ -60,7 +59,7 @@ export function Crossword() {
     }
     if (key.length === 1) {
       setSolution(key.toUpperCase());
-      if (currentClueDirection === ClueDirection.across) {
+      if (currentClue?.direction === ClueDirection.across) {
         move(0, 1);
       } else {
         move(1, 0);
@@ -75,7 +74,7 @@ export function Crossword() {
       move(1, 0);
     } else if (key === 'Backspace') {
       setSolution(' ');
-      if (currentClueDirection === ClueDirection.across) {
+      if (currentClue?.direction === ClueDirection.across) {
         move(0, -1);
       } else {
         move(-1, 0);
@@ -85,7 +84,17 @@ export function Crossword() {
 
   useEffect(() => {
     onValue(dbRef, (snapshot) => {
-      setCrossword(snapshot.val());
+      const puzzle = snapshot.val();
+      for (const row of puzzle.cells) {
+        for (const cell of row) {
+          for (const clue of cell.clues || []) {
+            if (!clue.initialPosition) {
+              clue.initialPosition = { row: -1, col: -1 };
+            }
+          }
+        }
+      }
+      setCrossword(cast<Puzzle>(puzzle));
     });
   }, [dbRef]);
 
@@ -105,12 +114,10 @@ export function Crossword() {
       <RenderCrossword
         crossword={crossword}
         position={position}
-        clueNumber={currentClueNumber}
-        clueDirection={currentClueDirection}
+        clue={currentClue}
         onClick={cell => {
           setPosition(cell.position);
-          setCurrentClueNumber(cell.clues?.[0].clueNumber);
-          setCurrentClueDirection(cell.clues?.[0].direction);
+          setCurrentClue(cell.clues[0]);
         }} />
     </div>
   </>

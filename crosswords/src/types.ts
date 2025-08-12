@@ -12,23 +12,24 @@ export enum ClueDirection {
 }
 
 export class Clue {
-  public clueNumber: number;
-  public direction: ClueDirection;
   public initialPosition: Position;
-  public clue: string | null = null;
 
-  constructor(clueNumber: number, direction: ClueDirection, row: number, col: number) {
-    this.clueNumber = clueNumber;
-    this.direction = direction;
+  constructor(
+    public clueNumber: number,
+    public direction: ClueDirection,
+    row: number,
+    col: number,
+  ) {
     this.initialPosition = new Position(row, col);
+  }
+
+  equals(other: Clue): boolean {
+    return this.clueNumber === other.clueNumber && this.direction === other.direction;
   }
 }
 
 export class Position {
-  public row: number;
-  public col: number;
-
-  constructor(row: number, col: number) {
+  constructor(public row: number, public col: number) {
     this.row = row;
     this.col = col;
   }
@@ -38,7 +39,7 @@ export class Cell {
   public solution: string = '';
   public type: CellType = CellType.empty;
   public clueNumber: number | null = null;
-  public clues: Array<{ clueNumber: number; direction: ClueDirection }> | null = null;
+  public clues: Array<Clue> = [];
   public position: Position;
   public wordBoundaryAcross: boolean = false;
   public wordBoundaryDown: boolean = false;
@@ -50,6 +51,8 @@ export class Cell {
 }
 
 export class Puzzle {
-  public cells: Cell[][] = [];
-  public clues: Clue[] = [];
+  constructor(
+    public cells: Cell[][] = [],
+    public clues: Clue[] = []
+  ) {}
 }
