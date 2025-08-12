@@ -4,7 +4,7 @@ import './crosswords.scss';
 type Props = {
   crossword: Puzzle;
   position?: Position;
-  clue: Clue | undefined;
+  clue?: Clue;
   onClick?: (cell: Cell) => void;
 }
 

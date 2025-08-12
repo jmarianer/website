@@ -54,6 +54,7 @@ export function Crossword() {
       }
     }
   }
+
   function handleKeyDown(e: KeyboardEvent) {
     if (!position || !crossword) {
       return;

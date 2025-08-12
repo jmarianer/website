@@ -21,7 +21,7 @@ export function Create() {
         <div className="input-section">
           <h2>Template</h2>
           <div className="instructions">
-            Enter the crossword template below, using 'x' for white squares and '.' for black squares.
+            Enter the crossword template below, using '.' for white squares and 'x' for black squares.
           </div>
           <textarea
             rows={25}
@@ -35,8 +35,6 @@ export function Create() {
         </div>
       </div>
       <button className="create-button" onClick={createCrossword}>Done</button>
-
-      {/* <pre>{JSON.stringify(createPuzzle(crossword), null, 2)}</pre> */}
     </>
   );
 }

@@ -23,7 +23,7 @@ export function createPuzzle(templateStr: string) {
     for (let j = 1; j < cols - 1; j++) {
       let Cell = puzzle.cells[i][j];
       let s = template[i - 1][j - 1];
-      if (s === '.' || s === undefined) {
+      if (s === 'x' || s === undefined) {
         Cell.type = CellType.black;
       } else {
         Cell.type = CellType.empty;
