@@ -9,7 +9,7 @@ type Props = {
 }
 
 export function RenderCrossword({crossword, position, clue, onClick}: Props) {
-  function RenderCell(cell: Cell) {
+  function RenderCell({cell}: {cell: Cell}) {
     if (cell.type === CellType.black) {
       return <td className='black' />;
     }
@@ -43,11 +43,13 @@ export function RenderCrossword({crossword, position, clue, onClick}: Props) {
 
   return (
     <table className='crossword'>
-    { crossword.cells.map((row) =>
-      <tr>
-        { row.map(RenderCell) }
-      </tr>
-    )}
-  </table>
+      <tbody>
+        {crossword.cells.map((row, i) =>
+          <tr key={i}>
+            {row.map((cell, j) => <RenderCell key={j} cell={cell} />)}
+          </tr>
+        )}
+      </tbody>
+    </table>
   )
 }
