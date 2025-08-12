@@ -4,6 +4,7 @@ import { Homepage } from './Homepage';
 import { BrowserRouter as Router, Routes, Route } from 'react-router';
 import { Create } from './Create';
 import { Crossword } from './Crossword';
+import { Edit } from './Edit';
 
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
@@ -15,6 +16,7 @@ root.render(
         <Route path="/" element={<Homepage />} />
         <Route path="/create" element={<Create />} />
         <Route path="/crossword/:id" element={<Crossword />} />
+        <Route path="/edit/:id" element={<Edit />} />
       </Routes>
     </Router>
   </React.StrictMode>
