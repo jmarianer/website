@@ -5,6 +5,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Position, Puzzle, ClueDirection, Clue } from "./types";
 import { RenderCrossword } from "./RenderCrossword";
 import { cast } from '@deepkit/type';
+import { sortBy } from "lodash";
 
 export function Crossword() {
   const {id} = useParams();
@@ -53,10 +54,12 @@ export function Crossword() {
       }
     }
   }
-  function handleKeyDown({ key }: KeyboardEvent) {
+  function handleKeyDown(e: KeyboardEvent) {
     if (!position || !crossword) {
       return;
     }
+
+    const key = e.key;
     if (key.length === 1) {
       setSolution(key.toUpperCase());
       if (currentClue?.direction === ClueDirection.across) {
@@ -78,6 +81,16 @@ export function Crossword() {
         move(0, -1);
       } else {
         move(-1, 0);
+      }
+    } else if (key === 'Tab') {
+      if (currentClue) {
+        e.preventDefault();
+
+        const clues = sortBy(crossword.clues, 'direction', 'clueNumber');
+        const i = clues.findIndex(c => currentClue.equals(c));
+        const newClue = clues[(i + (e.shiftKey ? -1 : 1) + clues.length) % clues.length];
+        setCurrentClue(newClue);
+        setPosition(newClue.initialPosition);
       }
     }
   }
