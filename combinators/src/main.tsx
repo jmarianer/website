@@ -10,7 +10,7 @@ function Home() {
   return (
     <div className='levels'>
       <Link className='practice' to="/practice">Practice</Link>
-      {levels.map((_, i) => <Link to={`/level/${i+1}`}>Level {i+1}</Link>)}
+      {levels.map((_, i) => <Link key={i} to={`/level/${i+1}`}>Level {i+1}</Link>)}
     </div>
   )
 }

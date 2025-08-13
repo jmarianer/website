@@ -10,7 +10,6 @@ body {
 }
 
 #root {
-  position: relative;
   display: flex;
   padding: 0px 20px 40px;
   flex-direction: column;
@@ -19,7 +18,9 @@ body {
   box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
   box-sizing: border-box;
   min-height: 100vh;
-  width: 50vw;
+  @media (min-width: 768px) {
+    width: 50vw;
+  }
 }
 
 .levelDescription {
@@ -134,14 +135,19 @@ form {
 
   .next {
     justify-self: end;
+    text-align: end;
     grid-column: 3;
   }
 }
 
 .levels {
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
   width: 100%;
+
+  grid-template-columns: repeat(3, 1fr);
+  @media (min-width: 768px) {
+    grid-template-columns: repeat(5, 1fr);
+  }
 
   > * {
     background-color: beige;
@@ -153,6 +159,10 @@ form {
 
   .practice {
     grid-column-start: 1;
-    grid-column-end: 6;
+    grid-column-end: 4;
+
+    @media (min-width: 768px) {
+      grid-column-end: 6;
+    }
   }
 }
