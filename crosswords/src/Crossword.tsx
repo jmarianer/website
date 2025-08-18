@@ -58,6 +58,8 @@ export function Crossword() {
   }
 
   function handleKeyDown(e: KeyboardEvent) {
+    e.preventDefault();
+
     if (!position || !crossword) {
       return;
     }
@@ -94,8 +96,6 @@ export function Crossword() {
       }
     } else if (key === 'Tab' || key === 'Enter') {
       if (currentClue) {
-        e.preventDefault();
-
         const clues = sortBy(crossword.clues, 'direction', 'clueNumber');
         const i = clues.findIndex(c => currentClue.equals(c));
         const newClue = clues[(i + (e.shiftKey ? -1 : 1) + clues.length) % clues.length];

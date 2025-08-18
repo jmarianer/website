@@ -16,5 +16,5 @@
     "noUncheckedSideEffectImports": true,
     "jsx": "react-jsx"
   },
-  "reflection": true,
+  "reflection": true
 }
