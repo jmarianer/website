@@ -1,6 +1,6 @@
 import { Cell, CellType, Clue, ClueDirection, Position, Puzzle } from './types';
 
-export function createPuzzle(templateStr: string) {
+export function createPuzzle(templateStr: string): Puzzle {
   let template = templateStr.split('\n').map((s) => s.replace(/(\r\n|\n|\r)/gm, ''));
 
   const rows = template.length + 2;

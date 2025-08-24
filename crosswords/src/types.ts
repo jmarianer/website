@@ -48,6 +48,7 @@ export class Cell {
     this.position = new Position(row, col);
   }
   public isFillable() { return this.type === CellType.empty; }
+  public isEmpty()    { return this.solution == '' || this.solution == ' '; }
 }
 
 export class Puzzle {

@@ -117,3 +117,20 @@ h1 {
   width: 100%;
   padding: 10px;
 }
+
+.settings {
+  align-self: flex-start;
+  vertical-align: middle;
+  margin-bottom: 3ex;
+
+  label {
+    display: inline-flex;
+    flex-direction: row;
+    align-items: center;
+    margin-right: 2em;
+
+    span {
+      margin-left: 0.5em;
+    }
+  }
+}

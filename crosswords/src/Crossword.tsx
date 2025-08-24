@@ -2,10 +2,11 @@ import { child, onValue, ref, set } from "firebase/database";
 import { useParams } from "react-router"
 import { database } from "./database";
 import { useEffect, useMemo, useState } from "react";
-import { Position, Puzzle, ClueDirection, Clue } from "./types";
+import { Position, Puzzle, ClueDirection, Clue, Cell } from "./types";
 import { RenderCrossword } from "./RenderCrossword";
 import { cast } from '@deepkit/type';
 import { sortBy } from "lodash";
+import Switch from "react-switch";
 
 export function Crossword() {
   const {id} = useParams();
@@ -13,6 +14,8 @@ export function Crossword() {
   const [crossword, setCrossword] = useState<Puzzle | null>(null);
   const [position, setPosition] = useState<Position | undefined>(undefined);
   const [currentClue, setCurrentClue] = useState<Clue | undefined>(undefined);
+  const [skipFilledCells, setSkipFilledCells] = useState<boolean>(false);
+  const [skipFinishedClues, setSkipFinishedClues] = useState<boolean>(false);
 
   const cell = position ? crossword?.cells[position.row][position.col] : null;
 
@@ -22,6 +25,25 @@ export function Crossword() {
     }
     set(child(dbRef, `cells/${position.row}/${position.col}/solution`), key);
   }
+
+  function setCell(cell: Cell) {
+    if (position === cell.position) {
+      if (cell.clues.length > 1 && currentClue?.equals(cell.clues[0])) {
+        setCurrentClue(cell.clues[1]);
+      } else {
+        setCurrentClue(cell.clues[0]);
+      }
+      return;
+    }
+
+    setPosition(cell.position);
+    if (cell.clues?.some(clue => clue.direction === currentClue?.direction)) {
+      setCurrentClue(cell.clues.filter(clue => clue.direction === currentClue?.direction)[0]);
+    } else {
+      setCurrentClue(cell.clues?.[0]);
+    }
+  }
+
   function move(drow: number, dcol: number) {
     if (!position || !crossword) {
       return;
@@ -43,17 +65,43 @@ export function Crossword() {
 
       const cell = crossword.cells[row][col];
       if (cell.isFillable()) {
-        setPosition(new Position(row, col));
-
-        let clue;
-        if (cell.clues?.some(clue => clue.direction === currentClue?.direction)) {
-          clue = cell.clues.filter(clue => clue.direction === currentClue?.direction)[0];
-        } else {
-          clue = cell.clues?.[0];
-        }
-        setCurrentClue(clue);
+        setCell(cell);
         return;
       }
+    }
+  }
+
+  function moveToNextSpace() {
+    if (!position || !crossword) {
+      return;
+    }
+
+    let [drow, dcol] = (currentClue?.direction === ClueDirection.across) ? [0, 1] : [1, 0];
+    let { row, col } = position;
+
+    for (; ;) {
+      row += drow;
+      col += dcol;
+
+      const cell = crossword.cells[row][col];
+      if (!cell.isFillable()) {
+        moveToNextClue()
+        return;
+      }
+      if (cell.isEmpty() || !skipFilledCells) {
+        setCell(cell);
+        return;
+      }
+    }
+  }
+
+  function moveToNextClue(forward: boolean = true) {
+    if (currentClue) {
+      const clues = sortBy(crossword?.clues, 'direction', 'clueNumber');
+      const i = clues.findIndex(c => currentClue.equals(c));
+      const newClue = clues[(i + (forward ? 1 : -1) + clues.length) % clues.length];
+      setCurrentClue(newClue);
+      setPosition(newClue.initialPosition);
     }
   }
 
@@ -74,11 +122,7 @@ export function Crossword() {
     }
     else if (key.length === 1) {
       setSolution(key.toUpperCase());
-      if (currentClue?.direction === ClueDirection.across) {
-        move(0, 1);
-      } else {
-        move(1, 0);
-      }
+      moveToNextSpace();
     } else if (key === 'ArrowLeft') {
       move(0, -1);
     } else if (key === 'ArrowRight') {
@@ -95,13 +139,7 @@ export function Crossword() {
         move(-1, 0);
       }
     } else if (key === 'Tab' || key === 'Enter') {
-      if (currentClue) {
-        const clues = sortBy(crossword.clues, 'direction', 'clueNumber');
-        const i = clues.findIndex(c => currentClue.equals(c));
-        const newClue = clues[(i + (e.shiftKey ? -1 : 1) + clues.length) % clues.length];
-        setCurrentClue(newClue);
-        setPosition(newClue.initialPosition);
-      }
+      moveToNextClue(!e.shiftKey);
     }
   }
 
@@ -133,19 +171,23 @@ export function Crossword() {
   }
   return <>
     <h1>Joey's awesome crossword app</h1>
+    <div className="settings">
+    <label>
+      <Switch onChange={setSkipFilledCells} checked={skipFilledCells} />
+      <span>Skip filled cells</span>
+    </label>
+    <label>
+      <Switch onChange={setSkipFinishedClues} checked={skipFinishedClues} />
+      <span>Skip finished clues</span>
+    </label>
+    </div>
+
     <div className="crossword-holder">
       <RenderCrossword
         crossword={crossword}
         position={position}
         clue={currentClue}
-        onClick={cell => {
-          setPosition(cell.position);
-          if (cell.clues.length > 1 && currentClue?.equals(cell.clues[0])) {
-            setCurrentClue(cell.clues[1]);
-          } else {
-            setCurrentClue(cell.clues[0]);
-          }
-        }} />
+        onClick={setCell} />
     </div>
   </>
 }

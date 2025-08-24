@@ -14,7 +14,8 @@
     "firebase": "^12.1.0",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
-    "react-router": "^7.8.0"
+    "react-router": "^7.8.0",
+    "react-switch": "^7.1.0"
   },
   "devDependencies": {
     "@deepkit/type-compiler": "^1.0.15",
