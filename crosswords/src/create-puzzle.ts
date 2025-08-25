@@ -6,10 +6,7 @@ export function createPuzzle(templateStr: string): Puzzle {
   const rows = template.length + 2;
   const cols = Math.max(...template.map((f) => f.length)) + 2;
 
-  let puzzle: Puzzle = {
-    cells: [],
-    clues: [],
-  };
+  let puzzle = new Puzzle([], [])
 
   for (let i = 0; i < rows; i++) {
     let row: Cell[] = [];
