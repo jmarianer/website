@@ -26,6 +26,13 @@ export class Clue {
   equals(other: Clue): boolean {
     return this.clueNumber === other.clueNumber && this.direction === other.direction;
   }
+
+  isComplete(puzzle: Puzzle): boolean {
+    const cells = puzzle.cells.flat().filter(cell => 
+      cell.clues.some(clue => clue.equals(this))
+    );
+    return cells.every(cell => !cell.isEmpty());
+  }
 }
 
 export class Position {
@@ -49,6 +56,7 @@ export class Cell {
   }
   public isFillable() { return this.type === CellType.empty; }
   public isEmpty()    { return this.solution == '' || this.solution == ' '; }
+  public isComplete() { return !this.isFillable() || !this.isEmpty(); }
 }
 
 export class Puzzle {
@@ -56,4 +64,8 @@ export class Puzzle {
     public cells: Cell[][] = [],
     public clues: Clue[] = []
   ) {}
+
+  isComplete(): boolean {
+    return this.cells.flat().every(cell => cell.isComplete());
+  }
 }

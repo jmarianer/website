@@ -85,10 +85,10 @@ export function Crossword() {
 
       const cell = crossword.cells[row][col];
       if (!cell.isFillable()) {
-        moveToNextClue()
+        moveToNextClue();
         return;
       }
-      if (cell.isEmpty() || !skipFilledCells) {
+      if (cell.isEmpty() || !skipFilledCells || (currentClue?.isComplete(crossword))) {
         setCell(cell);
         return;
       }
@@ -96,12 +96,20 @@ export function Crossword() {
   }
 
   function moveToNextClue(forward: boolean = true) {
-    if (currentClue) {
-      const clues = sortBy(crossword?.clues, 'direction', 'clueNumber');
-      const i = clues.findIndex(c => currentClue.equals(c));
-      const newClue = clues[(i + (forward ? 1 : -1) + clues.length) % clues.length];
-      setCurrentClue(newClue);
-      setPosition(newClue.initialPosition);
+    if (!currentClue || !crossword) {
+      return;
+    }
+
+    const clues = sortBy(crossword?.clues, 'direction', 'clueNumber');
+    let i = clues.findIndex(c => currentClue.equals(c));
+    for ( ; ; ) {
+      i = (i + (forward ? 1 : -1) + clues.length) % clues.length;
+      const newClue = clues[i];
+      if (!newClue.isComplete(crossword) || !skipFinishedClues || crossword.isComplete()) {
+        setCurrentClue(newClue);
+        setPosition(newClue.initialPosition);
+        return;
+      }
     }
   }
 
