@@ -114,12 +114,15 @@ export function Crossword() {
   }
 
   function handleKeyDown(e: KeyboardEvent) {
-    e.preventDefault();
-
     if (!position || !crossword) {
       return;
     }
 
+    if (e.ctrlKey || e.metaKey || e.altKey) {
+      return;
+    }
+
+    e.preventDefault();
     const key = e.key;
     if (key === ' ') {
       if (currentClue?.direction === ClueDirection.across) {
