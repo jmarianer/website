@@ -182,23 +182,25 @@ export function Crossword() {
   }
   return <>
     <h1>Joey's awesome crossword app</h1>
-    <div className="settings">
-    <label>
-      <Switch onChange={setSkipFilledCells} checked={skipFilledCells} />
-      <span>Skip filled cells</span>
-    </label>
-    <label>
-      <Switch onChange={setSkipFinishedClues} checked={skipFinishedClues} />
-      <span>Skip finished clues</span>
-    </label>
-    </div>
+    <div className="crossword-and-settings">
+      <div className="settings">
+      <label>
+        <Switch onChange={setSkipFilledCells} checked={skipFilledCells} />
+        <span>Skip filled cells</span>
+      </label>
+      <label>
+        <Switch onChange={setSkipFinishedClues} checked={skipFinishedClues} />
+        <span>Skip finished clues</span>
+      </label>
+      </div>
 
-    <div className="crossword-holder">
-      <RenderCrossword
-        crossword={crossword}
-        position={position}
-        clue={currentClue}
-        onClick={setCell} />
+      <div className="crossword-holder">
+        <RenderCrossword
+          crossword={crossword}
+          position={position}
+          clue={currentClue}
+          onClick={setCell} />
+      </div>
     </div>
   </>
 }
