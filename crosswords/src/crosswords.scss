@@ -28,13 +28,13 @@ body {
 }
 
 h1 {
-    @media print {
-    display: none;
-  }
-
   color: #2c3e50;
   margin-bottom: 100px;
   letter-spacing: 1px;
+
+  @media print {
+    display: none;
+  }
 }
 
 .crossword-holder {
@@ -130,10 +130,6 @@ h1 {
 }
 
 .settings {
-  @media print {
-    display: none;
-  }
-
   align-self: flex-start;
   vertical-align: middle;
   margin-bottom: 3ex;
@@ -147,5 +143,9 @@ h1 {
     span {
       margin-left: 0.5em;
     }
+  }
+
+  @media print {
+    display: none;
   }
 }
