@@ -7,3 +7,4 @@ npm start
 # Deploy
 npm run build
 gcloud storage cp -r dist/* gs://crosswords-joeym-org
+gcloud compute url-maps invalidate-cdn-cache joeym-org --path "/*" --async
