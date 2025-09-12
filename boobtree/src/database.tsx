@@ -1,6 +1,15 @@
 import { initializeApp } from "firebase/app";
 import { getDatabase, onValue, ref } from "firebase/database";
-import { createContext, useEffect, useMemo, useState } from "react";
+import { createContext, useContext, useEffect, useMemo, useState } from "react";
+
+export interface Game {
+  id: string;
+  current_round: number;
+  total_rounds: number;
+  players: string[];
+  archive: string[][];
+  started: boolean;
+}
 
 const firebaseConfig = {
   apiKey: "AIzaSyDNY7EWSosnLYffp_zpmySLfF-Ea5YDlFk",
@@ -30,4 +39,9 @@ export function DataProvider({path, children}: {path: string, children: React.Re
   return <DataContext.Provider value={data}>
     {children}
   </DataContext.Provider>;
+}
+
+export function useCurrentGame() {
+  // TODO: use deepkit/type to cast this properly
+  return useContext(DataContext) as Game;
 }

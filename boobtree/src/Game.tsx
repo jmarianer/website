@@ -1,13 +1,11 @@
 import { ref, set } from "firebase/database";
-import { useContext, useState } from "react";
+import { useState } from "react";
 import { Link, useNavigate, useParams } from "react-router";
-import { database, DataContext } from "./database";
+import { database, useCurrentGame } from "./database";
 
 export function GameAdmin() {
   const { id } = useParams();
-  // TODO: useContext should be wrapped in a function that also casts (deepkit/type) it to a game so we don't have to `as` everywhere
-  const game = useContext(DataContext);
-  const players = game?.players as string[] || [];
+  const { players } = useCurrentGame();
 
   return <>
     <Link to='join'>Join the game</Link>
@@ -33,8 +31,7 @@ export function Join() {
   const { id } = useParams();
   const [name, setName] = useState('');
   const navigate = useNavigate();
-  const game = useContext(DataContext);
-  const players = game?.players as string[] || [];
+  const { players } = useCurrentGame();
 
   return <>
     <div>Join game {id}</div>
