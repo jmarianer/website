@@ -10,5 +10,5 @@ export function Homepage() {
 export function Start() {
   const id = cryptoRandomString({ length: 4, characters: 'CDEHKMPRTUWXY' });
 
-  return <Navigate to={`/game/${id}`} replace />;
+  return <Navigate to={`/game/${id}/admin`} replace />;
 }

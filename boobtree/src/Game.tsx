@@ -1,18 +1,13 @@
-import { onValue, ref, set } from "firebase/database";
-import { useEffect, useMemo, useState } from "react";
+import { ref, set } from "firebase/database";
+import { useContext, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router";
-import { database } from "./database";
+import { database, DataContext } from "./database";
 
-export function Game() {
-  const {id} = useParams();
-  const dbRef = useMemo(() => ref(database, `boobtree/${id}`), [id]);
-  const [players, setPlayers] = useState<string[]>([]);
-
-  useEffect(() => {
-    onValue(dbRef, (snapshot) => {
-      setPlayers(snapshot.val().players || []);
-    });
-  }, [dbRef]);
+export function GameAdmin() {
+  const { id } = useParams();
+  // TODO: useContext should be wrapped in a function that also casts (deepkit/type) it to a game so we don't have to `as` everywhere
+  const game = useContext(DataContext);
+  const players = game?.players as string[] || [];
 
   return <>
     <Link to='join'>Join the game</Link>
@@ -28,32 +23,29 @@ export function Game() {
       </div>
     </div>
     <button onClick={() => {
-      const dbRef = ref(database, `boobtree/${id}`);
-      set(dbRef, {started: true});
+      const dbRef = ref(database, `boobtree/${id}/started`);
+      set(dbRef, true);
     }}>That's everyone!</button>
   </>;
 }
 
 export function Join() {
-  const {id} = useParams();
+  const { id } = useParams();
   const [name, setName] = useState('');
   const navigate = useNavigate();
+  const game = useContext(DataContext);
+  const players = game?.players as string[] || [];
 
   return <>
     <div>Join game {id}</div>
     <form onSubmit={(e) => {
       e.preventDefault();
-      const dbRef = ref(database, `boobtree/${id}`);
-      console.log('Submitting', name);
-      onValue(dbRef, async (snapshot) => {
-        const game = snapshot.val() || {};
-        const players = game.players || [];
-        if (!players.includes(name)) {
-          players.push(name);
-          await set(ref(database, `boobtree/${id}/players`), players);
+      if (!players.includes(name)) {
+        players.push(name);
+        set(ref(database, `boobtree/${id}/players`), players).then(() => {
           navigate(`/game/${id}/user/${name}`);
-        }
-      }, {onlyOnce: true});
+        });
+      }
     }}>
       <input
         type="text"

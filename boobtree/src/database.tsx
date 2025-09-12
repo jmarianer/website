@@ -1,5 +1,6 @@
 import { initializeApp } from "firebase/app";
-import { getDatabase } from "firebase/database";
+import { getDatabase, onValue, ref } from "firebase/database";
+import { createContext, useEffect, useMemo, useState } from "react";
 
 const firebaseConfig = {
   apiKey: "AIzaSyDNY7EWSosnLYffp_zpmySLfF-Ea5YDlFk",
@@ -13,3 +14,20 @@ const firebaseConfig = {
 initializeApp(firebaseConfig);
 
 export const database = getDatabase();
+
+export const DataContext = createContext<any>(null);
+
+export function DataProvider({path, children}: {path: string, children: React.ReactNode}) {
+  const dbRef = useMemo(() => ref(database, path), [path]);
+  const [data, setData] = useState<any>(null);
+
+  useEffect(() => {
+    onValue(dbRef, (snapshot) => {
+      setData(snapshot.val());
+    });
+  }, [dbRef]);
+
+  return <DataContext.Provider value={data}>
+    {children}
+  </DataContext.Provider>;
+}
