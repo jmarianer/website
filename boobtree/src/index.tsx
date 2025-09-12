@@ -2,7 +2,7 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { Homepage, Start } from './Homepage';
 import { BrowserRouter as Router, Routes, Route, useParams, Outlet } from 'react-router';
-import { GameAdmin, Join } from './Game';
+import { GameAdmin, Join } from './GameAdmin';
 import { DataProvider } from './database';
 
 function Game() {
