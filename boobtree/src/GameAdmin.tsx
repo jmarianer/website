@@ -28,7 +28,7 @@ export function GameAdmin() {
       const game: Game = {
         id: id!,
         current_round: 0,
-        total_rounds: players.length % 2 === 0 ? players.length - 1 : players.length * 2,
+        total_rounds: players.length % 2 === 0 ? players.length - 1 : players.length,
         players,
         previous_player,
         archive: Array(players.length).fill(0).map(() => ({})),
