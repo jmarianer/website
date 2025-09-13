@@ -5,6 +5,7 @@ import { BrowserRouter as Router, Routes, Route, useParams, Outlet } from 'react
 import { GameAdmin, Join } from './GameAdmin';
 import { DataProvider } from './database';
 import { GameInProgress } from './Game';
+import "./boobtree.scss";
 
 function Game() {
   return <DataProvider path={`boobtree/${useParams().id}`}>
