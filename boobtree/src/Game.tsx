@@ -1,9 +1,10 @@
 import { useParams } from "react-router";
-import { useCurrentGame } from "./database";
+import { database, useCurrentGame } from "./database";
+import { ref, set } from "firebase/database";
 
 export function GameInProgress() {
   const { started, archive, current_round } = useCurrentGame();
-  const { name: playerName } = useParams();
+  const { name: playerName, id } = useParams();
 
   if (!started) {
     return <div>The game hasn't started yet. Please wait for the admin to start the game.</div>;
@@ -18,7 +19,10 @@ export function GameInProgress() {
     return <>
       <div>Write a phrase here</div>
       <textarea id="next-phrase"></textarea>
-      <button id="done">Done</button>
+      <button id="done" onClick={() => {
+        console.log('dfas');
+        set(ref(database, `boobtree/${id}/archive/${current_round}/${playerName}`), (document.getElementById('next-phrase') as HTMLTextAreaElement).value);
+      }}>Done</button>
     </>;
   } else if (current_round % 2 == 1) {
     return <>

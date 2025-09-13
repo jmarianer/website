@@ -7,7 +7,8 @@ export interface Game {
   current_round: number;
   total_rounds: number;
   players: string[];
-  archive: string[][];
+  previous_player: Record<string, string>;
+  archive: Array<Record<string, string>>;
   started: boolean;
 }
 
@@ -24,24 +25,47 @@ initializeApp(firebaseConfig);
 
 export const database = getDatabase();
 
-export const DataContext = createContext<any>(null);
+export const DataContext = createContext<Game | null>(null);
 
 export function DataProvider({path, children}: {path: string, children: React.ReactNode}) {
   const dbRef = useMemo(() => ref(database, path), [path]);
-  const [data, setData] = useState<any>(null);
+  const [data, setData] = useState<Game | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     onValue(dbRef, (snapshot) => {
-      setData(snapshot.val());
+      const val = snapshot.val();
+      const archive = val.archive || [];
+      while (archive.length < val.total_rounds) {
+        archive.push({});
+      }
+      setData({
+        id: val.id,
+        current_round: val.current_round,
+        total_rounds: val.total_rounds,
+        players: val.players,
+        previous_player: val.previous_player,
+        archive: archive,
+        started: val.started || false,
+      });
+      setLoading(false);
     });
   }, [dbRef]);
+
+  if (loading) {
+    return <div>Loading...</div>;
+  }
 
   return <DataContext.Provider value={data}>
     {children}
   </DataContext.Provider>;
 }
 
-export function useCurrentGame() {
-  // TODO: use deepkit/type to cast this properly
-  return useContext(DataContext) as Game;
+export function useCurrentGame(): Game {
+  const game = useContext(DataContext);
+  if (!game) {
+    throw new Error('DataContext not found');
+  }
+  console.log(game);
+  return game;
 }
