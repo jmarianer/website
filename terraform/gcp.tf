@@ -47,7 +47,7 @@ resource "google_compute_managed_ssl_certificate" "ssl_cert" {
   name = "joeym-org-cert"
 
   managed {
-    domains = ["joeym.org", "crosswords.joeym.org", "combinators.joeym.org"]
+    domains = ["joeym.org", "crosswords.joeym.org", "combinators.joeym.org", "boobtree.com"]
   }
 }
 
@@ -57,7 +57,7 @@ resource "google_compute_url_map" "url-map" {
 
   host_rule {
     hosts        = ["joeym.org"]
-    path_matcher = "allpaths"
+    path_matcher = "mainsite"
   }
 
   host_rule {
@@ -70,8 +70,13 @@ resource "google_compute_url_map" "url-map" {
     path_matcher = "combinators"
   }
 
+  host_rule {
+    hosts        = ["boobtree.com"]
+    path_matcher = "boobtree"
+  }
+
   path_matcher {
-    name            = "allpaths"
+    name            = "mainsite"
     default_service = google_compute_backend_bucket.backend-bucket.id
 
     path_rule {
@@ -94,6 +99,11 @@ resource "google_compute_url_map" "url-map" {
     name            = "combinators"
     default_service = google_compute_backend_bucket.combinators-backend-bucket.id
   }
+
+  path_matcher {
+    name            = "boobtree"
+    default_service = google_compute_backend_bucket.boobtree-backend-bucket.id
+  }
 }
 
 resource "google_compute_backend_bucket" "backend-bucket" {
@@ -114,6 +124,12 @@ resource "google_compute_backend_bucket" "combinators-backend-bucket" {
   enable_cdn  = true
 }
 
+resource "google_compute_backend_bucket" "boobtree-backend-bucket" {
+  name        = "boobtree-com"
+  bucket_name = google_storage_bucket.boobtree-bucket.name
+  enable_cdn  = true
+}
+
 resource "google_storage_bucket" "bucket" {
   name = "joeym-org-main-website"
   location = "US"
@@ -131,6 +147,16 @@ resource "google_storage_bucket" "crosswords_bucket" {
 
 resource "google_storage_bucket" "combinators-bucket" {
   name = "combinators-joeym-org"
+  location = "US"
+
+  website {
+    main_page_suffix = "index.html"
+    not_found_page   = "index.html"
+  }
+}
+
+resource "google_storage_bucket" "boobtree-bucket" {
+  name = "boobtree-com"
   location = "US"
 
   website {
