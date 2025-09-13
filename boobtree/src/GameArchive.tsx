@@ -5,7 +5,7 @@ import "reveal.js/dist/theme/black.css";
 import { useCurrentGame } from "./database";
 
 export function GameArchive() {
-  const { archive, players, previous_player } = useCurrentGame();
+  const { archive, players } = useCurrentGame();
 
   const deckDivRef = useRef<HTMLDivElement>(null); // reference to deck container div
   const deckRef = useRef<Reveal.Api | null>(null); // reference to deck reveal instance
