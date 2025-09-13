@@ -8,7 +8,7 @@ export function GameAdmin() {
   const { players } = useCurrentGame();
 
   return <>
-    <Link to='join'>Join the game</Link>
+    <Link to={`/game/${id}/join`}>Join the game</Link>
     <span>({id})</span>
     <div id="sharelink">
       Please share this link or the code with the rest of your party

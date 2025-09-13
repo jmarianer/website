@@ -4,8 +4,9 @@ import { Homepage, Start } from './Homepage';
 import { BrowserRouter as Router, Routes, Route, useParams, Outlet } from 'react-router';
 import { GameAdmin, Join } from './GameAdmin';
 import { DataProvider } from './database';
-import { GameInProgress } from './Game';
+import { GameInProgress } from './GameInProgress';
 import "./boobtree.scss";
+import { GameArchive } from './GameArchive';
 
 function Game() {
   return <DataProvider path={`boobtree/${useParams().id}`}>
@@ -26,6 +27,7 @@ root.render(
           <Route path="admin" element={<GameAdmin />} />
           <Route path="join" element={<Join />} />
           <Route path="user/:name" element={<GameInProgress />} />
+          <Route path="archive" element={<GameArchive />} />
         </Route>
       </Routes>
     </Router>

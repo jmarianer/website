@@ -34,7 +34,10 @@ export function DataProvider({path, children}: {path: string, children: React.Re
 
   useEffect(() => {
     onValue(dbRef, (snapshot) => {
-      const val = snapshot.val();
+      const val = snapshot.val() || {
+        archive: [],
+        players: [],
+      };
       const archive = val.archive || [];
       while (archive.length < val.total_rounds) {
         archive.push({});

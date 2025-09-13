@@ -1,4 +1,4 @@
-import { useParams } from "react-router";
+import { Navigate, useParams } from "react-router";
 import { database, useCurrentGame } from "./database";
 import { ref, set } from "firebase/database";
 import { useEffect, useRef } from "react";
@@ -21,15 +21,15 @@ export function GameInProgress() {
     return <div>The game hasn't started yet. Please wait for the admin to start the game.</div>;
   }
   if (current_round >= total_rounds) {
-    return <div>The game is over! Here are the results:</div>;
+    return <Navigate to={`/game/${id}/archive`} />;
   }
 
   if (playerName in archive[current_round]) {
-    return <div>Waiting for other players to finish round {current_round}...</div>;
+    return <div>Waiting for other players to finish round {current_round+1}...</div>;
   }
-  if (current_round == 0) {
+  if (current_round === 0) {
     return <FirstRound />;
-  } else if (current_round % 2 == 1) {
+  } else if (current_round % 2 === 1) {
     return <DrawingRound />;
   } else {
     return <WritingRound />;
