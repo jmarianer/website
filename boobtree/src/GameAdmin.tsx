@@ -1,7 +1,7 @@
 import { ref, set } from "firebase/database";
 import { useState } from "react";
 import { Link, useNavigate, useParams } from "react-router";
-import { database, useCurrentGame } from "./database";
+import { database, useCurrentGame, type Game } from "./database";
 
 export function GameAdmin() {
   const { id } = useParams();
@@ -21,8 +21,20 @@ export function GameAdmin() {
       </div>
     </div>
     <button onClick={() => {
-      const dbRef = ref(database, `boobtree/${id}/started`);
-      set(dbRef, true);
+      // Create previous_player mapping: each player maps to the previous one in the array (circular)
+      const previous_player = Object.fromEntries(
+        players.map((player, i) => [player, players[(i - 1 + players.length) % players.length]])
+      );
+      const game: Game = {
+        id: id!,
+        current_round: 0,
+        total_rounds: players.length % 2 === 0 ? players.length - 1 : players.length * 2,
+        players,
+        previous_player,
+        archive: Array(players.length).fill(0).map(() => ({})),
+        started: true,
+      };
+      set(ref(database, `boobtree/${id}`), game);
     }}>That's everyone!</button>
   </>;
 }
