@@ -1,6 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import { Homepage, Start } from './Homepage';
+import { Homepage, Start, JoinWithCode } from './Homepage';
 import { BrowserRouter as Router, Routes, Route, useParams, Outlet } from 'react-router';
 import { GameAdmin, Join } from './GameAdmin';
 import { DataProvider } from './database';
@@ -22,7 +22,8 @@ root.render(
     <Router>
       <Routes>
         <Route path="/" element={<Homepage />} />
-        <Route path="/newgame" element={<Start />} />
+        <Route path="/new" element={<Start />} />
+        <Route path="/join" element={<JoinWithCode />} />
         <Route path="/game/:id" element={<Game />}>
           <Route path="admin" element={<GameAdmin />} />
           <Route path="join" element={<Join />} />

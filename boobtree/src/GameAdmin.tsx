@@ -43,18 +43,12 @@ export function Join() {
   const { id } = useParams();
   const [name, setName] = useState('');
   const navigate = useNavigate();
-  const { players } = useCurrentGame();
 
   return <>
     <div>Join game {id}</div>
     <form onSubmit={(e) => {
       e.preventDefault();
-      if (!players.includes(name)) {
-        players.push(name);
-        set(ref(database, `boobtree/${id}/players`), players).then(() => {
-          navigate(`/game/${id}/user/${name}`);
-        });
-      }
+      navigate(`/game/${id}/user/${name}`);
     }}>
       <input
         type="text"
