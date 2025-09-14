@@ -11,6 +11,7 @@ export function GameInProgress() {
   const id = params.id!;
 
   useEffect(() => {
+    if (!started) return;
     if (current_round >= total_rounds) return;
     if (players.every((player) => player in archive[current_round])) {
       set(ref(database, `boobtree/${id}/current_round`), current_round + 1);
