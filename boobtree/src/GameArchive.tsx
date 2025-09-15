@@ -5,7 +5,7 @@ import "reveal.js/dist/theme/black.css";
 import { useCurrentGame } from "./database";
 
 export function GameArchive() {
-  const { archive, players, total_rounds } = useCurrentGame();
+  const { archive, players, totalRounds } = useCurrentGame();
 
   const deckDivRef = useRef<HTMLDivElement>(null); // reference to deck container div
   const deckRef = useRef<Reveal.Api | null>(null); // reference to deck reveal instance
@@ -34,7 +34,7 @@ export function GameArchive() {
     <div className="archive reveal" ref={deckDivRef}>
       <div className="slides">
         {players.map((firstPlayer, chainNo) => {
-          const lastPlayer = players[(chainNo + total_rounds - 1) % players.length];
+          const lastPlayer = players[(chainNo + totalRounds - 1) % players.length];
           return <>
             <section key={`chain-${chainNo}-title`}>
               Chain {chainNo+1}
@@ -61,7 +61,7 @@ export function GameArchive() {
               <div>Started with {firstPlayer}:</div>
               <div className="text">{archive[0][firstPlayer]}</div>
               <div>Ended with {lastPlayer}:</div>
-              <div className="text">{archive[total_rounds - 1][lastPlayer]}</div>
+              <div className="text">{archive[totalRounds - 1][lastPlayer]}</div>
             </section>
           </>
         })}

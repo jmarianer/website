@@ -14,7 +14,7 @@ export class Game {
   public archive: Array<Record<string, string>> = [];
   public started = false;
 
-  get current_round(): number {
+  get currentRound(): number {
     for (let round = 0; round < this.players.length; round++) {
       if (Object.keys(this.archive[round] || {}).length < this.players.length) {
         return round;
@@ -22,7 +22,7 @@ export class Game {
     }
     return this.players.length;
   }
-  get total_rounds(): number {
+  get totalRounds(): number {
     return this.players.length % 2 === 0 ? this.players.length - 1 : this.players.length;
   }
   get previous_player(): Record<string, string> {
@@ -43,7 +43,7 @@ export class Game {
   }
 
   addResponse(playerName: string, response: string) {
-    set(ref(database, `boobtree/${this.id}/archive/${this.current_round}/${playerName}`), response);
+    set(ref(database, `boobtree/${this.id}/archive/${this.currentRound}/${playerName}`), response);
   }
 }
 
@@ -75,7 +75,7 @@ export function DataProvider({gameId, children}: {gameId: string, children: Reac
         set(ref(database, `boobtree/${gameId}/id`), gameId);
       } else {
         const game = cast<Game>(snapshot.val());
-        while (game.archive.length < game.total_rounds) {
+        while (game.archive.length < game.totalRounds) {
           game.archive.push({});
         }
         setData(game);

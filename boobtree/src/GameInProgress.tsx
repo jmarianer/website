@@ -5,7 +5,7 @@ import { Canvas, PencilBrush } from "fabric";
 
 export function GameInProgress() {
   const game = useCurrentGame();
-  const { started, archive, current_round, players, total_rounds } = game;
+  const { started, archive, currentRound, players, totalRounds } = game;
   const params = useParams();
   const playerName = params.name!;
   const id = params.id!;
@@ -19,16 +19,16 @@ export function GameInProgress() {
   if (!started) {
     return <div>The game hasn't started yet. Please wait for the admin to start the game.</div>;
   }
-  if (current_round >= total_rounds) {
+  if (currentRound >= totalRounds) {
     return <Navigate to={`/game/${id}/archive`} />;
   }
 
-  if (playerName in archive[current_round]) {
-    return <div>Waiting for other players to finish round {current_round+1}...</div>;
+  if (playerName in archive[currentRound]) {
+    return <div>Waiting for other players to finish round {currentRound+1}...</div>;
   }
-  if (current_round === 0) {
+  if (currentRound === 0) {
     return <FirstRound />;
-  } else if (current_round % 2 === 1) {
+  } else if (currentRound % 2 === 1) {
     return <DrawingRound />;
   } else {
     return <WritingRound />;
@@ -37,7 +37,7 @@ export function GameInProgress() {
 
 function WritingRound() {
   const game = useCurrentGame();
-  const { current_round, archive, previous_player } = game;
+  const { currentRound, archive, previous_player } = game;
   const params = useParams();
   const playerName = params.name!;
 
@@ -45,7 +45,7 @@ function WritingRound() {
   return <>
     <div id="instructions">Describe that drawing below</div>
     <div id="previous">
-      <img id="previous-drawing-image" src={archive[current_round - 1][previous_player[playerName]]} alt="Previous drawing" />
+      <img id="previous-drawing-image" src={archive[currentRound - 1][previous_player[playerName]]} alt="Previous drawing" />
     </div>
     <div id="next">
       <textarea id="next-phrase" ref={textareaRef}></textarea>
@@ -58,7 +58,7 @@ function WritingRound() {
 
 function DrawingRound() {
   const game = useCurrentGame();
-  const { archive, current_round, previous_player } = game;
+  const { archive, currentRound, previous_player } = game;
   const params = useParams();
   const playerName = params.name!;
 
@@ -85,7 +85,7 @@ function DrawingRound() {
   return <>
     <div id="instructions">Draw that phrase below</div>
     <div id="previous">
-      <span>{archive[current_round - 1][previous_player[playerName]]}</span>
+      <span>{archive[currentRound - 1][previous_player[playerName]]}</span>
     </div>
     <div id="next">
       <canvas ref={canvasRef} id="next-drawing-canvas"></canvas>
