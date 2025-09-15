@@ -1,15 +1,50 @@
+import { cast } from "@deepkit/type";
 import { initializeApp } from "firebase/app";
-import { getDatabase, onValue, ref } from "firebase/database";
+import { getDatabase, onValue, ref, set } from "firebase/database";
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
 
-export interface Game {
-  id: string;
-  current_round: number;
-  total_rounds: number;
-  players: string[];
-  previous_player: Record<string, string>;
-  archive: Array<Record<string, string>>;
-  started: boolean;
+export class Game {
+  constructor(
+    public id: string,
+  ) {
+    console.log(this.id);
+  }
+
+  public players: string[] = [];
+  public archive: Array<Record<string, string>> = [];
+  public started = false;
+
+  get current_round(): number {
+    for (let round = 0; round < this.players.length; round++) {
+      if (Object.keys(this.archive[round] || {}).length < this.players.length) {
+        return round;
+      }
+    }
+    return this.players.length;
+  }
+  get total_rounds(): number {
+    return this.players.length % 2 === 0 ? this.players.length - 1 : this.players.length;
+  }
+  get previous_player(): Record<string, string> {
+    return Object.fromEntries(
+      this.players.map((player, i) => [player, this.players[(i - 1 + this.players.length) % this.players.length]])
+    );
+  }
+
+  start() {
+    set(ref(database, `boobtree/${this.id}/started`), true);
+  }
+
+  addPlayer(playerName: string) {
+    if (this.players.includes(playerName)) {
+      return;
+    }
+    set(ref(database, `boobtree/${this.id}/players`), [...this.players, playerName]);
+  }
+
+  addResponse(playerName: string, response: string) {
+    set(ref(database, `boobtree/${this.id}/archive/${this.current_round}/${playerName}`), response);
+  }
 }
 
 const firebaseConfig = {
@@ -23,34 +58,28 @@ const firebaseConfig = {
 };
 initializeApp(firebaseConfig);
 
-export const database = getDatabase();
+const database = getDatabase();
 
-export const DataContext = createContext<Game | null>(null);
+const DataContext = createContext<Game | null>(null);
 
-export function DataProvider({path, children}: {path: string, children: React.ReactNode}) {
+export function DataProvider({gameId, children}: {gameId: string, children: React.ReactNode}) {
+  const path = `boobtree/${gameId}`;
   const dbRef = useMemo(() => ref(database, path), [path]);
   const [data, setData] = useState<Game | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     onValue(dbRef, (snapshot) => {
-      const val = snapshot.val() || {
-        archive: [],
-        players: [],
-      };
-      const archive = val.archive || [];
-      while (archive.length < val.total_rounds) {
-        archive.push({});
+      const val = snapshot.val();
+      if (val === null) {
+        set(ref(database, `boobtree/${gameId}/id`), gameId);
+      } else {
+        const game = cast<Game>(snapshot.val());
+        while (game.archive.length < game.total_rounds) {
+          game.archive.push({});
+        }
+        setData(game);
       }
-      setData({
-        id: val.id,
-        current_round: val.current_round,
-        total_rounds: val.total_rounds,
-        players: val.players,
-        previous_player: val.previous_player,
-        archive: archive,
-        started: val.started || false,
-      });
       setLoading(false);
     });
   }, [dbRef]);

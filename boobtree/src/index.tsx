@@ -9,7 +9,7 @@ import "./boobtree.scss";
 import { GameArchive } from './GameArchive';
 
 function Game() {
-  return <DataProvider path={`boobtree/${useParams().id}`}>
+  return <DataProvider gameId={useParams().id!}>
     <Outlet />
   </DataProvider>;
 }

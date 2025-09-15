@@ -1,27 +1,20 @@
 import { Navigate, useParams } from "react-router";
-import { database, useCurrentGame } from "./database";
-import { ref, set } from "firebase/database";
+import { useCurrentGame } from "./database";
 import { useEffect, useRef } from "react";
 import { Canvas, PencilBrush } from "fabric";
 
 export function GameInProgress() {
-  const { started, archive, current_round, players, total_rounds } = useCurrentGame();
+  const game = useCurrentGame();
+  const { started, archive, current_round, players, total_rounds } = game;
   const params = useParams();
   const playerName = params.name!;
   const id = params.id!;
 
   useEffect(() => {
     if (!players.includes(playerName)) {
-      players.push(playerName);
-      set(ref(database, `boobtree/${id}/players`), players);
+      game.addPlayer(playerName);
     }
-
-    if (!started) return;
-    if (current_round >= total_rounds) return;
-    if (players.every((player) => player in archive[current_round])) {
-      set(ref(database, `boobtree/${id}/current_round`), current_round + 1);
-    }
-  }, [current_round, archive]);
+  }, [playerName, players, game]);
   
   if (!started) {
     return <div>The game hasn't started yet. Please wait for the admin to start the game.</div>;
@@ -43,10 +36,10 @@ export function GameInProgress() {
 }
 
 function WritingRound() {
-  const { current_round, archive, previous_player } = useCurrentGame();
+  const game = useCurrentGame();
+  const { current_round, archive, previous_player } = game;
   const params = useParams();
   const playerName = params.name!;
-  const id = params.id!;
 
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   return <>
@@ -58,16 +51,16 @@ function WritingRound() {
       <textarea id="next-phrase" ref={textareaRef}></textarea>
     </div>
     <button id="done" onClick={() => {
-      set(ref(database, `boobtree/${id}/archive/${current_round}/${playerName}`), textareaRef.current!.value);
+      game.addResponse(playerName, textareaRef.current!.value);
     } }>Done</button>
   </>;
 }
 
 function DrawingRound() {
-  const { archive, current_round, previous_player } = useCurrentGame();
+  const game = useCurrentGame();
+  const { archive, current_round, previous_player } = game;
   const params = useParams();
   const playerName = params.name!;
-  const id = params.id!;
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const fabricCanvasRef = useRef<Canvas>(null);
@@ -98,16 +91,15 @@ function DrawingRound() {
       <canvas ref={canvasRef} id="next-drawing-canvas"></canvas>
     </div>
     <button id="done" onClick={() => {
-      set(ref(database, `boobtree/${id}/archive/${current_round}/${playerName}`), fabricCanvasRef.current!.toDataURL({ format: 'png', multiplier: 1 }));
+      game.addResponse(playerName, fabricCanvasRef.current!.toDataURL({ format: 'png', multiplier: 1 }));
     } }>Done</button>
   </>;
 }
 
 function FirstRound() {
-  const { current_round } = useCurrentGame();
+  const game = useCurrentGame();
   const params = useParams();
   const playerName = params.name!;
-  const id = params.id!;
 
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   return <>
@@ -117,7 +109,7 @@ function FirstRound() {
       <textarea id="next-phrase" ref={textareaRef}></textarea>
     </div>
     <button id="done" onClick={() => {
-      set(ref(database, `boobtree/${id}/archive/${current_round}/${playerName}`), textareaRef.current!.value);
+      game.addResponse(playerName, textareaRef.current!.value);
     } }>Done</button>
   </>;
 }
