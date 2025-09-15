@@ -37,15 +37,15 @@ export function GameInProgress() {
 
 function WritingRound() {
   const game = useCurrentGame();
-  const { currentRound, archive, previous_player } = game;
-  const params = useParams();
-  const playerName = params.name!;
+  const { currentRound, archive } = game;
+  const playerName = useParams().name!;
+  const previousPlayer = game.previousPlayer(playerName);
 
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   return <>
     <div id="instructions">Describe that drawing below</div>
     <div id="previous">
-      <img id="previous-drawing-image" src={archive[currentRound - 1][previous_player[playerName]]} alt="Previous drawing" />
+      <img id="previous-drawing-image" src={archive[currentRound - 1][previousPlayer]} alt="Previous drawing" />
     </div>
     <div id="next">
       <textarea id="next-phrase" ref={textareaRef}></textarea>
@@ -58,9 +58,9 @@ function WritingRound() {
 
 function DrawingRound() {
   const game = useCurrentGame();
-  const { archive, currentRound, previous_player } = game;
-  const params = useParams();
-  const playerName = params.name!;
+  const { currentRound, archive } = game;
+  const playerName = useParams().name!;
+  const previousPlayer = game.previousPlayer(playerName);
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const fabricCanvasRef = useRef<Canvas>(null);
@@ -85,7 +85,7 @@ function DrawingRound() {
   return <>
     <div id="instructions">Draw that phrase below</div>
     <div id="previous">
-      <span>{archive[currentRound - 1][previous_player[playerName]]}</span>
+      <span>{archive[currentRound - 1][previousPlayer]}</span>
     </div>
     <div id="next">
       <canvas ref={canvasRef} id="next-drawing-canvas"></canvas>
@@ -98,8 +98,7 @@ function DrawingRound() {
 
 function FirstRound() {
   const game = useCurrentGame();
-  const params = useParams();
-  const playerName = params.name!;
+  const playerName = useParams().name!;
 
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   return <>

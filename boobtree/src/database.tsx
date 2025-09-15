@@ -25,11 +25,6 @@ export class Game {
   get totalRounds(): number {
     return this.players.length % 2 === 0 ? this.players.length - 1 : this.players.length;
   }
-  get previous_player(): Record<string, string> {
-    return Object.fromEntries(
-      this.players.map((player, i) => [player, this.players[(i - 1 + this.players.length) % this.players.length]])
-    );
-  }
 
   start() {
     set(ref(database, `boobtree/${this.id}/started`), true);
@@ -44,6 +39,14 @@ export class Game {
 
   addResponse(playerName: string, response: string) {
     set(ref(database, `boobtree/${this.id}/archive/${this.currentRound}/${playerName}`), response);
+  }
+
+  previousPlayer(playerName: string): string {
+    const index = this.players.indexOf(playerName);
+    if (index === -1) {
+      throw new Error(`Player ${playerName} not found`);
+    }
+    return this.players[(index - 1 + this.players.length) % this.players.length];
   }
 }
 
