@@ -7,19 +7,33 @@ export function GameAdmin() {
   const game = useCurrentGame();
 
   return <>
-    <Link to={`/game/${id}/join`}>Join the game</Link>
-    <span>({id})</span>
-    <div id="sharelink">
-      Please share this link or the code with the rest of your party
+    <div id="instructions">
+      Please share this <Link to={`/game/${id}/join`}>join link</Link> or the code {id} with the rest of your party
     </div>
-    <div id="player-container">
+
+    {game.started ? <GameStarted /> : <GameNotStarted />}
+  </>;
+}
+
+function GameStarted() {
+  return <div>
+    The game has started! You can close this tab now.
+  </div>;
+}
+
+function GameNotStarted() {
+  const game = useCurrentGame();
+
+  if (game.players.length === 0) {
+    return <div><i>No players have joined yet</i></div>;
+  }
+
+  return <>
+    <div>
       The following players have already joined:
-      <div id="players">
-        { game.players.length === 0 && <i>No players have joined yet</i> }
-        { game.players.map((player) => <div key={player}>{player}</div>) }
-      </div>
+      {game.players.map((player) => <div key={player}>{player}</div>)}
     </div>
-    <button onClick={() => {
+    <button id="done" onClick={() => {
       game.start();
     }}>That's everyone!</button>
   </>;
