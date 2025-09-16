@@ -17,16 +17,12 @@ export function GameInProgress() {
   }, [playerName, players, game]);
   
   if (!started) {
-    return <div>The game hasn't started yet. Please wait for the admin to start the game.</div>;
-  }
-  if (currentRound >= totalRounds) {
+    return <div id="instructions">The game hasn't started yet. Please wait for the admin to start the game.</div>;
+  } else if (currentRound >= totalRounds) {
     return <Navigate to={`/game/${id}/archive`} />;
-  }
-
-  if (playerName in archive[currentRound]) {
-    return <div>Waiting for other players to finish round {currentRound+1}...</div>;
-  }
-  if (currentRound === 0) {
+  } else if (playerName in archive[currentRound]) {
+    return <PleaseWait />;
+  } else if (currentRound === 0) {
     return <FirstRound />;
   } else if (currentRound % 2 === 1) {
     return <DrawingRound />;
@@ -35,23 +31,17 @@ export function GameInProgress() {
   }
 }
 
-function WritingRound() {
+function FirstRound() {
   const game = useCurrentGame();
-  const { currentRound, archive } = game;
   const playerName = useParams().name!;
-  const previousPlayer = game.previousPlayer(playerName);
 
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const phraseRef = useRef<HTMLInputElement>(null);
   return <>
-    <div id="instructions">Describe that drawing below</div>
-    <div id="previous">
-      <img id="previous-drawing-image" src={archive[currentRound - 1][previousPlayer]} alt="Previous drawing" />
-    </div>
-    <div id="next">
-      <textarea id="next-phrase" ref={textareaRef}></textarea>
-    </div>
+    <div id="instructions">Write a phrase for others to draw:</div>
+    <input type="text" className="phrase-input" ref={phraseRef} placeholder="e.g., A cat wearing a superhero cape"></input>
+    <div className="spacer"></div>
     <button id="done" onClick={() => {
-      game.addResponse(playerName, textareaRef.current!.value);
+      game.addResponse(playerName, phraseRef.current!.value);
     } }>Done</button>
   </>;
 }
@@ -83,12 +73,10 @@ function DrawingRound() {
   }, []);
 
   return <>
-    <div id="instructions">Draw that phrase below</div>
-    <div id="previous">
-      <span>{archive[currentRound - 1][previousPlayer]}</span>
-    </div>
-    <div id="next">
-      <canvas ref={canvasRef} id="next-drawing-canvas"></canvas>
+    <div id="instructions">Draw this phrase:</div>
+    <div id="phrase-to-draw">{archive[currentRound - 1][previousPlayer]}</div>
+    <div id="drawing-area">
+      <canvas ref={canvasRef}></canvas>
     </div>
     <button id="done" onClick={() => {
       game.addResponse(playerName, fabricCanvasRef.current!.toDataURL({ format: 'png', multiplier: 1 }));
@@ -96,19 +84,24 @@ function DrawingRound() {
   </>;
 }
 
-function FirstRound() {
+function WritingRound() {
   const game = useCurrentGame();
+  const { currentRound, archive } = game;
   const playerName = useParams().name!;
+  const previousPlayer = game.previousPlayer(playerName);
 
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const phraseRef = useRef<HTMLInputElement>(null);
   return <>
-    <div id="instructions">Write a phrase here</div>
-    <div id="previous"></div>
-    <div id="next">
-      <textarea id="next-phrase" ref={textareaRef}></textarea>
-    </div>
+    <div id="instructions">Describe this drawing:</div>
+    <img id="drawing-to-describe" src={archive[currentRound - 1][previousPlayer]} alt="Previous drawing" />
+    <input type="text" className="phrase-input" ref={phraseRef} placeholder="e.g., A cat wearing a superhero cape"></input>
     <button id="done" onClick={() => {
-      game.addResponse(playerName, textareaRef.current!.value);
+      game.addResponse(playerName, phraseRef.current!.value);
     } }>Done</button>
   </>;
+}
+
+function PleaseWait() {
+  // TODO: Show "k out of n players have finished"
+  return <div id="instructions">Please wait for other players to finish this round...</div>;
 }

@@ -1,7 +1,5 @@
 import { Link, Navigate, useNavigate } from "react-router";
 import cryptoRandomString from "crypto-random-string";
-import { useState } from "react";
-import Modal from 'react-modal';
 
 export function Homepage() {
   return <div id="homepage">

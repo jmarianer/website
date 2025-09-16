@@ -14,10 +14,10 @@ function Game() {
   </DataProvider>;
 }
 
-const root = ReactDOM.createRoot(
-  document.getElementById('root') as HTMLElement
+const reactRoot = ReactDOM.createRoot(
+  document.getElementById('app') as HTMLElement
 );
-root.render(
+reactRoot.render(
   <React.StrictMode>
     <Router>
       <Routes>
