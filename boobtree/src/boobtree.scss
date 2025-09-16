@@ -23,6 +23,12 @@ body {
   min-height: 600px;
   display: flex;
   flex-direction: column;
+
+  @media (max-width: 768px) {
+    max-width: none;
+    min-height: calc(100vh - 20px);
+    border-radius: 20px;
+  }
 }
 
 .header {
