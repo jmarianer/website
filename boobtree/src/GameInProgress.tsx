@@ -1,7 +1,21 @@
 import { Navigate, useParams } from "react-router";
 import { useCurrentGame } from "./database";
 import { useEffect, useRef, useState } from "react";
-import { Canvas, PencilBrush } from "fabric";
+import { Canvas, FabricImage, PencilBrush } from "fabric";
+
+function createBlankImageDataURL(width: number, height: number): string {
+  const canvas = document.createElement('canvas');
+  canvas.width = width;
+  canvas.height = height;
+  const ctx = canvas.getContext('2d');
+  ctx!.fillStyle = '#fff';
+  ctx!.fillRect(0, 0, width, height);
+  return canvas.toDataURL('image/png');
+}
+
+const IMAGE_WIDTH = 500;
+const IMAGE_HEIGHT = 300;
+const BLANK_IMAGE = createBlankImageDataURL(IMAGE_WIDTH, IMAGE_HEIGHT);
 
 export function GameInProgress() {
   const game = useCurrentGame();
@@ -69,26 +83,35 @@ function DrawingRound() {
   }, [drawingAreaContainerRef]);
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const fabricCanvasRef = useRef<Canvas>(null);
+  const [image, setImage] = useState(BLANK_IMAGE);
+  // Create a data URL from OffscreenCanvas
   useEffect(() => {
     if (!canvasRef.current || !drawingAreaContainerRef.current) {
       return;
     }
 
-    const canvasWidth = Math.min(drawingAreaContainerWidth - 20, 500);
+    const canvasWidth = Math.min(drawingAreaContainerWidth - 20, IMAGE_WIDTH);
     const canvas = new Canvas(canvasRef.current, {
       isDrawingMode: true,
       width: canvasWidth,
-      height: canvasWidth * 3 / 5,
+      height: canvasWidth * IMAGE_HEIGHT / IMAGE_WIDTH,
     });
     canvas.freeDrawingBrush = new PencilBrush(canvas);
     canvas.freeDrawingBrush.width = 5;
     canvas.freeDrawingBrush.color = "#000000";
 
-    fabricCanvasRef.current = canvas;
+    FabricImage.fromURL(image).then((img) => {
+      img.scaleToWidth(canvasWidth);
+      canvas.backgroundImage = img;
+      canvas.renderAll();
+    });
+
+    canvas.on('path:created', function() {
+      setImage(canvas.toDataURL({ format: 'png', multiplier: IMAGE_WIDTH / canvasWidth }) );
+    });
+
     return () => {
       canvas.dispose();
-      fabricCanvasRef.current = null;
     };
   }, [canvasRef, drawingAreaContainerRef, drawingAreaContainerWidth]);
 
@@ -101,7 +124,7 @@ function DrawingRound() {
       </div>
     </div>
     <button id="done" onClick={() => {
-      game.addResponse(playerName, fabricCanvasRef.current!.toDataURL({ format: 'png', multiplier: 1 }));
+      game.addResponse(playerName, image);
     } }>Done</button>
   </>;
 }
