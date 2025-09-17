@@ -130,13 +130,21 @@ function DrawingRound() {
     </div>
     <div id="color-picker">
       {colors.map(c => (
-        <div key={c} className="color-swatch" style={{ backgroundColor: c, border: c === color ? '3px solid #667eea' : '3px solid white' }} onClick={() => setColor(c)}></div>
+        <div
+          key={c}
+          className={`swatch-container ${c}` + (c === color ? " active" : "")}
+          onClick={() => setColor(c)}>
+          <div className="color-swatch" style={{ backgroundColor: c }} />
+        </div>
       ))}
     </div>
     <div id="thickness-picker">
       {range(1, 17, 2).map(t => (
-        <div key={t} className="thickness-swatch-container" style={{ border: t === thickness ? '3px solid #667eea' : '3px solid white' }} onClick={() => setThickness(t)}>
-          <div className="thickness-swatch" style={{ backgroundColor: color, height: t }} onClick={() => setThickness(t)}></div>
+        <div
+          key={t}
+          className={`swatch-container ${color}` + (t === thickness ? " active" : "")}
+          onClick={() => setThickness(t)}>
+          <div className="thickness-swatch" style={{ backgroundColor: color, height: t }} />
         </div>
       ))}
     </div>
