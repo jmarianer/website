@@ -9,5 +9,6 @@ npm run dev -- --host 192.xxx.xxx.xxx
 
 # Deploy
 npm run build
-gcloud storage cp -r dist/* gs://boobtree-com
+gcloud storage cp -r dist-boobtree/* gs://boobtree-com
+gcloud storage cp -r dist-passthepic/* gs://passthepic-com
 gcloud compute url-maps invalidate-cdn-cache joeym-org --path "/*" --async

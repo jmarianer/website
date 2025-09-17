@@ -5,7 +5,7 @@ import { BrowserRouter as Router, Routes, Route, useParams, Outlet } from 'react
 import { GameAdmin, Join } from './GameAdmin';
 import { DataProvider } from './database';
 import { GameInProgress } from './GameInProgress';
-import "./boobtree.scss";
+import "./style.scss";
 import { GameArchive } from './GameArchive';
 
 function Game() {

@@ -25,18 +25,18 @@ export class Game {
   }
 
   start() {
-    set(ref(database, `boobtree/${this.id}/started`), true);
+    set(ref(database, `${DB_PREFIX}/${this.id}/started`), true);
   }
 
   addPlayer(playerName: string) {
     if (this.players.includes(playerName)) {
       return;
     }
-    set(ref(database, `boobtree/${this.id}/players`), [...this.players, playerName]);
+    set(ref(database, `${DB_PREFIX}/${this.id}/players`), [...this.players, playerName]);
   }
 
   addResponse(playerName: string, response: string) {
-    set(ref(database, `boobtree/${this.id}/archive/${this.currentRound}/${playerName}`), response);
+    set(ref(database, `${DB_PREFIX}/${this.id}/archive/${this.currentRound}/${playerName}`), response);
   }
 
   previousPlayer(playerName: string): string {
@@ -60,11 +60,15 @@ const firebaseConfig = {
 initializeApp(firebaseConfig);
 
 const database = getDatabase();
+export const DB_PREFIX = import.meta.env.VITE_DB_PREFIX;
+if (!DB_PREFIX) {
+  throw new Error('VITE_DB_PREFIX environment variable must be defined');
+}
 
 const DataContext = createContext<Game | null>(null);
 
 export function DataProvider({gameId, children}: {gameId: string, children: React.ReactNode}) {
-  const path = `boobtree/${gameId}`;
+  const path = `${DB_PREFIX}/${gameId}`;
   const dbRef = useMemo(() => ref(database, path), [path]);
   const [data, setData] = useState<Game | null>(null);
   const [loading, setLoading] = useState(true);
@@ -73,7 +77,7 @@ export function DataProvider({gameId, children}: {gameId: string, children: Reac
     onValue(dbRef, (snapshot) => {
       const val = snapshot.val();
       if (val === null) {
-        set(ref(database, `boobtree/${gameId}/id`), gameId);
+        set(ref(database, `${DB_PREFIX}/${gameId}/id`), gameId);
       } else {
         const game = cast<Game>(snapshot.val());
         while (game.archive.length < game.totalRounds) {

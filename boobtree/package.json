@@ -1,11 +1,12 @@
 {
-  "name": "boobtree",
+  "name": "passthepic",
   "private": true,
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "tsc -b && vite build",
+    "dev-boobtree": "env DB_PREFIX=boobtree vite",
+    "dev-passthepic": "env DB_PREFIX=passthepic vite",
+    "build": "tsc -b && env DB_PREFIX=passthepic vite build && env DB_PREFIX=boobtree vite build",
     "lint": "eslint .",
     "preview": "vite preview"
   },

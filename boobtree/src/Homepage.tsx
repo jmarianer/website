@@ -1,9 +1,10 @@
 import { Link, Navigate, useNavigate } from "react-router";
 import cryptoRandomString from "crypto-random-string";
+import { DB_PREFIX } from "./database";
 
 export function Homepage() {
   return <div id="homepage">
-    <img src="/boobtrees.jpg" id="treeofboobs" alt="Trees of boobs" />
+    <img src={`/${DB_PREFIX}.jpg`} id="homepage-img" alt="" />
     <div>
       <Link to="/new">Start a new game</Link>
       &nbsp;|&nbsp;
