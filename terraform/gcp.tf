@@ -6,12 +6,25 @@ resource "google_compute_global_address" "joeym-org-ip" {
   name = "joeym-org-ip"
 }
 
+locals {
+  domains = toset([
+    "joeym.org",
+    "crosswords.joeym.org",
+    "combinators.joeym.org",
+    "boobtree.com",
+    "passthepic.com"
+  ])
+}
+
+// HTTP to HTTPS redirect
 resource "google_compute_global_forwarding_rule" "forwarding-rule" {
   name = "joeym-org-http"
-  target = google_compute_target_http_proxy.http-proxy.self_link
+
   ip_address = google_compute_global_address.joeym-org-ip.self_link
   ip_protocol = "TCP"
   port_range = "80"
+
+  target = google_compute_target_http_proxy.http-proxy.self_link
 }
 
 resource "google_compute_target_http_proxy" "http-proxy" {
@@ -29,6 +42,7 @@ resource "google_compute_url_map" "http-redirect-map" {
   }
 }
 
+// HTTPS setup
 resource "google_compute_global_forwarding_rule" "forwarding-rule-https" {
   name = "joeym-org-https"
   target = google_compute_target_https_proxy.https-proxy.self_link
@@ -40,44 +54,33 @@ resource "google_compute_global_forwarding_rule" "forwarding-rule-https" {
 resource "google_compute_target_https_proxy" "https-proxy" {
   name    = "joeym-org"
   url_map = google_compute_url_map.url-map.id
-  ssl_certificates = [google_compute_managed_ssl_certificate.ssl_cert.id]
+  ssl_certificates = [for cert in google_compute_managed_ssl_certificate.ssl_cert : cert.self_link]
 }
 
 resource "google_compute_managed_ssl_certificate" "ssl_cert" {
-  name = "joeym-org-cert"
+  for_each = local.domains
+  name = "ssl-cert-${replace(each.value, ".", "-")}"
 
   managed {
-    domains = ["joeym.org", "crosswords.joeym.org", "combinators.joeym.org", "boobtree.com"]
+    domains = [each.value]
   }
 }
 
 resource "google_compute_url_map" "url-map" {
-  name            = "joeym-org"
-  default_service = google_compute_backend_bucket.backend-bucket.id
+  name            = "url-map"
+  default_service = google_compute_backend_bucket.backend-bucket["joeym.org"].id
 
-  host_rule {
-    hosts        = ["joeym.org"]
-    path_matcher = "mainsite"
-  }
-
-  host_rule {
-    hosts        = ["crosswords.joeym.org"]
-    path_matcher = "crosswords"
-  }
-
-  host_rule {
-    hosts        = ["combinators.joeym.org"]
-    path_matcher = "combinators"
-  }
-
-  host_rule {
-    hosts        = ["boobtree.com"]
-    path_matcher = "boobtree"
+  dynamic "host_rule" {
+    for_each = local.domains
+    content {
+      hosts        = [host_rule.value]
+      path_matcher = replace(host_rule.value, ".", "-")
+    }
   }
 
   path_matcher {
-    name            = "mainsite"
-    default_service = google_compute_backend_bucket.backend-bucket.id
+    name            = "joeym-org"
+    default_service = google_compute_backend_bucket.backend-bucket["joeym.org"].id
 
     path_rule {
       paths = ["/resume"]
@@ -90,77 +93,36 @@ resource "google_compute_url_map" "url-map" {
     }
   }
 
-  path_matcher {
-    name            = "crosswords"
-    default_service = google_compute_backend_bucket.crosswords-backend-bucket.id
+  dynamic "path_matcher" {
+    for_each = [for d in local.domains : d if d != "joeym.org"]
+    content {
+      name            = replace(path_matcher.value, ".", "-")
+      default_service = google_compute_backend_bucket.backend-bucket[path_matcher.value].id
+    }
   }
 
-  path_matcher {
-    name            = "combinators"
-    default_service = google_compute_backend_bucket.combinators-backend-bucket.id
-  }
-
-  path_matcher {
-    name            = "boobtree"
-    default_service = google_compute_backend_bucket.boobtree-backend-bucket.id
+  lifecycle {
+    create_before_destroy = true
   }
 }
 
+// Backends and buckets
 resource "google_compute_backend_bucket" "backend-bucket" {
-  name        = "joeym-org"
-  bucket_name = google_storage_bucket.bucket.name
-  enable_cdn  = true
-}
-
-resource "google_compute_backend_bucket" "crosswords-backend-bucket" {
-  name        = "crosswords-joeym-org"
-  bucket_name = google_storage_bucket.crosswords_bucket.name
-  enable_cdn  = true
-}
-
-resource "google_compute_backend_bucket" "combinators-backend-bucket" {
-  name        = "combinators-joeym-org"
-  bucket_name = google_storage_bucket.combinators-bucket.name
-  enable_cdn  = true
-}
-
-resource "google_compute_backend_bucket" "boobtree-backend-bucket" {
-  name        = "boobtree-com"
-  bucket_name = google_storage_bucket.boobtree-bucket.name
+  for_each    = local.domains
+  name        = replace(each.value, ".", "-")
+  bucket_name = google_storage_bucket.bucket[each.value].name
   enable_cdn  = true
 }
 
 resource "google_storage_bucket" "bucket" {
-  name = "joeym-org-main-website"
-  location = "US"
-}
-
-resource "google_storage_bucket" "crosswords_bucket" {
-  name = "crosswords-joeym-org"
-  location = "US"
+  for_each    = local.domains
+  // TODO: Fix this one-off
+  name = each.value == "joeym.org" ? "joeym-org-main-website" : replace(each.value, ".", "-")
+  location    = "US"
 
   website {
     main_page_suffix = "index.html"
     not_found_page   = "index.html"
   }
 }
-
-resource "google_storage_bucket" "combinators-bucket" {
-  name = "combinators-joeym-org"
-  location = "US"
-
-  website {
-    main_page_suffix = "index.html"
-    not_found_page   = "index.html"
-  }
-}
-
-resource "google_storage_bucket" "boobtree-bucket" {
-  name = "boobtree-com"
-  location = "US"
-
-  website {
-    main_page_suffix = "index.html"
-    not_found_page   = "index.html"
-  }
-}
+// TODO: Enable public access to all these buckets. I've been doing this manually via the console, but it should be in the code.
