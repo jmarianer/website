@@ -2,6 +2,7 @@ import { Navigate, useParams } from "react-router";
 import { useCurrentGame } from "./database";
 import { useEffect, useRef, useState } from "react";
 import { Canvas, FabricImage, PencilBrush } from "fabric";
+import { range } from "lodash";
 
 function createBlankImageDataURL(width: number, height: number): string {
   const canvas = document.createElement('canvas');
@@ -66,8 +67,9 @@ function DrawingRound() {
   const playerName = useParams().name!;
   const previousPlayer = game.previousPlayer(playerName);
 
-  const colors = ["red", "blue", "green", "orange", "purple", "brown", "black"];
+  const colors = ["black", "red", "orange", "yellow", "green", "blue", "purple", "white"];
   const [color, setColor] = useState("black");
+  const [thickness, setThickness] = useState(5);
 
   const [drawingAreaContainerWidth, setDrawingAreaContainerWidth] = useState(0);
   const drawingAreaContainerRef = useRef<HTMLDivElement>(null);
@@ -100,7 +102,7 @@ function DrawingRound() {
       height: canvasWidth * IMAGE_HEIGHT / IMAGE_WIDTH,
     });
     canvas.freeDrawingBrush = new PencilBrush(canvas);
-    canvas.freeDrawingBrush.width = 5 * canvasWidth / IMAGE_WIDTH;
+    canvas.freeDrawingBrush.width = thickness * canvasWidth / IMAGE_WIDTH;
     canvas.freeDrawingBrush.color = color;
 
     FabricImage.fromURL(image).then((img) => {
@@ -116,7 +118,7 @@ function DrawingRound() {
     return () => {
       canvas.dispose();
     };
-  }, [canvasRef, drawingAreaContainerRef, drawingAreaContainerWidth, color]);
+  }, [canvasRef, drawingAreaContainerRef, drawingAreaContainerWidth, color, thickness, image]);
 
   return <>
     <div id="instructions">Draw this phrase:</div>
@@ -129,6 +131,13 @@ function DrawingRound() {
     <div id="color-picker">
       {colors.map(c => (
         <div key={c} className="color-swatch" style={{ backgroundColor: c, border: c === color ? '3px solid #667eea' : '3px solid white' }} onClick={() => setColor(c)}></div>
+      ))}
+    </div>
+    <div id="thickness-picker">
+      {range(1, 17, 2).map(t => (
+        <div key={t} className="thickness-swatch-container" style={{ border: t === thickness ? '3px solid #667eea' : '3px solid white' }} onClick={() => setThickness(t)}>
+          <div className="thickness-swatch" style={{ backgroundColor: color, height: t }} onClick={() => setThickness(t)}></div>
+        </div>
       ))}
     </div>
     <button id="done" onClick={() => {
