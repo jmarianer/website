@@ -6,9 +6,7 @@ import { createContext, useContext, useEffect, useMemo, useState } from "react";
 export class Game {
   constructor(
     public id: string,
-  ) {
-    console.log(this.id);
-  }
+  ) { }
 
   public players: string[] = [];
   public archive: Array<Record<string, string>> = [];
@@ -101,6 +99,5 @@ export function useCurrentGame(): Game {
   if (!game) {
     throw new Error('DataContext not found');
   }
-  console.log(game);
   return game;
 }

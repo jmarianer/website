@@ -90,6 +90,13 @@ body {
   }
 }
 
+#drawing-area-container {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
 #drawing-area, #drawing-to-describe {
   border: 3px solid #e1e8ed;
   border-radius: 16px;

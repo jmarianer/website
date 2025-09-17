@@ -1,6 +1,6 @@
 import { Navigate, useParams } from "react-router";
 import { useCurrentGame } from "./database";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Canvas, PencilBrush } from "fabric";
 
 export function GameInProgress() {
@@ -52,14 +52,34 @@ function DrawingRound() {
   const playerName = useParams().name!;
   const previousPlayer = game.previousPlayer(playerName);
 
+  const [drawingAreaContainerWidth, setDrawingAreaContainerWidth] = useState(0);
+  const drawingAreaContainerRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const resizeObserver = new ResizeObserver(entries => {
+      for (let entry of entries) {
+        setDrawingAreaContainerWidth(entry.contentRect.width);
+      }
+    });
+    if (drawingAreaContainerRef.current) {
+      resizeObserver.observe(drawingAreaContainerRef.current);
+    }
+    return () => {
+      resizeObserver.disconnect();
+    };
+  }, [drawingAreaContainerRef]);
+
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const fabricCanvasRef = useRef<Canvas>(null);
   useEffect(() => {
-    if (!canvasRef.current) return;
+    if (!canvasRef.current || !drawingAreaContainerRef.current) {
+      return;
+    }
+
+    const canvasWidth = Math.min(drawingAreaContainerWidth - 20, 500);
     const canvas = new Canvas(canvasRef.current, {
       isDrawingMode: true,
-      width: 500,
-      height: 300,
+      width: canvasWidth,
+      height: canvasWidth * 3 / 5,
     });
     canvas.freeDrawingBrush = new PencilBrush(canvas);
     canvas.freeDrawingBrush.width = 5;
@@ -70,13 +90,15 @@ function DrawingRound() {
       canvas.dispose();
       fabricCanvasRef.current = null;
     };
-  }, []);
+  }, [canvasRef, drawingAreaContainerRef, drawingAreaContainerWidth]);
 
   return <>
     <div id="instructions">Draw this phrase:</div>
     <div id="phrase-to-draw">{archive[currentRound - 1][previousPlayer]}</div>
-    <div id="drawing-area">
-      <canvas ref={canvasRef}></canvas>
+    <div id="drawing-area-container" ref={drawingAreaContainerRef}>
+      <div id="drawing-area">
+        <canvas ref={canvasRef} />
+      </div>
     </div>
     <button id="done" onClick={() => {
       game.addResponse(playerName, fabricCanvasRef.current!.toDataURL({ format: 'png', multiplier: 1 }));
