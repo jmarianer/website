@@ -66,6 +66,9 @@ function DrawingRound() {
   const playerName = useParams().name!;
   const previousPlayer = game.previousPlayer(playerName);
 
+  const colors = ["red", "blue", "green", "orange", "purple", "brown", "black"];
+  const [color, setColor] = useState("black");
+
   const [drawingAreaContainerWidth, setDrawingAreaContainerWidth] = useState(0);
   const drawingAreaContainerRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
@@ -97,8 +100,8 @@ function DrawingRound() {
       height: canvasWidth * IMAGE_HEIGHT / IMAGE_WIDTH,
     });
     canvas.freeDrawingBrush = new PencilBrush(canvas);
-    canvas.freeDrawingBrush.width = 5;
-    canvas.freeDrawingBrush.color = "#000000";
+    canvas.freeDrawingBrush.width = 5 * canvasWidth / IMAGE_WIDTH;
+    canvas.freeDrawingBrush.color = color;
 
     FabricImage.fromURL(image).then((img) => {
       img.scaleToWidth(canvasWidth);
@@ -113,7 +116,7 @@ function DrawingRound() {
     return () => {
       canvas.dispose();
     };
-  }, [canvasRef, drawingAreaContainerRef, drawingAreaContainerWidth]);
+  }, [canvasRef, drawingAreaContainerRef, drawingAreaContainerWidth, color]);
 
   return <>
     <div id="instructions">Draw this phrase:</div>
@@ -122,6 +125,11 @@ function DrawingRound() {
       <div id="drawing-area">
         <canvas ref={canvasRef} />
       </div>
+    </div>
+    <div id="color-picker">
+      {colors.map(c => (
+        <div key={c} className="color-swatch" style={{ backgroundColor: c, border: c === color ? '3px solid #667eea' : '3px solid white' }} onClick={() => setColor(c)}></div>
+      ))}
     </div>
     <button id="done" onClick={() => {
       game.addResponse(playerName, image);
