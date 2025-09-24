@@ -9,7 +9,7 @@ import "./style.scss";
 import { GameArchive } from './GameArchive';
 
 function Game() {
-  return <DataProvider gameId={useParams().id!}>
+  return <DataProvider gameId={useParams().gameId!}>
     <Outlet />
   </DataProvider>;
 }
@@ -24,10 +24,10 @@ reactRoot.render(
         <Route path="/" element={<Homepage />} />
         <Route path="/new" element={<Start />} />
         <Route path="/join" element={<JoinWithCode />} />
-        <Route path="/game/:id" element={<Game />}>
+        <Route path="/game/:gameId" element={<Game />}>
           <Route path="admin" element={<GameAdmin />} />
           <Route path="join" element={<Join />} />
-          <Route path="user/:name" element={<GameInProgress />} />
+          <Route path="player/:userId" element={<GameInProgress />} />
           <Route path="archive" element={<GameArchive />} />
         </Route>
       </Routes>

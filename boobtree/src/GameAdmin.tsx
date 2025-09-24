@@ -1,14 +1,14 @@
-import { useState } from "react";
-import { Link, useNavigate, useParams } from "react-router";
-import { useCurrentGame } from "./database";
+import { useRef } from "react";
+import { Link, useParams } from "react-router";
+import { useCurrentGame, useJoinGame } from "./database";
 
 export function GameAdmin() {
-  const { id } = useParams();
-  const game = useCurrentGame();
+  const { gameId } = useParams();
+  const { game } = useCurrentGame();
 
   return <>
     <div id="instructions">
-      Please share this <Link to={`/game/${id}/join`}>join link</Link> or the code {id} with the rest of your party
+      Please share this <Link to={`/game/${gameId}/join`}>join link</Link> or the code {gameId} with the rest of your party
     </div>
 
     {game.started ? <GameStarted /> : <GameNotStarted />}
@@ -22,7 +22,7 @@ function GameStarted() {
 }
 
 function GameNotStarted() {
-  const game = useCurrentGame();
+  const { game } = useCurrentGame();
 
   if (game.players.length === 0) {
     return <div><i>No players have joined yet</i></div>;
@@ -40,22 +40,17 @@ function GameNotStarted() {
 }
 
 export function Join() {
-  const { id } = useParams();
-  const [name, setName] = useState('');
-  const navigate = useNavigate();
+  const joinGame = useJoinGame();
+  const { gameId } = useParams();
+  const nameRef = useRef<HTMLInputElement | null>(null);
 
   return <>
-    <div>Join game {id}</div>
+    <div>Join game {gameId}</div>
     <form onSubmit={(e) => {
       e.preventDefault();
-      navigate(`/game/${id}/user/${name}`);
+      joinGame(gameId!, nameRef.current!.value);
     }}>
-      <input
-        type="text"
-        placeholder="Your name"
-        value={name}
-        onChange={e => setName(e.target.value)}
-      />
+      <input type="text" placeholder="Your name" maxLength={20} ref={nameRef} />
       <button type="submit">Join</button>
     </form>
   </>;

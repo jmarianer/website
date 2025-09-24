@@ -1,4 +1,3 @@
-import { Navigate, useParams } from "react-router";
 import { useCurrentGame } from "./database";
 import { useEffect, useRef, useState } from "react";
 import { Canvas, FabricImage, PencilBrush } from "fabric";
@@ -19,23 +18,13 @@ const IMAGE_HEIGHT = 300;
 const BLANK_IMAGE = createBlankImageDataURL(IMAGE_WIDTH, IMAGE_HEIGHT);
 
 export function GameInProgress() {
-  const game = useCurrentGame();
-  const { started, archive, currentRound, players, totalRounds } = game;
-  const params = useParams();
-  const playerName = params.name!;
-  const id = params.id!;
+  const { game: { started, archive, currentRound, totalRounds }, userId } = useCurrentGame();
 
-  useEffect(() => {
-    if (!players.includes(playerName)) {
-      game.addPlayer(playerName);
-    }
-  }, [playerName, players, game]);
-  
   if (!started) {
     return <div id="instructions">The game hasn't started yet. Please wait for the admin to start the game.</div>;
   } else if (currentRound >= totalRounds) {
-    return <Navigate to={`/game/${id}/archive`} />;
-  } else if (playerName in archive[currentRound]) {
+    return <div id="instructions">The game is over.</div>;
+  } else if (userId in archive[currentRound]) {
     return <PleaseWait />;
   } else if (currentRound === 0) {
     return <FirstRound />;
@@ -47,8 +36,7 @@ export function GameInProgress() {
 }
 
 function FirstRound() {
-  const game = useCurrentGame();
-  const playerName = useParams().name!;
+  const { game, userId } = useCurrentGame();
 
   const phraseRef = useRef<HTMLInputElement>(null);
   return <>
@@ -56,16 +44,14 @@ function FirstRound() {
     <input type="text" className="phrase-input" ref={phraseRef} placeholder="e.g., A cat wearing a superhero cape"></input>
     <div className="spacer"></div>
     <button id="done" onClick={() => {
-      game.addResponse(playerName, phraseRef.current!.value);
+      game.addResponse(userId, phraseRef.current!.value);
     } }>Done</button>
   </>;
 }
 
 function DrawingRound() {
-  const game = useCurrentGame();
-  const { currentRound, archive } = game;
-  const playerName = useParams().name!;
-  const previousPlayer = game.previousPlayer(playerName);
+  const { game, userId } = useCurrentGame();
+  const { archive, currentRound, players } = game;
 
   const colors = ["black", "red", "orange", "yellow", "green", "blue", "purple", "white"];
   const [color, setColor] = useState("black");
@@ -89,7 +75,6 @@ function DrawingRound() {
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [image, setImage] = useState(BLANK_IMAGE);
-  // Create a data URL from OffscreenCanvas
   useEffect(() => {
     if (!canvasRef.current || !drawingAreaContainerRef.current) {
       return;
@@ -122,7 +107,7 @@ function DrawingRound() {
 
   return <>
     <div id="instructions">Draw this phrase:</div>
-    <div id="phrase-to-draw">{archive[currentRound - 1][previousPlayer]}</div>
+    <div id="phrase-to-draw">{archive[currentRound - 1][(userId + players.length - 1) % players.length]}</div>
     <div id="drawing-area-container" ref={drawingAreaContainerRef}>
       <div id="drawing-area">
         <canvas ref={canvasRef} />
@@ -149,24 +134,22 @@ function DrawingRound() {
       ))}
     </div>
     <button id="done" onClick={() => {
-      game.addResponse(playerName, image);
+      game.addResponse(userId, image);
     } }>Done</button>
   </>;
 }
 
 function WritingRound() {
-  const game = useCurrentGame();
-  const { currentRound, archive } = game;
-  const playerName = useParams().name!;
-  const previousPlayer = game.previousPlayer(playerName);
+  const { game, userId } = useCurrentGame();
+  const { archive, currentRound, players } = game;
 
   const phraseRef = useRef<HTMLInputElement>(null);
   return <>
     <div id="instructions">Describe this drawing:</div>
-    <img id="drawing-to-describe" src={archive[currentRound - 1][previousPlayer]} alt="Previous drawing" />
+    <img id="drawing-to-describe" src={archive[currentRound - 1][(userId + players.length - 1) % players.length]!} alt="Previous drawing" />
     <input type="text" className="phrase-input" ref={phraseRef} placeholder="e.g., A cat wearing a superhero cape"></input>
     <button id="done" onClick={() => {
-      game.addResponse(playerName, phraseRef.current!.value);
+      game.addResponse(userId, phraseRef.current!.value);
     } }>Done</button>
   </>;
 }

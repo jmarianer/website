@@ -1,7 +1,8 @@
 import { cast } from "@deepkit/type";
 import { initializeApp } from "firebase/app";
-import { getDatabase, onValue, ref, set } from "firebase/database";
+import { get, getDatabase, onValue, ref, set } from "firebase/database";
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
+import { useNavigate, useParams } from "react-router";
 
 export class Game {
   constructor(
@@ -9,7 +10,7 @@ export class Game {
   ) { }
 
   public players: string[] = [];
-  public archive: Array<Record<string, string>> = [];
+  public archive: Array<Record<number, string | null>> = [];
   public started = false;
 
   get currentRound(): number {
@@ -28,23 +29,8 @@ export class Game {
     set(ref(database, `${DB_PREFIX}/${this.id}/started`), true);
   }
 
-  addPlayer(playerName: string) {
-    if (this.players.includes(playerName)) {
-      return;
-    }
-    set(ref(database, `${DB_PREFIX}/${this.id}/players`), [...this.players, playerName]);
-  }
-
-  addResponse(playerName: string, response: string) {
-    set(ref(database, `${DB_PREFIX}/${this.id}/archive/${this.currentRound}/${playerName}`), response);
-  }
-
-  previousPlayer(playerName: string): string {
-    const index = this.players.indexOf(playerName);
-    if (index === -1) {
-      throw new Error(`Player ${playerName} not found`);
-    }
-    return this.players[(index - 1 + this.players.length) % this.players.length];
+  addResponse(playerIndex: number, response: string) {
+    set(ref(database, `${DB_PREFIX}/${this.id}/archive/${this.currentRound}/${playerIndex}`), response);
   }
 }
 
@@ -98,10 +84,23 @@ export function DataProvider({gameId, children}: {gameId: string, children: Reac
   </DataContext.Provider>;
 }
 
-export function useCurrentGame(): Game {
+export function useCurrentGame() {
   const game = useContext(DataContext);
   if (!game) {
     throw new Error('DataContext not found');
   }
-  return game;
+  const { userId } = useParams();
+  return { game, userId: +userId! };
+}
+
+export function useJoinGame() {
+  const navigate = useNavigate();
+
+  return async (id: string, name: string) => {
+    const playersRef = ref(database, `${DB_PREFIX}/${id}/players`);
+    const players = await get(playersRef);
+    const newPlayers = [...(players.val() || []), name];
+    set(playersRef, newPlayers);
+    navigate(`/game/${id}/player/${newPlayers.length - 1}`);
+  };
 }

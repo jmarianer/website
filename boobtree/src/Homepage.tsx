@@ -1,6 +1,7 @@
-import { Link, Navigate, useNavigate } from "react-router";
+import { Link, Navigate } from "react-router";
 import cryptoRandomString from "crypto-random-string";
-import { DB_PREFIX } from "./database";
+import { DB_PREFIX, useJoinGame } from "./database";
+import { useRef } from "react";
 
 export function Homepage() {
   return <div id="homepage">
@@ -14,17 +15,20 @@ export function Homepage() {
 }
 
 export function JoinWithCode() {
-  const navigate = useNavigate();
+  const nameRef = useRef<HTMLInputElement | null>(null);
+  const gameIdRef = useRef<HTMLInputElement | null>(null);
+  const joinGame = useJoinGame();
 
   return <>
-    Join a game
-    <input id="gameid" type="text" placeholder="Game code" maxLength={4} />
-    <input id="playername" type="text" placeholder="Your name" maxLength={20} />
-    <button onClick={() => {
-      const gameid = (document.getElementById("gameid") as HTMLInputElement).value.toUpperCase();
-      const playername = (document.getElementById("playername") as HTMLInputElement).value;
-      navigate(`/game/${gameid}/user/${playername}`);
-    }}>Join</button>
+    <div>Join a game</div>
+    <form onSubmit={(e) => {
+      e.preventDefault();
+      joinGame(gameIdRef.current!.value, nameRef.current!.value);
+    }}>
+      <input type="text" placeholder="Game code" maxLength={4} ref={gameIdRef} />
+      <input type="text" placeholder="Your name" maxLength={20} ref={nameRef} />
+      <button type="submit">Join</button>
+    </form>
   </>;
 }
 
