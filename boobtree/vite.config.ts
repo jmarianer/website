@@ -12,14 +12,14 @@ export default defineConfig({
   server: {
     open: true,
   },
-  plugins: [
+  plugins: [ 
     react(),
     deepkitType(),
     {
       name: 'rename-index',
       configureServer(server) {
         server.middlewares.use((req, _, next) => {
-          if (req.url === '/') {
+          if (req.headers.accept?.includes('text/html')) {
             req.url = `/index-${DB_PREFIX}.html`;
           }
           next();
@@ -32,7 +32,7 @@ export default defineConfig({
           fs.renameSync(oldPath, newPath);
         }
       }
-    }
+    },
   ],
   build: {
     outDir: `dist-${DB_PREFIX}`,
