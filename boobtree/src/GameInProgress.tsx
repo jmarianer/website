@@ -23,7 +23,7 @@ export function GameInProgress() {
   if (!started) {
     return <div id="instructions">The game hasn't started yet. Please wait for the admin to start the game.</div>;
   } else if (currentRound >= totalRounds) {
-    return <div id="instructions">The game is over.</div>;
+    return <div id="instructions">The game is over. Please wait for the admin to show the archives.</div>;
   } else if (userId in archive[currentRound]) {
     return <PleaseWait />;
   } else if (currentRound === 0) {
@@ -155,6 +155,10 @@ function WritingRound() {
 }
 
 function PleaseWait() {
-  // TODO: Show "k out of n players have finished"
-  return <div id="instructions">Please wait for other players to finish this round...</div>;
+  const { game: { archive, currentRound, players } } = useCurrentGame();
+  const playersDone = Object.keys(archive[currentRound]).length;
+  return <>
+    <div id="instructions">Please wait for other players to finish this round...</div>
+    <div>{playersDone} of {players.length} are done.</div>
+  </>;
 }

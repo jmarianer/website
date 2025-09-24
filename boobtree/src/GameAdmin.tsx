@@ -3,40 +3,46 @@ import { Link, useParams } from "react-router";
 import { useCurrentGame, useJoinGame } from "./database";
 
 export function GameAdmin() {
-  const { gameId } = useParams();
   const { game } = useCurrentGame();
 
-  return <>
-    <div id="instructions">
-      Please share this <Link to={`/game/${gameId}/join`}>join link</Link> or the code {gameId} with the rest of your party
-    </div>
-
-    {game.started ? <GameStarted /> : <GameNotStarted />}
-  </>;
+  if (!game.started) {
+    return <GameNotStarted />;
+  } else if (game.currentRound < game.totalRounds) {
+    return <GameStarted />;
+  } else {
+    return <GameOver />;
+  }
 }
 
 function GameStarted() {
+  const { game } = useCurrentGame();
   return <div>
-    The game has started! You can close this tab now.
+    Now playing round {game.currentRound}.
+    {game.players.map((player, i) => <div key={i}>{game.archive[game.currentRound][i] ? "✓" : "✗"} {player}</div>)}
   </div>;
+}
+
+function GameOver() {
+  const { game } = useCurrentGame();
+  return <Link to={`/game/${game.id}/archive`}>View the archive</Link>;
 }
 
 function GameNotStarted() {
   const { game } = useCurrentGame();
 
-  if (game.players.length === 0) {
-    return <div><i>No players have joined yet</i></div>;
-  }
-
   return <>
-    <div>
+    <div id="instructions">
+      Please share this <Link to={`/game/${game.id}/join`}>join link</Link> or the code {game.id} with the rest of your party
+    </div>
+    {game.players.length ? <><div>
       The following players have already joined:
       {game.players.map((player) => <div key={player}>{player}</div>)}
     </div>
     <button id="done" onClick={() => {
       game.start();
     }}>That's everyone!</button>
-  </>;
+    </> : <div><i>No players have joined yet</i></div>}
+  </>
 }
 
 export function Join() {
