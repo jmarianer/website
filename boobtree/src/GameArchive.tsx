@@ -1,4 +1,4 @@
-import { ReactElement, useEffect, useState } from "react";
+import { cloneElement, ReactElement, useEffect, useState } from "react";
 import { useCurrentGame } from "./database";
 
 export function GameArchive() {
@@ -6,51 +6,56 @@ export function GameArchive() {
   const [currentSlide, setCurrentSlide] = useState(0);
 
   // Doing this iteratively because sometimes declarative syntax is hard.
-  // TODO can definitely refactor this: factor out an "addSlide" function, perhaps?
   const slides: ReactElement[] = [];
   let slideNo = 0;
+
+  function addSlide(contents: ReactElement<{className: string}>) {
+    const additionalClass =
+      slideNo === currentSlide
+      ? "current"
+      : slideNo === currentSlide - 1
+      ? "previous"
+      : slideNo < currentSlide
+      ? "past"
+      : "future";
+    slides.push(cloneElement(contents, {
+      className: `slide ${contents.props.className} ${additionalClass}`,
+    }));
+    slideNo++;
+  }
+
   for (let chainNo = 0; chainNo < players.length; chainNo++) {
     const firstPlayer = chainNo;
     const lastPlayer = (chainNo + totalRounds - 1) % players.length;
-    slides.push(
-      <div key={`chain-${chainNo}-title`} className={slideNo === currentSlide ? "slide fullscreen current" : slideNo < currentSlide ? "slide fullscreen past" : "slide fullscreen future"}>
+    addSlide(
+      <div key={`chain-${chainNo}-title`} className="fullscreen">
         ⛓️‍💥Chain {chainNo + 1}⛓️‍💥
       </div>
     );
-    slideNo++;
 
     for (let roundNo = 0; roundNo < totalRounds; roundNo++) {
       const player = (chainNo + roundNo) % players.length;
       const key = `chainplayer-${chainNo}-round-${roundNo}`;
-      const additionalClass =
-        slideNo === currentSlide
-          ? "current"
-          : slideNo === currentSlide - 1 && roundNo < totalRounds - 1
-          ? "previous"
-          : slideNo < currentSlide
-          ? "past"
-          : "future";
 
       if (roundNo % 2 === 1) {
-        slides.push(
-          <div key={key} className={`slide drawing ${additionalClass}`}>
+        addSlide(
+          <div key={key} className="drawing">
             <div className="player-name">{players[player]} drew:</div>
             <img src={archive[roundNo][player]!} alt={`Round ${roundNo} drawing by ${player}`} />
           </div>
         );
       } else {
-        slides.push(
-          <div key={key} className={`slide description ${additionalClass} ${roundNo === 0 ? "first" : ""}`}>
+        addSlide(
+          <div key={key} className="description">
             <div className="player-name">{players[player]} wrote:</div>
             <div className="text">{archive[roundNo][player]}</div>
           </div>
         );
       }
-      slideNo++;
     }
 
-    slides.push(
-      <div key={`chain-${chainNo}-end`} className={slideNo === currentSlide ? "slide fullscreen current" : slideNo < currentSlide ? "slide fullscreen past" : "slide fullscreen future"}>
+    addSlide(
+      <div key={`chain-${chainNo}-end`} className="fullscreen">
         <div className="player-name">Started with {players[firstPlayer]}:</div>
         <div className="text">{archive[0][firstPlayer]}</div>
         <div className="spacer" />
@@ -58,15 +63,13 @@ export function GameArchive() {
         <div className="text">{archive[totalRounds - 1][lastPlayer]}</div>
       </div>
     );
-    slideNo++;
   }
   
-  slides.push(
-    <div className={slideNo === currentSlide ? "slide fullscreen current" : slideNo < currentSlide ? "slide fullscreen past" : "slide fullscreen future"}>
+  addSlide(
+    <div key={`the-end`} className="fullscreen">
       ⛓️‍💥The end⛓️‍💥
     </div>
   );
-  slideNo++;
   const totalSlides = slideNo;
 
   function handleKeyDown(event: KeyboardEvent) {

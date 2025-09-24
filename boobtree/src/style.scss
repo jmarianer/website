@@ -231,7 +231,7 @@ button {
   .slide.drawing.past {
     top: -1000px;
   }
-  .slide.past {
+  .slide.past, .slide.fullscreen.previous, .slide.previous:has(+ .fullscreen) {
     top: -600px;
     opacity: 0;
   }
