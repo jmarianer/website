@@ -1,5 +1,6 @@
+import Switch from "react-switch";
 import { useCurrentGame } from "./database";
-import { useEffect, useRef, useState } from "react";
+import { createRef, RefObject, useEffect, useRef, useState } from "react";
 import { Canvas, FabricImage, PencilBrush } from "fabric";
 import { range } from "lodash";
 
@@ -20,19 +21,38 @@ const BLANK_IMAGE = createBlankImageDataURL(IMAGE_WIDTH, IMAGE_HEIGHT);
 export function GameInProgress() {
   const { game: { started, archive, currentRound, totalRounds }, userId } = useCurrentGame();
 
-  if (!started) {
-    return <div id="instructions">The game hasn't started yet. Please wait for the admin to start the game.</div>;
-  } else if (currentRound >= totalRounds) {
-    return <div id="instructions">The game is over. Please wait for the admin to show the archives.</div>;
-  } else if (userId in archive[currentRound]) {
-    return <PleaseWait />;
-  } else if (currentRound === 0) {
-    return <FirstRound />;
-  } else if (currentRound % 2 === 1) {
-    return <DrawingRound />;
-  } else {
-    return <WritingRound />;
-  }
+  const previousRoundRef = useRef(currentRound);
+  const audioRef = createRef<HTMLAudioElement>();
+  const [allowAudio, setAllowAudio] = useState(false);
+
+  useEffect(() => {
+    if (currentRound > previousRoundRef.current && audioRef.current && allowAudio) {
+      audioRef.current.volume = 1;
+      audioRef.current.currentTime = 0;
+      console.log("Playing audio");
+      audioRef.current.play().catch(console.error).then(() => {
+        console.log("Audio played successfully");
+      });
+    }
+    previousRoundRef.current = currentRound;
+  }, [currentRound]);
+
+
+  return <>
+    <audio ref={audioRef} src="/next-round.m4a" />
+    { !started
+      ? <div id="instructions">The game hasn't started yet. Please wait for the admin to start the game.</div>
+      : currentRound >= totalRounds
+      ? <div id="instructions">The game is over. Please wait for the admin to show the archives.</div>
+      : userId in archive[currentRound]
+      ? <PleaseWait audio={audioRef} allowAudio={allowAudio} setAllowAudio={setAllowAudio} />
+      : currentRound === 0
+      ? <FirstRound />
+      : currentRound % 2 === 1
+      ? <DrawingRound />
+      : <WritingRound />
+    }
+  </>;
 }
 
 function FirstRound() {
@@ -154,11 +174,28 @@ function WritingRound() {
   </>;
 }
 
-function PleaseWait() {
+type PleaseWaitProps = {
+  audio: RefObject<HTMLAudioElement | null>,
+  allowAudio: boolean,
+  setAllowAudio: (allow: boolean) => void,
+};
+function PleaseWait({audio, allowAudio, setAllowAudio}: PleaseWaitProps) {
   const { game: { archive, currentRound, players } } = useCurrentGame();
   const playersDone = Object.keys(archive[currentRound]).length;
   return <>
     <div id="instructions">Please wait for other players to finish this round...</div>
     <div>{playersDone} of {players.length} are done.</div>
+    <label>
+      <Switch onChange={(checked) => {
+        setAllowAudio(checked);
+        if (checked) {
+          // Play the audio immediately so that the user gets asked for permission if necessary
+          audio.current!.volume = 0;
+          audio.current!.currentTime = 0;
+          audio.current!.play().catch(console.error);
+        }
+      }} checked={allowAudio} />
+      <span>Play sound when next round starts</span>
+    </label>
   </>;
 }

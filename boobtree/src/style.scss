@@ -192,3 +192,14 @@ button#done {
     width: 400px;
   }
 }
+
+label {
+  display: inline-flex;
+  flex-direction: row;
+  align-items: center;
+  margin-right: 2em;
+
+  span {
+    margin-left: 0.5em;
+  }
+}
