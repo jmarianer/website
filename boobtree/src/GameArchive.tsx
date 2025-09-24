@@ -1,5 +1,6 @@
 import { cloneElement, ReactElement, useEffect, useState } from "react";
 import { useCurrentGame } from "./database";
+import { useSwipeable } from "react-swipeable";
 
 export function GameArchive() {
   const { game: { archive, players, totalRounds } } = useCurrentGame();
@@ -82,6 +83,12 @@ export function GameArchive() {
     }
   }
 
+  const handlers = useSwipeable({
+    onSwipedUp: () => setCurrentSlide((prev) => Math.min(prev + 1, totalSlides - 1)),
+    onSwipedDown: () => setCurrentSlide((prev) => Math.max(prev - 1, 0)),
+    preventScrollOnSwipe: true,
+  })
+
   useEffect(() => {
     document.addEventListener('keydown', handleKeyDown);
     return () => {
@@ -89,5 +96,5 @@ export function GameArchive() {
     };
   }, []);
 
-  return <div className="archive">{slides}</div>;
+  return <div className="archive" {...handlers}>{slides}</div>;
 }
