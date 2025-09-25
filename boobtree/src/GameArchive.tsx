@@ -42,7 +42,7 @@ export function GameArchive() {
         addSlide(
           <div key={key} className="drawing">
             <div className="player-name">{players[player]} drew:</div>
-            <img src={archive[roundNo][player]!} alt={`Round ${roundNo} drawing by ${player}`} />
+            <img src={archive[roundNo][player]!} alt={`Round ${roundNo} drawing by ${players[player]}`} />
           </div>
         );
       } else {
