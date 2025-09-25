@@ -106,12 +106,12 @@ export function GameArchive() {
   return <div className="archive" {...handlers}>
     {slides}
     <div className="controls">
-      <div onClick={previousSlide} id="previous-slide">
+      <div onClick={previousSlide} id="previous-slide" style={{visibility: currentSlide === 0 ? 'hidden' : 'visible'}}>
         <svg width="23" height="12">
           <path d="M2 10 L12 2 L22 10" />
         </svg>
       </div>
-      <div onClick={nextSlide} id="next-slide">
+      <div onClick={nextSlide} id="next-slide" style={{visibility: currentSlide === totalSlides - 1 ? 'hidden' : 'visible'}}>
         <svg width="23" height="12">
           <path d="M2 2 L12 10 L22 2" />
         </svg>
