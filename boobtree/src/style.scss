@@ -239,6 +239,52 @@ button {
     top: 800px;
     opacity: 0;
   }
+
+  .controls {
+    position: absolute;
+    height: 50px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    bottom: 0;
+    right: 0;
+    z-index: 100;
+    cursor: default;
+
+    path {
+      stroke: #42affa;
+      stroke-width: 2;
+      fill: none;
+    }
+
+    div {
+      position: relative;
+
+      &:hover path {
+        stroke: blue;
+      }
+
+      &:active path {
+        stroke: black;
+      }
+    }
+
+    #previous-slide:hover {
+      top: -2px;
+
+      &:active {
+        top: 0;
+      }
+    }
+
+    #next-slide:hover {
+      top: 2px;
+
+      &:active {
+        top: 0;
+      }
+    }
+  }
 }
 
 #homepage {

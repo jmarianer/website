@@ -73,19 +73,26 @@ export function GameArchive() {
   );
   const totalSlides = slideNo;
 
+  function nextSlide() {
+    setCurrentSlide((prev) => Math.min(prev + 1, totalSlides - 1));
+  }
+  function previousSlide() {
+    setCurrentSlide((prev) => Math.max(prev - 1, 0));
+  }
+
   function handleKeyDown(event: KeyboardEvent) {
     if (event.key === 'ArrowDown' || event.key === ' ') {
       event.preventDefault();
-      setCurrentSlide((prev) => Math.min(prev + 1, totalSlides - 1));
+      nextSlide();
     } else if (event.key === 'ArrowUp') {
       event.preventDefault();
-      setCurrentSlide((prev) => Math.max(prev - 1, 0));
+      previousSlide();
     }
   }
 
   const handlers = useSwipeable({
-    onSwipedUp: () => setCurrentSlide((prev) => Math.min(prev + 1, totalSlides - 1)),
-    onSwipedDown: () => setCurrentSlide((prev) => Math.max(prev - 1, 0)),
+    onSwipedUp: nextSlide,
+    onSwipedDown: previousSlide,
     preventScrollOnSwipe: true,
   })
 
@@ -96,5 +103,19 @@ export function GameArchive() {
     };
   }, []);
 
-  return <div className="archive" {...handlers}>{slides}</div>;
+  return <div className="archive" {...handlers}>
+    {slides}
+    <div className="controls">
+      <div onClick={previousSlide} id="previous-slide">
+        <svg width="23" height="12">
+          <path d="M2 10 L12 2 L22 10" />
+        </svg>
+      </div>
+      <div onClick={nextSlide} id="next-slide">
+        <svg width="23" height="12">
+          <path d="M2 2 L12 10 L22 2" />
+        </svg>
+      </div>
+    </div>
+  </div>;
 }
