@@ -3,6 +3,7 @@ import { useCurrentGame } from "./database";
 import { createRef, RefObject, useEffect, useRef, useState } from "react";
 import { Canvas, FabricImage, PencilBrush } from "fabric";
 import { range } from "lodash";
+import { IMAGE_HEIGHT, IMAGE_WIDTH, useSize } from "./utils";
 
 function createBlankImageDataURL(width: number, height: number): string {
   const canvas = document.createElement('canvas');
@@ -14,8 +15,6 @@ function createBlankImageDataURL(width: number, height: number): string {
   return canvas.toDataURL('image/png');
 }
 
-const IMAGE_WIDTH = 500;
-const IMAGE_HEIGHT = 300;
 const BLANK_IMAGE = createBlankImageDataURL(IMAGE_WIDTH, IMAGE_HEIGHT);
 
 export function GameInProgress() {
@@ -58,7 +57,7 @@ export function GameInProgress() {
 function FirstRound() {
   const { game, userId } = useCurrentGame();
 
-  const phraseRef = useRef<HTMLInputElement>(null);
+  const phraseRef = createRef<HTMLInputElement>();
   return <>
     <div id="instructions">Write a phrase for others to draw:</div>
     <input type="text" className="phrase-input" ref={phraseRef} placeholder="e.g., A cat wearing a superhero cape"></input>
@@ -77,23 +76,10 @@ function DrawingRound() {
   const [color, setColor] = useState("black");
   const [thickness, setThickness] = useState(5);
 
-  const [drawingAreaContainerWidth, setDrawingAreaContainerWidth] = useState(0);
-  const drawingAreaContainerRef = useRef<HTMLDivElement>(null);
-  useEffect(() => {
-    const resizeObserver = new ResizeObserver(entries => {
-      for (let entry of entries) {
-        setDrawingAreaContainerWidth(entry.contentRect.width);
-      }
-    });
-    if (drawingAreaContainerRef.current) {
-      resizeObserver.observe(drawingAreaContainerRef.current);
-    }
-    return () => {
-      resizeObserver.disconnect();
-    };
-  }, [drawingAreaContainerRef]);
+  const drawingAreaContainerRef = createRef<HTMLDivElement>();
+  const { width: drawingAreaContainerWidth } = useSize(drawingAreaContainerRef);
 
-  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const canvasRef = createRef<HTMLCanvasElement>();
   const [image, setImage] = useState(BLANK_IMAGE);
   useEffect(() => {
     if (!canvasRef.current || !drawingAreaContainerRef.current) {
@@ -163,7 +149,7 @@ function WritingRound() {
   const { game, userId } = useCurrentGame();
   const { archive, currentRound, players } = game;
 
-  const phraseRef = useRef<HTMLInputElement>(null);
+  const phraseRef = createRef<HTMLInputElement>();
   return <>
     <div id="instructions">Describe this drawing:</div>
     <img id="drawing-to-describe" src={archive[currentRound - 1][(userId + players.length - 1) % players.length]!} alt="Previous drawing" />
