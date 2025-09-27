@@ -20,7 +20,7 @@ body {
   width: 100%;
   overflow: hidden;
   max-width: 800px;
-  min-height: 600px;
+  flex: 1;
   display: flex;
   flex-direction: column;
 
@@ -105,10 +105,6 @@ body {
   overflow: hidden;
 }
 
-.archive .text {
-  padding: 16px 20px;
-}
-
 #drawing-area:hover {
   border-color: #667eea;
   background: white;
@@ -180,7 +176,7 @@ button {
 
 .archive {
   width: 100%;
-  height: 600px;
+  flex-grow: 1;
   position: relative;
 
   .slide {
@@ -188,56 +184,24 @@ button {
     font-size: 3rem;
     text-align: center;
     padding: 20px;
-    transition: top 0.5s ease, opacity 0.2s ease 0.3s;
+    transition: all 0.5s ease;
     position: absolute;
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
-  }
 
-  .slide.fullscreen {
-    height: 100%;
-  }
-  .slide .text {
-    font-size: 3rem;
-    width: 500px;
-  }
-  .slide .spacer {
-    height: 50px;
-    flex-grow: 0;
+    .text {
+      padding: 16px 20px;
+    }
+    .spacer {
+      height: 50px;
+      flex-grow: 0;
+    }
   }
 
   .player-name {
     font-size: 0.5em;
-  }
-
-  .slide.fullscreen.current {
-    top: 0px;
-  }
-  .slide.drawing.current {
-    top: 200px;
-  }
-  .slide.description.current {
-    top: 400px;
-  }
-  .slide.description.first.current {
-    top: 200px;
-  }
-  .slide.previous {
-    top: 0px;
-  }
-
-  .slide.drawing.past {
-    top: -1000px;
-  }
-  .slide.past, .slide.fullscreen.previous, .slide.previous:has(+ .fullscreen) {
-    top: -600px;
-    opacity: 0;
-  }
-  .slide.future {
-    top: 800px;
-    opacity: 0;
   }
 
   .controls {
