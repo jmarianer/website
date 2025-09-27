@@ -1,4 +1,4 @@
-import { cloneElement, ReactElement, useEffect, createRef, useState } from "react";
+import { cloneElement, ReactElement, useEffect, useState, useCallback } from "react";
 import { useCurrentGame } from "./database";
 import { useSwipeable } from "react-swipeable";
 import { IMAGE_HEIGHT, IMAGE_WIDTH, useSize, Textfit } from "./utils";
@@ -12,8 +12,8 @@ export function GameArchive() {
   const { game: { archive, players, totalRounds } } = useCurrentGame();
   const [currentSlide, setCurrentSlide] = useState(0);
 
-  const archiveRef = createRef<HTMLDivElement>();
-  const { height: slideHeight } = useSize(archiveRef);
+  const [archiveDiv, setArchiveDiv] = useState<HTMLDivElement | null>(null);
+  const { height: slideHeight } = useSize(archiveDiv);
   const scalingFactor = slideHeight / REFERENCE_HEIGHT;
 
   // Doing this iteratively because sometimes declarative syntax is hard.
@@ -172,30 +172,35 @@ export function GameArchive() {
     setCurrentSlide((prev) => Math.max(prev - 1, 0));
   }
 
-  function handleKeyDown(event: KeyboardEvent) {
-    if (event.key === 'ArrowDown' || event.key === ' ' && !event.shiftKey) {
-      event.preventDefault();
-      nextSlide();
-    } else if (event.key === 'ArrowUp' || event.key === ' ' && event.shiftKey) {
-      event.preventDefault();
-      previousSlide();
-    }
-  }
-
-  const handlers = useSwipeable({
-    onSwipedUp: nextSlide,
-    onSwipedDown: previousSlide,
-    preventScrollOnSwipe: true,
-  })
-
   useEffect(() => {
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key === 'ArrowDown' || event.key === ' ' && !event.shiftKey) {
+        event.preventDefault();
+        nextSlide();
+      } else if (event.key === 'ArrowUp' || event.key === ' ' && event.shiftKey) {
+        event.preventDefault();
+        previousSlide();
+      }
+    }
+
     document.addEventListener('keydown', handleKeyDown);
     return () => {
       document.removeEventListener('keydown', handleKeyDown);
     };
   }, []);
 
-  return <div className="archive" {...handlers} ref={archiveRef}>
+  const swipeHandlers = useSwipeable({
+    onSwipedUp: nextSlide,
+    onSwipedDown: previousSlide,
+    preventScrollOnSwipe: true,
+  })
+
+  const setArchiveRefs = useCallback((r: HTMLDivElement) => {
+    setArchiveDiv(r);
+    swipeHandlers.ref(r);
+  }, []);
+
+  return <div className="archive" {...swipeHandlers} ref={setArchiveRefs} >
     {slides}
     <div className="controls">
       <div onClick={previousSlide} id="previous-slide" style={{visibility: currentSlide === 0 ? 'hidden' : 'visible'}}>

@@ -1,24 +1,27 @@
-import { useState, useEffect, RefObject, createRef } from "react";
+import { useState, useEffect } from "react";
 
 export const IMAGE_WIDTH = 500;
 export const IMAGE_HEIGHT = 300;
 
-export function useSize(elt: RefObject<Element | null>): DOMRectReadOnly {
+export function useSize(elt: Element | null): DOMRectReadOnly {
   const [size, setSize] = useState(new DOMRectReadOnly());
 
   useEffect(() => {
+    if (!elt) {
+      return;
+    }
+
     const resizeObserver = new ResizeObserver(entries => {
       for (let entry of entries) {
         setSize(entry.contentRect);
       }
     });
-    if (elt.current) {
-      resizeObserver.observe(elt.current);
-    }
+    resizeObserver.observe(elt);
+
     return () => {
       resizeObserver.disconnect();
     };
-  }, [elt.current]);
+  }, [elt]);
 
   return size;
 }
@@ -31,15 +34,14 @@ interface TextfitProps extends React.HTMLAttributes<HTMLDivElement> {
 }
 
 export function Textfit(props: TextfitProps) {
-  const divRef = createRef<HTMLDivElement>();
-  const size = useSize(divRef);
+  const [div, setDiv] = useState<HTMLDivElement | null>(null);
+  const size = useSize(div);
   const {width, height} = props;
   const [minFontSize, maxFontSize] = [1, 100];
   const [fontSize, setFontSize] = useState(maxFontSize);
 
   useEffect(() => {
-    const element = divRef.current;
-    if (!element) return;
+    if (!div) return;
 
     // Binary search for optimal font size
     let min = minFontSize;
@@ -47,17 +49,17 @@ export function Textfit(props: TextfitProps) {
     
     while (min <= max) {
       const mid = Math.floor((min + max) / 2);
-      element.style.fontSize = mid + 'px';
+      div.style.fontSize = mid + 'px';
       
-      if (element.scrollHeight <= element.clientHeight) {
+      if (div.scrollHeight <= div.clientHeight) {
         min = mid + 1;
       } else {
         max = mid - 1;
       }
     }
     setFontSize(max);
-    element.style.fontSize = max + 'px';
+    div.style.fontSize = max + 'px';
   }, [minFontSize, maxFontSize, size]);
 
-  return <div {...props} ref={divRef} style={{ width, height, fontSize: fontSize + 'px' }}/>;
+  return <div {...props} ref={setDiv} style={{ width, height, fontSize: fontSize + 'px' }}/>;
 }

@@ -76,13 +76,13 @@ function DrawingRound() {
   const [color, setColor] = useState("black");
   const [thickness, setThickness] = useState(5);
 
-  const drawingAreaContainerRef = createRef<HTMLDivElement>();
-  const { width: drawingAreaContainerWidth } = useSize(drawingAreaContainerRef);
+  const [drawingAreaContainer, setDrawingAreaContainer] = useState<HTMLDivElement | null>(null);
+  const { width: drawingAreaContainerWidth } = useSize(drawingAreaContainer);
 
   const canvasRef = createRef<HTMLCanvasElement>();
   const [image, setImage] = useState(BLANK_IMAGE);
   useEffect(() => {
-    if (!canvasRef.current || !drawingAreaContainerRef.current) {
+    if (!canvasRef.current || !drawingAreaContainer) {
       return;
     }
 
@@ -109,12 +109,12 @@ function DrawingRound() {
     return () => {
       canvas.dispose();
     };
-  }, [canvasRef, drawingAreaContainerRef, drawingAreaContainerWidth, color, thickness, image]);
+  }, [canvasRef, drawingAreaContainer, drawingAreaContainerWidth, color, thickness, image]);
 
   return <>
     <div id="instructions">Draw this phrase:</div>
     <div id="phrase-to-draw">{archive[currentRound - 1][(userId + players.length - 1) % players.length]}</div>
-    <div id="drawing-area-container" ref={drawingAreaContainerRef}>
+    <div id="drawing-area-container" ref={setDrawingAreaContainer}>
       <div id="drawing-area">
         <canvas ref={canvasRef} />
       </div>
