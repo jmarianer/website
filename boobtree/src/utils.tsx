@@ -55,8 +55,9 @@ export function Textfit(props: TextfitProps) {
         max = mid - 1;
       }
     }
-    setFontSize(min);
+    setFontSize(max);
+    element.style.fontSize = max + 'px';
   }, [minFontSize, maxFontSize, size]);
 
-  return <div {...props} ref={divRef} style={{ width, height, fontSize }}/>;
+  return <div {...props} ref={divRef} style={{ width, height, fontSize: fontSize + 'px' }}/>;
 }
