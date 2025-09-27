@@ -24,16 +24,16 @@ export function GameArchive() {
     FirstText, MiddleText, LastText, Drawing, Fullscreen
   }
   function addSlide(slideType: SlideType, contents: ReactElement<{className: string, style?: any}>) {
-    let top = 0, height = 'auto';
+    let top = 0, minHeight = 'auto';
 
     if (slideType === SlideType.Fullscreen) {
-      height = '100%';
+      minHeight = '100%';
     }
     if (slideNo === currentSlide) {
       switch (slideType) {
         case SlideType.FirstText:
           top = 0;
-          height = slideHeight + 'px';
+          minHeight = slideHeight + 'px';
           break;
         case SlideType.MiddleText:
         case SlideType.LastText:
@@ -50,7 +50,7 @@ export function GameArchive() {
       switch (slideType) {
         case SlideType.FirstText:
           top = 0;
-          height = '0px';
+          minHeight = '0px';
           break;
         case SlideType.MiddleText:
         case SlideType.Drawing:
@@ -67,7 +67,7 @@ export function GameArchive() {
           top = -2 * REFERENCE_HEIGHT - DRAWING_START;
           break;
         case SlideType.FirstText:
-          height = slideHeight + 'px';
+          minHeight = slideHeight + 'px';
           top = -2 * REFERENCE_HEIGHT;
           break;
         case SlideType.MiddleText:
@@ -79,16 +79,18 @@ export function GameArchive() {
     } else {
       top = REFERENCE_HEIGHT * 1.25;
       if (slideType === SlideType.FirstText) {
-        height = slideHeight + 'px';
+        minHeight = slideHeight + 'px';
       }
+    }
+
+    top *= scalingFactor;
+    if (slideHeight === 0 && slideNo > 0) {
+      top = 10_000;
     }
 
     slides.push(cloneElement(contents, {
       className: 'slide',
-      style: {
-        top: top * scalingFactor,
-        minHeight: height,
-      }
+      style: { top, minHeight }
     }));
 
     slideNo++;
