@@ -133,7 +133,8 @@ export function GameArchive() {
               className="text"
               width={IMAGE_WIDTH * scalingFactor}
               height={TEXT_HEIGHT * scalingFactor}
-            >{archive[roundNo][player]}</Textfit>
+              text={archive[roundNo][player] || ''}
+            />
           </div>
         );
       }
@@ -147,14 +148,16 @@ export function GameArchive() {
           className="text"
           width={IMAGE_WIDTH * scalingFactor}
           height={TEXT_HEIGHT * scalingFactor}
-        >{archive[0][firstPlayer]}</Textfit>
+          text={archive[0][firstPlayer] || ''}
+        />
         <div className="spacer" />
         <div className="player-name">Ended with {players[lastPlayer]}:</div>
         <Textfit
           className="text"
           width={IMAGE_WIDTH * scalingFactor}
           height={TEXT_HEIGHT * scalingFactor}
-        >{archive[totalRounds - 1][lastPlayer]}</Textfit>
+          text={archive[totalRounds - 1][lastPlayer] || ''}
+        />
       </div>
     );
   }

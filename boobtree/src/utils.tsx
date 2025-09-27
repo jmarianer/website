@@ -31,6 +31,7 @@ export function useSize(elt: Element | null): DOMRectReadOnly {
 interface TextfitProps extends React.HTMLAttributes<HTMLDivElement> {
   width: number;
   height: number;
+  text: string;
 }
 
 export function Textfit(props: TextfitProps) {
@@ -61,5 +62,5 @@ export function Textfit(props: TextfitProps) {
     div.style.fontSize = max + 'px';
   }, [minFontSize, maxFontSize, size]);
 
-  return <div {...props} ref={setDiv} style={{ width, height, fontSize: fontSize + 'px' }}/>;
+  return <div {...props} ref={setDiv} style={{ width, height, fontSize: fontSize + 'px' }}>{props.text}</div>;
 }
