@@ -6,7 +6,7 @@ import { IMAGE_HEIGHT, IMAGE_WIDTH, useSize, Textfit } from "./utils";
 const REFERENCE_HEIGHT = 600;
 const DRAWING_START = 200;
 const TEXT_HEIGHT = 100;
-const TEXT_START = 350;
+const TEXT_START = 400;
 
 export function GameArchive() {
   const { game: { archive, players, totalRounds } } = useCurrentGame();
@@ -50,7 +50,7 @@ export function GameArchive() {
       switch (slideType) {
         case SlideType.FirstText:
           top = 0;
-          height = '200px';
+          height = '0px';
           break;
         case SlideType.MiddleText:
         case SlideType.Drawing:
@@ -87,7 +87,7 @@ export function GameArchive() {
       className: 'slide',
       style: {
         top: top * scalingFactor,
-        height,
+        minHeight: height,
       }
     }));
 
