@@ -72,7 +72,7 @@ export function Textfit(props: TextfitProps) {
     div.style.height = 'fit-content';
     const totalHeight = getRealHeight(div);
     div.innerText = 'A';
-    const lineCount = totalHeight / getRealHeight(div);
+    const lineCount = Math.round(totalHeight / getRealHeight(div));
     div.innerText = props.text;
     div.style.height = props.height + 'px';
     
