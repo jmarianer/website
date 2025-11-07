@@ -12,7 +12,8 @@ locals {
     "crosswords.joeym.org",
     "combinators.joeym.org",
     "boobtree.com",
-    "passthepic.com"
+    "passthepic.com",
+    "quickerpass.joeym.org",
   ])
 }
 

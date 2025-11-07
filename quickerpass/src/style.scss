@@ -1,0 +1,158 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    padding: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.container {
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    max-width: 600px;
+    width: 100%;
+    padding: 40px;
+}
+
+h1 {
+    color: #333;
+    margin-bottom: 10px;
+    font-size: 28px;
+}
+
+.subtitle {
+    color: #666;
+    margin-bottom: 30px;
+    font-size: 14px;
+}
+
+.section {
+    margin-bottom: 35px;
+    display: flex;
+    flex-direction: column;
+
+    .section-title {
+        color: #667eea;
+        font-size: 18px;
+        font-weight: 600;
+        margin-bottom: 15px;
+        padding-bottom: 8px;
+        border-bottom: 2px solid #e0e0e0;
+    }
+
+    .input-group {
+        margin-bottom: 20px;
+    }
+
+    label {
+        display: block;
+        color: #555;
+        font-size: 14px;
+        font-weight: 500;
+        margin-bottom: 6px;
+    }
+
+    input, select {
+        width: 100%;
+        padding: 12px;
+        border: 2px solid #e0e0e0;
+        border-radius: 8px;
+        font-size: 14px;
+        transition: border-color 0.3s;
+
+        &:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+    }
+
+    select {
+        cursor: pointer;
+        background-color: white;
+        appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23666' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 12px center;
+        padding-right: 40px;
+    }
+
+    .question {
+        background: #f8f9fa;
+        padding: 15px;
+        border-radius: 8px;
+        margin-bottom: 12px;
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-end;
+
+        .question-text {
+            color: #333;
+            font-size: 14px;
+            flex: 1;
+            margin-right: 20px;
+        }
+
+        .toggle-buttons {
+            display: flex;
+            gap: 8px;
+
+            button {
+                padding: 8px 20px;
+                border: 2px solid #ddd;
+                background: white;
+                border-radius: 6px;
+                cursor: pointer;
+                font-size: 14px;
+                font-weight: 600;
+                transition: all 0.3s;
+        
+                &.yes {
+                    color: #10b981;
+                    border-color: #10b981;
+                
+                    &.active {
+                        color: white;
+                        background-color: #10b981;
+                    }
+                }
+        
+                &.no {
+                    color: #ef4444;
+                    border-color: #ef4444;
+                
+                    &.active {
+                        color: white;
+                        background-color: #ef4444;
+                    }
+                }
+
+                &.skip {
+                    color: #6b7280;
+                    border-color: #6b7280;
+                
+                    &.active {
+                        color: white;
+                        background-color: #6b7280;
+                    }
+                }
+        
+                &:hover {
+                    transform: scale(1.05);
+                }
+            }
+        }
+    }
+
+    .barcode-image {
+        align-self: center;
+    }
+}
