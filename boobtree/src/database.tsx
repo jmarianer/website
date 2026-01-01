@@ -98,9 +98,19 @@ export function useJoinGame() {
 
   return async (id: string, name: string) => {
     const playersRef = ref(database, `${DB_PREFIX}/${id}/players`);
-    const players = await get(playersRef);
-    const newPlayers = [...(players.val() || []), name];
-    set(playersRef, newPlayers);
+    const playersSnap = await get(playersRef);
+    const playersList: string[] = playersSnap.val() || [];
+
+    // If the name already exists, redirect to that player's index instead of adding a duplicate
+    const trimmed = name.trim();
+    const existingIndex = playersList.indexOf(trimmed);
+    if (existingIndex !== -1) {
+      navigate(`/game/${id}/player/${existingIndex}`);
+      return;
+    }
+
+    const newPlayers = [...playersList, trimmed];
+    await set(playersRef, newPlayers);
     navigate(`/game/${id}/player/${newPlayers.length - 1}`);
   };
 }
