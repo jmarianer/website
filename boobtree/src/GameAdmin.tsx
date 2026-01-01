@@ -54,7 +54,7 @@ export function Join() {
     <div>Join game {gameId}</div>
     <form onSubmit={(e) => {
       e.preventDefault();
-      joinGame(gameId!, nameRef.current!.value);
+      joinGame(gameId!.toUpperCase(), nameRef.current!.value);
     }}>
       <input type="text" placeholder="Your name" maxLength={20} ref={nameRef} />
       <button type="submit">Join</button>
