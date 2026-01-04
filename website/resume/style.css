@@ -1,0 +1,81 @@
+@import url('https://fonts.cdnfonts.com/css/calibri-light'); 
+
+@media print {
+  html {
+    font-size: 12px;
+  }
+}
+
+@media screen {
+  body {
+    max-width: 800px;
+    margin: 0 auto;
+    border-left: 1px solid #002060;
+    border-right: 1px solid #002060;
+    padding: 0 10px;
+  }
+}
+
+body {
+  font-family: 'Calibri Light', Arial, Helvetica, sans-serif;
+  font-weight: normal;
+}
+
+h1, h2 {
+    color: #002060;
+    font-weight: normal;
+    margin-bottom: 0;
+}
+
+h1 {
+    margin-top: 0;
+    font-size: 4em;
+}
+h2 {
+    text-transform: uppercase;
+}
+
+div.contact {
+  display: flex;
+  gap: 5em;
+    border-bottom: 1px solid;
+}
+
+div.work {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+}
+div.work, div.professional-skills {
+  break-inside: avoid;
+  page-break-inside: avoid;
+}
+div.work .company, div.work .title {
+    grid-column: 1;
+    color: #5b9bd5;
+}
+div.work .location, div.work .date {
+    grid-column: 2;
+    text-align: right;
+}
+div.work .company {
+    font-weight: bold;
+    font-size: 1.2em;
+    text-decoration: none;
+}
+div.work .title {
+    font-style: italic;
+}
+div.work .summary {
+    font-style: italic;
+    grid-column: 1 / span 2;
+}
+div.work ul {
+    grid-column: 1 / span 2;
+    margin-top: 5px;
+}
+
+div.professional-skills ul {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    column-gap: 2em;
+}
