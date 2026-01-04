@@ -78,4 +78,5 @@ div.professional-skills ul {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     column-gap: 2em;
+    margin-top: 0;
 }
