@@ -79,23 +79,8 @@ resource "google_compute_url_map" "url-map" {
     }
   }
 
-  path_matcher {
-    name            = "joeym-org"
-    default_service = google_compute_backend_bucket.backend-bucket["joeym.org"].id
-
-    path_rule {
-      paths = ["/resume"]
-      url_redirect {
-        host_redirect = "docs.google.com"
-        https_redirect = true
-        path_redirect = "/document/d/e/2PACX-1vTULD7-CDdmj6nHF3EhLIUp9rq-od86fiPu2KZdYVgoDbdWKVkysvhwF-AqSkGGot-LCXY3tEITFi9R/pub"
-        strip_query = true
-      }
-    }
-  }
-
   dynamic "path_matcher" {
-    for_each = [for d in local.domains : d if d != "joeym.org"]
+    for_each = [for d in local.domains : d]
     content {
       name            = replace(path_matcher.value, ".", "-")
       default_service = google_compute_backend_bucket.backend-bucket[path_matcher.value].id
