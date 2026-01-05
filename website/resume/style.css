@@ -36,9 +36,21 @@ h2 {
 }
 
 div.contact {
-  display: flex;
-  gap: 5em;
-    border-bottom: 1px solid;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  border-bottom: 1px solid;
+}
+
+@media screen and (max-width: 600px) {
+  div.contact {
+    grid-template-columns: 1fr;
+  }
+}
+
+div.contact a {
+  color: #5b9bd5;
+  text-decoration: none;
+  white-space: nowrap;
 }
 
 div.work {
