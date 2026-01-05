@@ -22,17 +22,17 @@ body {
 }
 
 h1, h2 {
-    color: #002060;
-    font-weight: normal;
-    margin-bottom: 0;
+  color: #002060;
+  font-weight: normal;
+  margin-bottom: 0;
 }
 
 h1 {
-    margin-top: 0;
-    font-size: 4em;
+  margin-top: 0;
+  font-size: 4em;
 }
 h2 {
-    text-transform: uppercase;
+  text-transform: uppercase;
 }
 
 div.contact {
@@ -62,33 +62,33 @@ div.work, div.professional-skills {
   page-break-inside: avoid;
 }
 div.work .company, div.work .title {
-    grid-column: 1;
-    color: #5b9bd5;
+  grid-column: 1;
+  color: #5b9bd5;
 }
 div.work .location, div.work .date {
-    grid-column: 2;
-    text-align: right;
+  grid-column: 2;
+  text-align: right;
 }
 div.work .company {
-    font-weight: bold;
-    font-size: 1.2em;
-    text-decoration: none;
+  font-weight: bold;
+  font-size: 1.2em;
+  text-decoration: none;
 }
 div.work .title {
-    font-style: italic;
+  font-style: italic;
 }
 div.work .summary {
-    font-style: italic;
-    grid-column: 1 / span 2;
+  font-style: italic;
+  grid-column: 1 / span 2;
 }
 div.work ul {
-    grid-column: 1 / span 2;
-    margin-top: 5px;
+  grid-column: 1 / span 2;
+  margin-top: 5px;
 }
 
 div.professional-skills ul {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    column-gap: 2em;
-    margin-top: 0;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  column-gap: 2em;
+  margin-top: 0;
 }
