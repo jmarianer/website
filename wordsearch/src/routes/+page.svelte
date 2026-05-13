@@ -25,35 +25,30 @@
 </script>
 
 <div class="page">
-  <div class="col col-input">
+  <h1>Word Search Solver</h1>
+  <div>
     <InputColumn bind:grid={grid} bind:words={words} />
   </div>
-  <div class="col col-output">
+  <div>
     <OutputColumn grid={grid} words={words} />
   </div>
 </div>
 
 <style>
   .page {
-    display: flex;
-    flex-direction: row;
+    display: grid;
+    grid-template-columns: 1fr 2fr;
     gap: 3rem;
     margin: 1rem;
     padding: 3rem;
     background-color: var(--card);
     border-radius: var(--radius-lg);
     box-shadow: var(--shadow-card);
-  }
-
-  .col {
-    min-width: 0;
-  }
-
-  .col-input {
-    flex: 1 1 33%;
-  }
-
-  .col-output {
-    flex: 1 1 67%;
+  
+    h1 {
+      grid-column: 1 / 3;
+      border-bottom: 1px solid var(--line);
+      padding-bottom: 1rem;
+    }
   }
 </style>
