@@ -9,8 +9,15 @@
   }
 
   let { grid, words }: { grid: string; words: string } = $props();
+
   let gridCells = $derived(grid.trim().split('\n').map(row => row.replaceAll(/\s/g, '').split('').map(c => c.toUpperCase())));
   let wordList = $derived(words.trim().split(/,?\s/).map(w => w.trim().toUpperCase()));
+
+  let tableEl = $state<Element>();
+  let cellEls = $state<Record<string, Element>>({});
+  let lines = $state<Array<{ x1: number, y1: number, x2: number, y2: number}>>([]);
+
+  let tableRect = $derived(tableEl?.getBoundingClientRect());
 
   const DIRECTIONS = [
     { di: 1, dj: 0, name: '↓' },
@@ -52,20 +59,50 @@
   function answerString({ iStart, jStart, iEnd, jEnd, direction }: Answer): string {
     return `r${iStart + 1}c${jStart + 1} ${DIRECTIONS[direction].name} r${iEnd + 1}c${jEnd + 1}`;
   }
+
+  function computeLines() {
+    if (!tableRect) {
+      return;
+    }
+    lines = allVectors.flatMap(([_, answers]) => answers).map(({ iStart, jStart, iEnd, jEnd }) => {
+      const a = cellEls[`r${iStart}c${jStart}`].getBoundingClientRect();
+      const b = cellEls[`r${iEnd}c${jEnd}`].getBoundingClientRect();
+      return {
+        x1: a.left + a.width / 2 - tableRect.left,
+        y1: a.top + a.height / 2 - tableRect.top,
+        x2: b.left + b.width / 2 - tableRect.left,
+        y2: b.top + b.height / 2 - tableRect.top
+      };
+
+    });
+  }
+
+  $effect(() => {
+    computeLines();
+    const ro = new ResizeObserver(computeLines);
+    if (tableEl) ro.observe(tableEl);
+    return () => ro.disconnect();
+  });
+
 </script>
 
 <div class="main">
-  <table class="word-grid">
+  <table class="word-grid" bind:this={tableEl}>
     <tbody>
       {#each gridCells as row, i (i)}
         <tr>
           {#each row as cell, j (j)}
-            <td>{cell}</td>
+            <td bind:this={cellEls[`r${i}c${j}`]}>{cell}</td>
           {/each}
         </tr>
       {/each}
     </tbody>
   </table>
+  <svg>
+    {#each lines as {x1, y1, x2, y2}, i (i)}}
+      <line x1={x1} y1={y1} x2={x2} y2={y2} />
+    {/each}
+  </svg>
   <details>
     <summary>Found cleanly</summary>
     <table class="clean-vectors">
@@ -120,6 +157,17 @@
         border: 1px solid var(--line-2);
         padding: 0.5rem;
         text-align: center;
+      }
+    }
+
+    svg {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+
+      line {
+        stroke: var(--stroke);
       }
     }
 
