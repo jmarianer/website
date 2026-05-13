@@ -22,6 +22,13 @@
 
   let grid = $state(storedGrid);
   let words = $state(storedWords);
+
+  $effect(() => {
+    if (browser) {
+      localStorage.setItem('grid', grid);
+      localStorage.setItem('words', words);
+    }
+  });
 </script>
 
 <div class="page">
