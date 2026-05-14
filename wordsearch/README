@@ -1,0 +1,10 @@
+# Install
+npm install
+
+# Serve on localhost
+npm start
+
+# Deploy
+npm run build
+gcloud storage cp -r dist/* gs://wordsearch-joeym-org
+gcloud compute url-maps invalidate-cdn-cache url-map --path "/*" --async

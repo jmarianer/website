@@ -14,6 +14,7 @@ locals {
     "boobtree.com",
     "passthepic.com",
     "quickerpass.joeym.org",
+    "wordsearch.joeym.org",
   ])
 }
 
@@ -111,4 +112,9 @@ resource "google_storage_bucket" "bucket" {
     not_found_page   = "index.html"
   }
 }
-// TODO: Enable public access to all these buckets. I've been doing this manually via the console, but it should be in the code.
+resource "google_storage_bucket_iam_member" "public_read" {
+  for_each = local.domains
+  bucket   = google_storage_bucket.bucket[each.value].name
+  role     = "roles/storage.objectViewer"
+  member   = "allUsers"
+}
