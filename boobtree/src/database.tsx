@@ -97,7 +97,8 @@ export function useJoinGame() {
   const navigate = useNavigate();
 
   return async (id: string, name: string) => {
-    const playersRef = ref(database, `${DB_PREFIX}/${id}/players`);
+    const upperId = id.trim().toUpperCase();
+    const playersRef = ref(database, `${DB_PREFIX}/${upperId}/players`);
     const playersSnap = await get(playersRef);
     const playersList: string[] = playersSnap.val() || [];
 
@@ -105,12 +106,12 @@ export function useJoinGame() {
     const trimmed = name.trim();
     const existingIndex = playersList.indexOf(trimmed);
     if (existingIndex !== -1) {
-      navigate(`/game/${id}/player/${existingIndex}`);
+      navigate(`/game/${upperId}/player/${existingIndex}`);
       return;
     }
 
     const newPlayers = [...playersList, trimmed];
     await set(playersRef, newPlayers);
-    navigate(`/game/${id}/player/${newPlayers.length - 1}`);
+    navigate(`/game/${upperId}/player/${newPlayers.length - 1}`);
   };
 }
