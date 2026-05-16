@@ -99,7 +99,7 @@
     </tbody>
   </table>
   <svg>
-    {#each lines as {x1, y1, x2, y2}, i (i)}}
+    {#each lines as {x1, y1, x2, y2}, i (i)}
       <line x1={x1} y1={y1} x2={x2} y2={y2} />
     {/each}
   </svg>
@@ -124,9 +124,9 @@
         {#each problemVectors as [word, answers], i (i)}
           <tr>
             {#if answers.length === 0}
-              <td class="missing"><span class="chip">x</span> <span class="word">{word}</span></td>
+              <td class="missing"><span class="chip">✗</span> <span class="word">{word}</span></td>
             {:else}
-              <td class="dup"><span class="chip">{answers.length}x</span> <span class="word">{word}</span></td>
+              <td class="dup"><span class="chip">{answers.length}×</span> <span class="word">{word}</span></td>
             {/if}
             <td>
               {answers.map(answer => answerString(answer)).join(', ')}

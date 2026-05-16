@@ -14,3 +14,10 @@ Features deferred from the initial design (2026-05-12). One-liners; expand into 
 10. **Near-match suggestions** for missing words — "you typed APLE; the grid contains APPLE at row 3 col 5."
 11. **"Try an example" button** — pre-fill a small demo puzzle (with a duplicate and a missing word) so first-time visitors see input format and solved-state at once.
 12. **Header chrome: GitHub + homepage links** — add `← joeym.org` and `View source on GitHub` links to the header. Worth doing once across all four SPAs (combinators, crosswords, quickerpass, wordsearch) as a single visual-unification pass.
+13. **Responsive layout** — stack the two columns on mobile. Currently `.page` uses a fixed `1fr 2fr` grid with no media query.
+14. **Good list count in summary** — render `Found cleanly (n) ▸` instead of bare `Found cleanly`.
+15. **Bad list sort order** — sort missing first, duplicates second, input order within each group. Currently interleaved in input order.
+16. **Words textarea placeholder** — add a placeholder hint; grid textarea already has one.
+17. **Palindrome dedup by cell set** — match identity should be the set of cells covered, so a palindrome at one location counts once (forward + backward over the same cells = one match). `ABA` in `ABABA` still counts twice (different cell sets).
+18. **Jagged-grid bounds check** — solver currently bounds columns by `gridCells[0].length`; should bound by the actual row, e.g. `gridCells[ni]?.[nj]`, so shorter/longer rows are honored without padding.
+19. **Word-list split: semicolons and collapsed runs** — split on `/[\s,;]+/` instead of `/,?\s/` so `;` is a separator and consecutive separators collapse.
