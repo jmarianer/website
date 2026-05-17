@@ -147,7 +147,7 @@ function DrawingRound() {
         </div>
       ))}
     </div>
-    <button id="done" onClick={() => {
+    <button id="done" disabled={image === BLANK_IMAGE} onClick={() => {
       game.addResponse(userId, image);
     } }>Done</button>
   </>;
