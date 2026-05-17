@@ -16,8 +16,15 @@ export function Crossword() {
   const [currentClue, setCurrentClue] = useState<Clue | undefined>(undefined);
   const [skipFilledCells, setSkipFilledCells] = useState<boolean>(false);
   const [skipFinishedClues, setSkipFinishedClues] = useState<boolean>(false);
+  const [shareLabel, setShareLabel] = useState<string>('Share');
 
   const cell = position ? crossword?.cells[position.row][position.col] : null;
+
+  function share() {
+    navigator.clipboard.writeText(window.location.href);
+    setShareLabel('Copied!');
+    setTimeout(() => setShareLabel('Share'), 2000);
+  }
 
   function setSolution(key: string) {
     if (!position || !crossword) {
@@ -182,6 +189,9 @@ export function Crossword() {
   }
   return <>
     <h1>Joey's awesome crossword app</h1>
+    <div className="actions">
+      <button onClick={share}>{shareLabel}</button>
+    </div>
     <div className="crossword-and-settings">
       <div className="settings">
       <label>

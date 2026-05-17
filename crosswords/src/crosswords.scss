@@ -29,7 +29,6 @@ body {
 
 h1 {
   color: #2c3e50;
-  margin-bottom: 100px;
   letter-spacing: 1px;
 
   @media print {
@@ -127,6 +126,30 @@ h1 {
   margin-top: 20px;
   width: 100%;
   padding: 10px;
+}
+
+.actions {
+  align-self: flex-end;
+  margin-bottom: 2ex;
+
+  button {
+    margin-left: 1em;
+    padding: 0.5em 1em;
+    font-size: 1rem;
+    border: none;
+    border-radius: 4px;
+    background-color: #2c3e50;
+    color: white;
+    cursor: pointer;
+
+    &:hover {
+      background-color: #34495e;
+    }
+  }
+
+  @media print {
+    display: none;
+  }
 }
 
 .settings {
