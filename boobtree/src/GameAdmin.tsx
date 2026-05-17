@@ -1,6 +1,7 @@
 import { useRef } from "react";
 import { Link, useParams } from "react-router";
 import { useCurrentGame, useJoinGame } from "./database";
+import { RoundIndicator } from "./GameInProgress";
 
 export function GameAdmin() {
   const { game } = useCurrentGame();
@@ -17,7 +18,7 @@ export function GameAdmin() {
 function GameStarted() {
   const { game } = useCurrentGame();
   return <div>
-    Now playing round {game.currentRound}.
+    <RoundIndicator />
     {game.players.map((player, i) => <div key={i}>{game.archive[game.currentRound][i] ? "✓" : "✗"} {player}</div>)}
   </div>;
 }

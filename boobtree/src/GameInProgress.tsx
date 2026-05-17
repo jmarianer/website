@@ -17,6 +17,11 @@ function createBlankImageDataURL(width: number, height: number): string {
 
 const BLANK_IMAGE = createBlankImageDataURL(IMAGE_WIDTH, IMAGE_HEIGHT);
 
+export function RoundIndicator() {
+  const { game: { currentRound, totalRounds } } = useCurrentGame();
+  return <div id="round-indicator">Round {currentRound + 1} of {totalRounds}</div>;
+}
+
 export function GameInProgress() {
   const { game: { started, archive, currentRound, totalRounds }, userId } = useCurrentGame();
 
@@ -59,6 +64,7 @@ function FirstRound() {
 
   const phraseRef = createRef<HTMLInputElement>();
   return <>
+    <RoundIndicator />
     <div id="instructions">Write a phrase for others to draw:</div>
     <input type="text" className="phrase-input" ref={phraseRef} placeholder="e.g., A cat wearing a superhero cape"></input>
     <div className="spacer"></div>
@@ -112,6 +118,7 @@ function DrawingRound() {
   }, [canvasRef, drawingAreaContainer, drawingAreaContainerWidth, color, thickness, image]);
 
   return <>
+    <RoundIndicator />
     <div id="instructions">Draw this phrase:</div>
     <div id="phrase-to-draw">{archive[currentRound - 1][(userId + players.length - 1) % players.length]}</div>
     <div id="drawing-area-container" ref={setDrawingAreaContainer}>
@@ -151,6 +158,7 @@ function WritingRound() {
 
   const phraseRef = createRef<HTMLInputElement>();
   return <>
+    <RoundIndicator />
     <div id="instructions">Describe this drawing:</div>
     <img id="drawing-to-describe" src={archive[currentRound - 1][(userId + players.length - 1) % players.length]!} alt="Previous drawing" />
     <input type="text" className="phrase-input" ref={phraseRef} placeholder="e.g., A cat wearing a superhero cape"></input>
@@ -169,6 +177,7 @@ function PleaseWait({audio, allowAudio, setAllowAudio}: PleaseWaitProps) {
   const { game: { archive, currentRound, players } } = useCurrentGame();
   const playersDone = Object.keys(archive[currentRound]).length;
   return <>
+    <RoundIndicator />
     <div id="instructions">Please wait for other players to finish this round...</div>
     <div>{playersDone} of {players.length} are done.</div>
     <label>
