@@ -1,5 +1,5 @@
 import { child, onValue, ref, set } from "firebase/database";
-import { useParams } from "react-router"
+import { useNavigate, useParams } from "react-router"
 import { database } from "./database";
 import { useEffect, useMemo, useState } from "react";
 import { Position, Puzzle, ClueDirection, Clue, Cell } from "./types";
@@ -10,6 +10,7 @@ import Switch from "react-switch";
 
 export function Crossword() {
   const {id} = useParams();
+  const navigate = useNavigate();
   const dbRef = useMemo(() => ref(database, `crosswords/${id}`), [id]);
   const [crossword, setCrossword] = useState<Puzzle | null>(null);
   const [position, setPosition] = useState<Position | undefined>(undefined);
@@ -190,6 +191,7 @@ export function Crossword() {
   return <>
     <h1>Joey's awesome crossword app</h1>
     <div className="actions">
+      <button onClick={() => navigate(`/edit/${id}`)}>Edit</button>
       <button onClick={share}>{shareLabel}</button>
     </div>
     <div className="crossword-and-settings">

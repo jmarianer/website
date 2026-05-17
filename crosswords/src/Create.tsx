@@ -1,40 +1,18 @@
-import { useState } from "react";
-import { createPuzzle } from "./create-puzzle";
-import { RenderCrossword } from "./RenderCrossword";
+import { PuzzleEditor } from "./PuzzleEditor";
 import { database } from "./database";
 import { push, ref } from "firebase/database";
 import { useNavigate } from "react-router";
 
 export function Create() {
-  const [crossword, setCrossword] = useState('');
   const navigate = useNavigate();
 
-  function createCrossword() {
-    let newCrossword = push(ref(database, 'crosswords'), createPuzzle(crossword));
-    navigate('/crossword/' + newCrossword.key);
-  }
-
   return (
-    <>
-      <h1>Create a new crossword</h1>
-      <div className="create-interface">
-        <div className="input-section">
-          <h2>Template</h2>
-          <div className="instructions">
-            Enter the crossword template below, using '.' for white squares and 'x' for black squares.
-          </div>
-          <textarea
-            rows={25}
-            value={crossword}
-            onChange={e => setCrossword(e.target.value)}
-          />
-        </div>
-        <div className="preview-section">
-          <h2>Preview</h2>
-          <RenderCrossword crossword={createPuzzle(crossword)} />
-        </div>
-      </div>
-      <button className="create-button" onClick={createCrossword}>Done</button>
-    </>
+    <PuzzleEditor
+      initialTemplate=""
+      onSubmit={puzzle => {
+        const newCrossword = push(ref(database, 'crosswords'), puzzle);
+        navigate('/crossword/' + newCrossword.key);
+      }}
+    />
   );
 }
