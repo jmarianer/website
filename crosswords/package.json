@@ -17,6 +17,9 @@
     "react-router": "^7.8.0",
     "react-switch": "^7.1.0"
   },
+  "overrides": {
+    "@typescript/vfs": "^1.6.4"
+  },
   "devDependencies": {
     "@deepkit/type-compiler": "^1.0.15",
     "@deepkit/vite": "^1.0.15",
