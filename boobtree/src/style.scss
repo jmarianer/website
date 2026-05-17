@@ -159,13 +159,19 @@ button {
   transition: all 0.3s ease;
   box-shadow: 0 4px 16px rgba(102, 126, 234, 0.3);
 
-  &:hover {
+  &:hover:not(:disabled, form:has(:invalid) &[type="submit"]) {
     transform: translateY(-2px);
     box-shadow: 0 8px 24px rgba(102, 126, 234, 0.4);
   }
 
-  &:active {
+  &:active:not(:disabled, form:has(:invalid) &[type="submit"]) {
     transform: translateY(0);
+  }
+
+  &:disabled,
+  form:has(:invalid) &[type="submit"] {
+    opacity: 0.5;
+    cursor: not-allowed;
   }
 }
 
