@@ -25,8 +25,8 @@ export function JoinWithCode() {
       e.preventDefault();
       joinGame(gameIdRef.current!.value, nameRef.current!.value);
     }}>
-      <input type="text" placeholder="Game code" maxLength={4} ref={gameIdRef} />
-      <input type="text" placeholder="Your name" maxLength={20} ref={nameRef} />
+      <input type="text" placeholder="Game code" maxLength={4} ref={gameIdRef} required pattern=".*\S.*" />
+      <input type="text" placeholder="Your name" maxLength={20} ref={nameRef} required pattern=".*\S.*" />
       <button type="submit">Join</button>
     </form>
   </>;

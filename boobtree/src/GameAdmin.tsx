@@ -57,7 +57,7 @@ export function Join() {
       e.preventDefault();
       joinGame(gameId!, nameRef.current!.value);
     }}>
-      <input type="text" placeholder="Your name" maxLength={20} ref={nameRef} />
+      <input type="text" placeholder="Your name" maxLength={20} ref={nameRef} required pattern=".*\S.*" />
       <button type="submit">Join</button>
     </form>
   </>;

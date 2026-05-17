@@ -63,15 +63,16 @@ function FirstRound() {
   const { game, userId } = useCurrentGame();
 
   const phraseRef = createRef<HTMLInputElement>();
-  return <>
+  return <form style={{ display: 'contents' }} onSubmit={(e) => {
+    e.preventDefault();
+    game.addResponse(userId, phraseRef.current!.value);
+  }}>
     <RoundIndicator />
     <div id="instructions">Write a phrase for others to draw:</div>
-    <input type="text" className="phrase-input" ref={phraseRef} placeholder="e.g., A cat wearing a superhero cape"></input>
+    <input type="text" className="phrase-input" ref={phraseRef} placeholder="e.g., A cat wearing a superhero cape" required pattern=".*\S.*"></input>
     <div className="spacer"></div>
-    <button id="done" onClick={() => {
-      game.addResponse(userId, phraseRef.current!.value);
-    } }>Done</button>
-  </>;
+    <button id="done" type="submit">Done</button>
+  </form>;
 }
 
 function DrawingRound() {
@@ -157,15 +158,16 @@ function WritingRound() {
   const { archive, currentRound, players } = game;
 
   const phraseRef = createRef<HTMLInputElement>();
-  return <>
+  return <form style={{ display: 'contents' }} onSubmit={(e) => {
+    e.preventDefault();
+    game.addResponse(userId, phraseRef.current!.value);
+  }}>
     <RoundIndicator />
     <div id="instructions">Describe this drawing:</div>
     <img id="drawing-to-describe" src={archive[currentRound - 1][(userId + players.length - 1) % players.length]!} alt="Previous drawing" />
-    <input type="text" className="phrase-input" ref={phraseRef} placeholder="e.g., A cat wearing a superhero cape"></input>
-    <button id="done" onClick={() => {
-      game.addResponse(userId, phraseRef.current!.value);
-    } }>Done</button>
-  </>;
+    <input type="text" className="phrase-input" ref={phraseRef} placeholder="e.g., A cat wearing a superhero cape" required pattern=".*\S.*"></input>
+    <button id="done" type="submit">Done</button>
+  </form>;
 }
 
 type PleaseWaitProps = {
