@@ -3,7 +3,6 @@ import { createPuzzle } from "./create-puzzle";
 import { RenderCrossword } from "./RenderCrossword";
 import { Puzzle } from "./types";
 import { isConnected, isPuzzleEmpty, isRotationallySymmetric } from "./validation";
-import { is } from "@deepkit/type";
 
 type Props = {
   initialTemplate: string;
