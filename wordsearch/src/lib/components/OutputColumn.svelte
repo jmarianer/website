@@ -109,7 +109,7 @@
       <tbody>
         {#each cleanVectors as [word, [ answer ]], i (i)}
           <tr>
-            <td>{word}</td>
+            <td class="word">{word}</td>
             <td>{answerString(answer)}</td>
           </tr>
         {/each}
@@ -182,7 +182,7 @@
       }
     }
 
-    @mixin word {
+    .word {
       font-size: 13px;
       font-family: var(--mono);
       color: var(--ink);
@@ -198,10 +198,6 @@
       td {
         border-top: 1px solid var(--line-2);
         padding: 7px 0;
-      }
-
-      td:first-child {
-        @include word;
       }
 
       td:last-child {
@@ -223,10 +219,6 @@
         font-size: 11px;
         font-weight: 700;
         background-color: var(--chip-bg);
-      }
-
-      .word {
-        @include word;
       }
 
       .missing {
