@@ -1,10 +1,10 @@
 import { initializeApp } from "firebase/app";
-import { getDatabase } from "firebase/database";
+import { connectDatabaseEmulator, getDatabase } from "firebase/database";
 
 const firebaseConfig = {
   apiKey: "AIzaSyDNY7EWSosnLYffp_zpmySLfF-Ea5YDlFk",
   authDomain: "prefab-conquest-186122.firebaseapp.com",
-  databaseURL: "https://prefab-conquest-186122-default-rtdb.firebaseio.com",
+  databaseURL: import.meta.env.VITE_FIREBASE_DATABASE_URL ?? "https://prefab-conquest-186122-default-rtdb.firebaseio.com",
   projectId: "prefab-conquest-186122",
   storageBucket: "prefab-conquest-186122.firebasestorage.app",
   messagingSenderId: "712554395291",
@@ -13,3 +13,9 @@ const firebaseConfig = {
 initializeApp(firebaseConfig);
 
 export const database = getDatabase();
+const emulatorHost = import.meta.env.VITE_FIREBASE_DATABASE_EMULATOR_HOST;
+if (emulatorHost) {
+  const [host, portString] = emulatorHost.split(":");
+  const port = Number(portString || "9000");
+  connectDatabaseEmulator(database, host, port);
+}

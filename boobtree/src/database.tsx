@@ -1,6 +1,6 @@
 import { cast } from "@deepkit/type";
 import { initializeApp } from "firebase/app";
-import { get, getDatabase, onValue, ref, set } from "firebase/database";
+import { connectDatabaseEmulator, get, getDatabase, onValue, ref, set } from "firebase/database";
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router";
 
@@ -37,7 +37,7 @@ export class Game {
 const firebaseConfig = {
   apiKey: "AIzaSyDNY7EWSosnLYffp_zpmySLfF-Ea5YDlFk",
   authDomain: "prefab-conquest-186122.firebaseapp.com",
-  databaseURL: "https://prefab-conquest-186122-default-rtdb.firebaseio.com",
+  databaseURL: import.meta.env.VITE_FIREBASE_DATABASE_URL ?? "https://prefab-conquest-186122-default-rtdb.firebaseio.com",
   projectId: "prefab-conquest-186122",
   storageBucket: "prefab-conquest-186122.firebasestorage.app",
   messagingSenderId: "712554395291",
@@ -46,6 +46,13 @@ const firebaseConfig = {
 initializeApp(firebaseConfig);
 
 const database = getDatabase();
+const emulatorHost = import.meta.env.VITE_FIREBASE_DATABASE_EMULATOR_HOST;
+if (emulatorHost) {
+  const [host, portString] = emulatorHost.split(":");
+  const port = Number(portString || "9000");
+  connectDatabaseEmulator(database, host, port);
+}
+
 export const DB_PREFIX = import.meta.env.VITE_DB_PREFIX;
 if (!DB_PREFIX) {
   throw new Error('VITE_DB_PREFIX environment variable must be defined');

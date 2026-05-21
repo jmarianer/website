@@ -7,7 +7,9 @@
     "start": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "playwright:install": "playwright install",
+    "test:e2e": "firebase emulators:exec \"playwright test\""
   },
   "dependencies": {
     "@deepkit/type": "^1.0.15",
@@ -23,6 +25,8 @@
   "devDependencies": {
     "@deepkit/type-compiler": "^1.0.15",
     "@deepkit/vite": "^1.0.15",
+    "@playwright/test": "^1.59.1",
+    "firebase-tools": "^11.30.0",
     "@eslint/js": "^9.32.0",
     "@types/react": "^19.1.9",
     "@types/react-dom": "^19.1.7",
