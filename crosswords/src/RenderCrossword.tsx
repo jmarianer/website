@@ -17,7 +17,7 @@ export function RenderCrossword({crossword, position, clue, onClick}: Props) {
       return <td className='outside' />;
     }
 
-    let classList = ['empty'];
+    const classList = ['empty'];
     if (cell.wordBoundaryAcross) {
       classList.push('word-boundary-across');
     }
@@ -34,7 +34,7 @@ export function RenderCrossword({crossword, position, clue, onClick}: Props) {
     }
 
     return (
-      <td className={classList.join(' ')} onClick={() => {if (onClick) onClick(cell)}}>
+      <td className={classList.join(' ')} data-testid={`cell-${cell.position.row}-${cell.position.col}`} onClick={() => {if (onClick) onClick(cell)}}>
         {cell.clueNumber === undefined ? '' : <div className='number'>{cell.clueNumber}</div>}
         <span className='solution'>{cell.solution}</span>
       </td>
@@ -42,7 +42,7 @@ export function RenderCrossword({crossword, position, clue, onClick}: Props) {
   }
 
   return (
-    <table className='crossword'>
+    <table className='crossword' role='grid'>
       <tbody>
         {crossword.cells.map((row, i) =>
           <tr key={i}>
