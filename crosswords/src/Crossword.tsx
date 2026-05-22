@@ -84,7 +84,7 @@ export function Crossword() {
       return;
     }
 
-    let [drow, dcol] = (currentClue?.direction === ClueDirection.across) ? [0, 1] : [1, 0];
+    const [drow, dcol] = (currentClue?.direction === ClueDirection.across) ? [0, 1] : [1, 0];
     let { row, col } = position;
 
     for (; ;) {
@@ -196,14 +196,14 @@ export function Crossword() {
     </div>
     <div className="crossword-and-settings">
       <div className="settings">
-      <label>
-        <Switch onChange={setSkipFilledCells} checked={skipFilledCells} />
-        <span>Skip filled cells</span>
-      </label>
-      <label>
-        <Switch onChange={setSkipFinishedClues} checked={skipFinishedClues} />
-        <span>Skip finished clues</span>
-      </label>
+        <div className="setting">
+          <Switch id="skip-filled-cells" onChange={setSkipFilledCells} checked={skipFilledCells} aria-label="Skip filled cells" />
+          <label htmlFor="skip-filled-cells">Skip filled cells</label>
+        </div>
+        <div className="setting">
+          <Switch id="skip-finished-clues" onChange={setSkipFinishedClues} checked={skipFinishedClues} aria-label="Skip finished clues" />
+          <label htmlFor="skip-finished-clues">Skip finished clues</label>
+        </div>
       </div>
 
       <div className="crossword-holder">

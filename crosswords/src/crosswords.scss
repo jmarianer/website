@@ -172,13 +172,13 @@ h1 {
   vertical-align: middle;
   margin-bottom: 3ex;
 
-  label {
+  .setting {
     display: inline-flex;
     flex-direction: row;
     align-items: center;
     margin-right: 2em;
 
-    span {
+    label {
       margin-left: 0.5em;
     }
   }
