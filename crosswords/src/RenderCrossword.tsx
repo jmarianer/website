@@ -36,7 +36,7 @@ export function RenderCrossword({crossword, position, clue, onClick}: Props) {
     return (
       <td className={classList.join(' ')} data-testid={`cell-${cell.position.row}-${cell.position.col}`} onClick={() => {if (onClick) onClick(cell)}}>
         {cell.clueNumber === undefined ? '' : <div className='number'>{cell.clueNumber}</div>}
-        <span className='solution'>{cell.solution}</span>
+        <span className='solution' data-testid="solution">{cell.solution}</span>
       </td>
     );
   }

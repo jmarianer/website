@@ -37,8 +37,8 @@ export function PuzzleEditor({ initialTemplate, onSubmit }: Props) {
     const message = isGood ? status.messageGood : status.messageBad;
     return (
       <tr key={status.testId} data-testid={status.testId}>
-        <td data-testid={`${status.testId}-icon`}>{icon}</td>
-        <td data-testid={`${status.testId}-message`}>{message}</td>
+        <td data-testid="icon">{icon}</td>
+        <td data-testid="message">{message}</td>
       </tr>
     );
   });
