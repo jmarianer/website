@@ -1,4 +1,4 @@
-import { test, PUZZLE_TEMPLATE } from './fixtures';
+import { test, PUZZLE_TEMPLATE, openCrossword } from './fixtures';
 import { expect } from '@playwright/test';
 
 test('Crosswords creation', async ({ page }) => {
@@ -12,22 +12,25 @@ test('Crosswords creation', async ({ page }) => {
   await expect(page.getByRole('grid')).toBeVisible();
 });
 
-test('Crosswords real-time sync', async ({ browser, page, crosswordId }) => {
-  const playerTwo = await browser.newContext();
-  const secondPage = await playerTwo.newPage();
-  await secondPage.goto(`/crossword/${crosswordId}`);
-  await expect(page.getByRole('grid')).toBeVisible();
-  await expect(secondPage.getByRole('grid')).toBeVisible();
+test('Crosswords real-time sync', async ({ browser, crossword }) => {
+  const secondCrossword = await openCrossword(browser, crossword.id);
+  await expect(secondCrossword.page.getByRole('grid')).toBeVisible();
 
-  await page.getByTestId('cell-1-1').click();
-  await page.keyboard.press('A');
-  await expect(page.getByTestId('cell-1-1').getByTestId('solution')).toHaveText('A');
-  await expect(secondPage.getByTestId('cell-1-1').getByTestId('solution')).toHaveText('A');
+  await crossword.cell(1, 1).click();
+  await crossword.press('A');
+  await expect(crossword.cell(1, 1).getByTestId('solution')).toHaveText('A');
+  await expect(secondCrossword.cell(1, 1).getByTestId('solution')).toHaveText('A');
 
   // Test that lowercase input gets uppercased.
-  await page.keyboard.press('b');
-  await expect(page.getByTestId('cell-1-2').getByTestId('solution')).toHaveText('B');
-  await expect(secondPage.getByTestId('cell-1-2').getByTestId('solution')).toHaveText('B');
+  await crossword.press('b');
+  await expect(crossword.cell(1, 2).getByTestId('solution')).toHaveText('B');
+  await expect(secondCrossword.cell(1, 2).getByTestId('solution')).toHaveText('B');
+
+  // Test that changes made in the second window also sync back to the first window.
+  await secondCrossword.cell(5, 1).click();
+  await secondCrossword.press('c');
+  await expect(secondCrossword.cell(5, 1).getByTestId('solution')).toHaveText('C');
+  await expect(crossword.cell(5, 1).getByTestId('solution')).toHaveText('C');
 });
 
 test.describe('Creation validation', () => {
@@ -87,133 +90,115 @@ test.describe('Creation validation', () => {
 });
 
 test.describe('Basic keyboard interactions', () => {
-  test('Arrow keys move selection', async ({ page, crosswordId: _ }) => {
-    await page.getByTestId('cell-1-1').click();
-    await page.keyboard.press('ArrowRight');
-    await expect(page.getByTestId('cell-1-2')).toHaveClass(/active/);
-    await page.keyboard.press('ArrowDown');
-    await expect(page.getByTestId('cell-5-2')).toHaveClass(/active/);
-    await page.keyboard.press('ArrowLeft');
-    await expect(page.getByTestId('cell-5-1')).toHaveClass(/active/);
-    await page.keyboard.press('ArrowUp');
-    await expect(page.getByTestId('cell-4-1')).toHaveClass(/active/);
+  test('Arrow keys move selection', async ({ crossword }) => {
+    await crossword.cell(1, 1).click();
+    await crossword.press('ArrowRight');
+    await expect(crossword.cell(1, 2)).toHaveClass(/active/);
+    await crossword.press('ArrowDown');
+    await expect(crossword.cell(5, 2)).toHaveClass(/active/);
+    await crossword.press('ArrowLeft');
+    await expect(crossword.cell(5, 1)).toHaveClass(/active/);
+    await crossword.press('ArrowUp');
+    await expect(crossword.cell(4, 1)).toHaveClass(/active/);
   });
 
   test.describe('Horizontal clue typing', () => {
-    test('Typing a letter moves right', async ({ page, crosswordId: _ }) => {
-      await page.getByTestId('cell-1-1').click();
-      await page.keyboard.press('A');
-      await expect(page.getByTestId('cell-1-1').getByTestId('solution')).toHaveText('A');
-      await expect(page.getByTestId('cell-1-2')).toHaveClass(/active/);
+    test('Typing a letter moves right', async ({ crossword }) => {
+      await crossword.cell(1, 1).click();
+      await crossword.press('A');
+      await expect(crossword.cell(1, 1).getByTestId('solution')).toHaveText('A');
+      await expect(crossword.cell(1, 2)).toHaveClass(/active/);
     });
 
-    test('Backspacing removes letter', async ({ page, crosswordId: _ }) => {
-      await page.getByTestId('cell-1-1').click();
-      await page.keyboard.press('A');
-      await page.keyboard.press('B');
-      await expect(page.getByTestId('cell-1-1').getByTestId('solution')).toHaveText('A');
-      await expect(page.getByTestId('cell-1-2').getByTestId('solution')).toHaveText('B');
-      await expect(page.getByTestId('cell-1-3')).toHaveClass(/active/);
-      await page.keyboard.press('Backspace');
-      await expect(page.getByTestId('cell-1-2')).toHaveClass(/active/);
-      await page.keyboard.press('Backspace');
-      await expect(page.getByTestId('cell-1-2').getByTestId('solution')).toHaveText('');
-      await expect(page.getByTestId('cell-1-1')).toHaveClass(/active/);
+    test('Backspacing removes letter', async ({ crossword }) => {
+      await crossword.cell(1, 1).click();
+      await crossword.press('A', 'B');
+      await expect(crossword.cell(1, 1).getByTestId('solution')).toHaveText('A');
+      await expect(crossword.cell(1, 2).getByTestId('solution')).toHaveText('B');
+      await expect(crossword.cell(1, 3)).toHaveClass(/active/);
+      await crossword.press('Backspace');
+      await expect(crossword.cell(1, 2)).toHaveClass(/active/);
+      await crossword.press('Backspace');
+      await expect(crossword.cell(1, 2).getByTestId('solution')).toHaveText('');
+      await expect(crossword.cell(1, 1)).toHaveClass(/active/);
     });
   });
 
   test.describe('Vertical clue typing', () => {
-    test('Typing a letter moves down', async ({ page, crosswordId: _ }) => {
-      await page.getByTestId('cell-1-1').click();
-      await page.getByTestId('cell-1-1').click();  // Second click to switch to vertical clue.
-      await page.keyboard.press('A');
-      await expect(page.getByTestId('cell-1-1').getByTestId('solution')).toHaveText('A');
-      await expect(page.getByTestId('cell-2-1')).toHaveClass(/active/);
+    test('Typing a letter moves down', async ({ crossword }) => {
+      await crossword.cell(1, 1).click();
+      await crossword.cell(1, 1).click();  // Second click to switch to vertical clue.
+      await crossword.press('A');
+      await expect(crossword.cell(1, 1).getByTestId('solution')).toHaveText('A');
+      await expect(crossword.cell(2, 1)).toHaveClass(/active/);
     });
 
-    test('Backspacing removes letter', async ({ page, crosswordId: _ }) => {
-      await page.getByTestId('cell-1-1').click();
-      await page.getByTestId('cell-1-1').click(); // Second click to switch to vertical clue.
-      await page.keyboard.press('A');
-      await page.keyboard.press('B');
-      await expect(page.getByTestId('cell-1-1').getByTestId('solution')).toHaveText('A');
-      await expect(page.getByTestId('cell-2-1').getByTestId('solution')).toHaveText('B');
-      await expect(page.getByTestId('cell-3-1')).toHaveClass(/active/);
-      await page.keyboard.press('Backspace');
-      await expect(page.getByTestId('cell-2-1')).toHaveClass(/active/);
-      await page.keyboard.press('Backspace');
-      await expect(page.getByTestId('cell-2-1').getByTestId('solution')).toHaveText('');
-      await expect(page.getByTestId('cell-1-1')).toHaveClass(/active/);
+    test('Backspacing removes letter', async ({ crossword }) => {
+      await crossword.cell(1, 1).click();
+      await crossword.cell(1, 1).click(); // Second click to switch to vertical clue.
+      await crossword.press('A', 'B');
+      await expect(crossword.cell(1, 1).getByTestId('solution')).toHaveText('A');
+      await expect(crossword.cell(2, 1).getByTestId('solution')).toHaveText('B');
+      await expect(crossword.cell(3, 1)).toHaveClass(/active/);
+      await crossword.press('Backspace');
+      await expect(crossword.cell(2, 1)).toHaveClass(/active/);
+      await crossword.press('Backspace');
+      await expect(crossword.cell(2, 1).getByTestId('solution')).toHaveText('');
+      await expect(crossword.cell(1, 1)).toHaveClass(/active/);
     });
   });
 });
 
 test.describe('Toggles', () => {
-  test('Skip filled cells off', async ({ page, crosswordId: _ }) => {
+  test('Skip filled cells off', async ({ page, crossword }) => {
     await expect(page.getByRole('switch', { name: 'Skip filled cells' })).not.toBeChecked();
-    await page.getByTestId('cell-1-1').click();
-    await page.keyboard.press('A');
-    await page.keyboard.press('B');
-    await page.getByTestId('cell-1-4').click();
-    await page.keyboard.press('D');
-    await page.getByTestId('cell-1-3').click();
-    await page.keyboard.press('C');
-    await expect(page.getByTestId('cell-1-4')).toHaveClass(/active/);
+    await crossword.cell(1, 1).click();
+    await crossword.press('A', 'B');
+    await crossword.cell(1, 4).click();
+    await crossword.press('D');
+    await crossword.cell(1, 3).click();
+    await crossword.press('C');
+    await expect(crossword.cell(1, 4)).toHaveClass(/active/);
   });
 
-  test('Skip filled cells on', async ({ page, crosswordId: _ }) => {
+  test('Skip filled cells on', async ({ page, crossword }) => {
     // Click the label instead of the switch itself since the switch is hidden.
     await page.getByText('Skip filled cells').click({ force: true });
     await expect(page.getByRole('switch', { name: 'Skip filled cells' })).toBeChecked();
-    await page.getByTestId('cell-1-1').click();
-    await page.keyboard.press('A');
-    await page.keyboard.press('B');
-    await page.getByTestId('cell-1-4').click();
-    await page.keyboard.press('D');
-    await page.getByTestId('cell-1-3').click();
-    await page.keyboard.press('C');
-    await expect(page.getByTestId('cell-1-5')).toHaveClass(/active/);
+    await crossword.cell(1, 1).click();
+    await crossword.press('A', 'B');
+    await crossword.cell(1, 4).click();
+    await crossword.press('D');
+    await crossword.cell(1, 3).click();
+    await crossword.press('C');
+    await expect(crossword.cell(1, 5)).toHaveClass(/active/);
   });
 
-  test('Skip finished clues off', async ({ page, crosswordId: _ }) => {
+  test('Skip finished clues off', async ({ page, crossword }) => {
     await expect(page.getByRole('switch', { name: 'Skip finished clues' })).not.toBeChecked();
-    await page.getByTestId('cell-1-1').click();
-    await page.keyboard.press('A');
-    await page.keyboard.press('B');
-    await page.keyboard.press('C');
-    await page.keyboard.press('D');
-    await page.keyboard.press('E');
-    await page.keyboard.press('Tab');
-    await page.keyboard.press('Tab');
-    await page.keyboard.press('Tab');
-    await expect(page.getByTestId('cell-1-1')).toHaveClass(/active/);
+    await crossword.cell(1, 1).click();
+    await crossword.press('A', 'B', 'C', 'D', 'E', 'Tab', 'Tab', 'Tab');
+    await expect(crossword.cell(1, 1)).toHaveClass(/active/);
   });
 
-  test('Skip finished clues on', async ({ page, crosswordId: _ }) => {
+  test('Skip finished clues on', async ({ page, crossword }) => {
     // Click the label instead of the switch itself since the switch is hidden.
     await page.getByText('Skip finished clues').click({ force: true });
     await expect(page.getByRole('switch', { name: 'Skip finished clues' })).toBeChecked();
-    await page.getByTestId('cell-1-1').click();
-    await page.keyboard.press('A');
-    await page.keyboard.press('B');
-    await page.keyboard.press('C');
-    await page.keyboard.press('D');
-    await page.keyboard.press('E');
-    await page.keyboard.press('Tab');
-    await page.keyboard.press('Tab');
-    await page.keyboard.press('Tab');
-    await expect(page.getByTestId('cell-5-1')).toHaveClass(/active/);
+    await crossword.cell(1, 1).click();
+    await crossword.press('A', 'B', 'C', 'D', 'E', 'Tab', 'Tab', 'Tab');
+    await expect(crossword.cell(5, 1)).toHaveClass(/active/);
   });
 
-  test('Space toggles word boundary across', async ({ page, crosswordId: _ }) => {
-    await page.getByTestId('cell-1-2').click();
-    await page.keyboard.press(' ');
-    await expect(page.getByTestId('cell-1-2')).toHaveClass(/word-boundary-across/);
+  test('Space toggles word boundary across', async ({ crossword }) => {
+    await crossword.cell(1, 2).click();
+    await crossword.press(' ');
+    await expect(crossword.cell(1, 2)).toHaveClass(/word-boundary-across/);
   });
 
-  test('Space toggles word boundary down', async ({ page, crosswordId: _ }) => {
-    await page.getByTestId('cell-2-1').click();
-    await page.keyboard.press(' ');
-    await expect(page.getByTestId('cell-2-1')).toHaveClass(/word-boundary-down/);
+  test('Space toggles word boundary down', async ({ crossword }) => {
+    await crossword.cell(2, 1).click();
+    await crossword.press(' ');
+    await expect(crossword.cell(2, 1)).toHaveClass(/word-boundary-down/);
   });
 });
