@@ -79,7 +79,7 @@ function DrawingRound() {
   const { game, userId } = useCurrentGame();
   const { archive, currentRound, players } = game;
 
-  const colors = ["black", "red", "orange", "yellow", "green", "blue", "purple", "brown", "magenta", "white"];
+  const colors = ["black", "red", "orange", "yellow", "green", "blue", "purple", "brown", "pink", "white"];
   const [color, setColor] = useState("black");
   const [thickness, setThickness] = useState(5);
 
