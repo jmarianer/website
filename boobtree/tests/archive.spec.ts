@@ -6,19 +6,19 @@ async function completeThreePlayerGame(
   phrases: string[],
   descriptions: string[],
 ) {
-  for (let i = 0; i < playerPages.length; i++) {
-    await playerPages[i].getByPlaceholder('e.g., A cat wearing a superhero cape').fill(phrases[i]);
-    await playerPages[i].getByRole('button', { name: 'Done' }).click();
+  for (const [i, page] of playerPages.entries()) {
+    await page.getByPlaceholder('e.g., A cat wearing a superhero cape').fill(phrases[i]);
+    await page.getByRole('button', { name: 'Done' }).click();
   }
   for (const page of playerPages) {
     await expect(page.locator('#instructions')).toHaveText('Draw this phrase:');
     await drawOnCanvas(page);
     await page.getByRole('button', { name: 'Done' }).click();
   }
-  for (let i = 0; i < playerPages.length; i++) {
-    await expect(playerPages[i].locator('#instructions')).toHaveText('Describe this drawing:');
-    await playerPages[i].getByPlaceholder('e.g., A cat wearing a superhero cape').fill(descriptions[i]);
-    await playerPages[i].getByRole('button', { name: 'Done' }).click();
+  for (const [i, page] of playerPages.entries()) {
+    await expect(page.locator('#instructions')).toHaveText('Describe this drawing:');
+    await page.getByPlaceholder('e.g., A cat wearing a superhero cape').fill(descriptions[i]);
+    await page.getByRole('button', { name: 'Done' }).click();
   }
 }
 
