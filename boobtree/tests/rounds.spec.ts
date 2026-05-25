@@ -86,6 +86,26 @@ test('please-wait screen shows live "X of N" counter and audio toggle', async ({
   await expect(playerPages[0].getByText('2 of 3 are done.')).toBeVisible();
 });
 
+test('audio preference persists across reloads', async ({ startedGame }) => {
+  const { playerPages } = await startedGame(3);
+  const page = playerPages[0];
+
+  await page.getByPlaceholder('e.g., A cat wearing a superhero cape').fill('Sun over water');
+  await page.getByRole('button', { name: 'Done' }).click();
+
+  await expect(page.getByText('Play sound when next round starts')).toBeVisible();
+  const toggle = page.getByRole('switch');
+  await expect(toggle).not.toBeChecked();
+
+  await toggle.click({ force: true });
+  await expect(toggle).toBeChecked();
+
+  await page.reload();
+
+  await expect(page.getByText('Play sound when next round starts')).toBeVisible();
+  await expect(page.getByRole('switch')).toBeChecked();
+});
+
 test('reload mid-game preserves player state', async ({ startedGame }) => {
   const { playerPages } = await startedGame(3);
   const N = playerPages.length;

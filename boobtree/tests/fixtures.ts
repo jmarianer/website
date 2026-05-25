@@ -63,7 +63,6 @@ export const test = base.extend<Fixtures>({
     await adminPage.goto('/');
     await adminPage.getByRole('link', { name: 'Start a new game' }).click();
     await expect(adminPage).toHaveURL(/\/game\/[A-Z0-9]{4}\/admin/);
-    // Assert the instructiXgainst URL-structure changes.
     const instructionsLocator = adminPage.locator('#instructions');
     await expect(instructionsLocator).toHaveText(
       /^Please share this join link or the code [A-Z]{4} with the rest of your party$/
