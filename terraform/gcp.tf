@@ -15,6 +15,7 @@ locals {
     "passthepic.com",
     "quickerpass.joeym.org",
     "wordsearch.joeym.org",
+    "lok-solver.joeym.org",
   ])
 }
 
@@ -103,8 +104,7 @@ resource "google_compute_backend_bucket" "backend-bucket" {
 
 resource "google_storage_bucket" "bucket" {
   for_each    = local.domains
-  // TODO: Fix this one-off
-  name = each.value == "joeym.org" ? "joeym-org-main-website" : replace(each.value, ".", "-")
+  name = replace(each.value, ".", "-")
   location    = "US"
 
   website {

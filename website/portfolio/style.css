@@ -25,6 +25,10 @@
   grid-area: a;
 }
 
+.portfolio-grid .image img {
+  max-width: 200px;
+}
+
 .portfolio-grid .title {
   font-weight: bold;
   font-variant: small-caps;
