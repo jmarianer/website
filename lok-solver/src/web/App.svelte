@@ -42,7 +42,11 @@ TLAOTX
   }
 
   function advance(): void {
-    if (!solution || step >= solution.moves.length) return;
+    if (!solution || step >= solution.moves.length) {
+      playing = false;
+      clearAnim();
+      return;
+    }
     clearAnim();
     const move = solution.moves[step]!;
     step++;
@@ -54,8 +58,12 @@ TLAOTX
     const frame = (now: number): void => {
       const elapsed = now - startTime;
       if (elapsed >= totalDuration) {
-        animElapsed = null;
-        animRAF = null;
+        if (playing) {
+          advance();
+        } else {
+          animElapsed = null;
+          animRAF = null;
+        }
         return;
       }
       animElapsed = elapsed;
@@ -87,17 +95,6 @@ TLAOTX
     playing = true;
     if (animElapsed === null) advance();
   }
-
-  // Drive auto-playback: whenever an animation settles and we're still playing,
-  // either advance to the next move or stop at the end.
-  $effect(() => {
-    if (animElapsed !== null || !playing) return;
-    if (!solution || step >= solution.moves.length) {
-      playing = false;
-      return;
-    }
-    advance();
-  });
 
   function handleSolve(): void {
     clearAnim();

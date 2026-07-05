@@ -25,11 +25,11 @@ export class SolverClient {
           break;
         case 'result':
           handlers.onResult(msg.result);
-          this.terminate();
+          this.cancel();
           break;
         case 'error':
           handlers.onError(msg.error);
-          this.terminate();
+          this.cancel();
           break;
       }
     });
@@ -38,10 +38,6 @@ export class SolverClient {
   }
 
   cancel(): void {
-    this.terminate();
-  }
-
-  private terminate(): void {
     if (this.worker !== null) {
       this.worker.terminate();
       this.worker = null;
