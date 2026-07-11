@@ -1,9 +1,9 @@
 /// <reference lib="webworker" />
 
-import { parseGrid } from '../core/grid.js';
 import { solve, type SolveProgress, type SolveResult } from '../core/solver.js';
+import { Grid } from '../core/types.js';
 
-export type SolveRequest = { input: string };
+export type SolveRequest = { grid: Grid };
 
 export type SolveResponse =
   | { type: 'progress'; progress: SolveProgress }
@@ -13,9 +13,8 @@ export type SolveResponse =
 declare const self: DedicatedWorkerGlobalScope;
 
 self.addEventListener('message', (event: MessageEvent<SolveRequest>) => {
-  const { input } = event.data;
+  const { grid } = event.data;
   try {
-    const grid = parseGrid(input);
     const result = solve(grid, {
       onProgress: (progress) => self.postMessage({ type: 'progress', progress } satisfies SolveResponse),
     });

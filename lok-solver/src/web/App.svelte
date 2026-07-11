@@ -1,5 +1,6 @@
 <script lang="ts">
   import { applyMove } from '../core/apply.js';
+  import { parseGrid } from '../core/grid.js';
   import type { SolveProgress } from '../core/solver.js';
   import type { Grid, Move } from '../core/types.js';
   import { SolverClient } from './solver-client.js';
@@ -102,7 +103,7 @@ TLAOTX
     solveError = null;
     solution = null;
     solveProgress = null;
-    solverClient.solve(input, {
+    solverClient.solve(parseGrid(input), {
       onProgress: (p) => {
         solveProgress = p;
       },

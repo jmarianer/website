@@ -1,4 +1,5 @@
 import type { SolveProgress, SolveResult } from '../core/solver.js';
+import { Grid } from '../core/types.js';
 import type { SolveRequest, SolveResponse } from './solver.worker.js';
 
 export type SolveHandlers = {
@@ -10,14 +11,13 @@ export type SolveHandlers = {
 export class SolverClient {
   private worker: Worker | null = null;
 
-  solve(input: string, handlers: SolveHandlers): void {
+  solve(grid: Grid, handlers: SolveHandlers): void {
     this.cancel();
-    const worker = new Worker(
+    this.worker = new Worker(
       new URL('./solver.worker.ts', import.meta.url),
-      { type: 'module' },
+      { type: 'module' }
     );
-    this.worker = worker;
-    worker.addEventListener('message', (event: MessageEvent<SolveResponse>) => {
+    this.worker.addEventListener('message', (event: MessageEvent<SolveResponse>) => {
       const msg = event.data;
       switch (msg.type) {
         case 'progress':
@@ -33,8 +33,7 @@ export class SolverClient {
           break;
       }
     });
-    const req: SolveRequest = { input };
-    worker.postMessage(req);
+    this.worker.postMessage({ grid } satisfies SolveRequest);
   }
 
   cancel(): void {
