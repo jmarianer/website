@@ -5,7 +5,6 @@ import { useEffect, useMemo, useState } from "react";
 import { Position, Puzzle, ClueDirection, Clue, Cell } from "./types";
 import { RenderCrossword } from "./RenderCrossword";
 import { cast } from '@deepkit/type';
-import { sortBy } from "lodash";
 import Switch from "react-switch";
 
 export function Crossword() {
@@ -108,7 +107,8 @@ export function Crossword() {
       return;
     }
 
-    const clues = sortBy(crossword?.clues, 'direction', 'clueNumber');
+    const clues = [...crossword.clues].sort((a, b) =>
+      a.direction - b.direction || a.clueNumber - b.clueNumber);
     let i = clues.findIndex(c => currentClue.equals(c));
     for ( ; ; ) {
       i = (i + (forward ? 1 : -1) + clues.length) % clues.length;
