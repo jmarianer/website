@@ -1,9 +1,10 @@
 import { child, onValue, ref, set } from "firebase/database";
 import { useNavigate, useParams } from "react-router"
 import { database } from "./database";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Position, Puzzle, ClueDirection, Clue, Cell } from "./types";
 import { RenderCrossword } from "./RenderCrossword";
+import { OnScreenKeyboard } from "./OnScreenKeyboard";
 import { cast } from '@deepkit/type';
 import Switch from "react-switch";
 
@@ -17,6 +18,17 @@ export function Crossword() {
   const [skipFilledCells, setSkipFilledCells] = useState<boolean>(false);
   const [skipFinishedClues, setSkipFinishedClues] = useState<boolean>(false);
   const [shareLabel, setShareLabel] = useState<string>('Share');
+  const [zoom, setZoom] = useState<number>(1);
+  const [fitSize, setFitSize] = useState<number>(40);
+  const pinch = useRef<{ distance: number, zoom: number } | null>(null);
+  const viewportRef = useRef<HTMLDivElement>(null);
+  // Read by the native touch listeners, which are attached once and so cannot
+  // close over the current zoom. During a pinch this ref leads and the state
+  // follows, so don't overwrite it mid-gesture.
+  const zoomRef = useRef<number>(zoom);
+  if (!pinch.current) {
+    zoomRef.current = zoom;
+  }
 
   const cell = position ? crossword?.cells[position.row][position.col] : null;
 
@@ -121,6 +133,16 @@ export function Crossword() {
     }
   }
 
+  function toggleDirection() {
+    if (!cell || cell.clues.length < 2) {
+      return;
+    }
+    const other = cell.clues.find(clue => clue.direction !== currentClue?.direction);
+    if (other) {
+      setCurrentClue(other);
+    }
+  }
+
   function handleKeyDown(e: KeyboardEvent) {
     if (!position || !crossword) {
       return;
@@ -131,7 +153,15 @@ export function Crossword() {
     }
 
     e.preventDefault();
-    const key = e.key;
+    handleKey(e.key, e.shiftKey);
+  }
+
+  // Shared by the physical keyboard and the on-screen keyboard.
+  function handleKey(key: string, shift: boolean = false) {
+    if (!position || !crossword) {
+      return;
+    }
+
     if (key === ' ') {
       if (currentClue?.direction === ClueDirection.across) {
         set(child(dbRef, `cells/${position.row}/${position.col}/wordBoundaryAcross`), !cell?.wordBoundaryAcross);
@@ -158,7 +188,7 @@ export function Crossword() {
         move(-1, 0);
       }
     } else if (key === 'Tab' || key === 'Enter') {
-      moveToNextClue(!e.shiftKey);
+      moveToNextClue(!shift);
     }
   }
 
@@ -185,6 +215,133 @@ export function Crossword() {
     };
   });
 
+  // --zoom is set imperatively rather than through the style prop, so that a
+  // re-render mid-pinch cannot stomp on the value the gesture is writing.
+  useEffect(() => {
+    viewportRef.current?.style.setProperty('--zoom', String(zoom));
+  }, [zoom]);
+
+  const cols = crossword?.cells[0]?.length ?? 0;
+
+  // Fit the puzzle to the available width, so there is never horizontal
+  // scrolling at zoom 1. Height is deliberately not fitted: the space left over
+  // after the header, settings and keyboard is small enough that fitting it too
+  // shrinks the cells much further than it needs to.
+  useEffect(() => {
+    const viewport = viewportRef.current;
+    if (!viewport || !cols) {
+      return;
+    }
+
+    const measure = () => {
+      const holder = viewport.querySelector<HTMLElement>('.crossword-holder');
+      const table = viewport.querySelector<HTMLElement>('.crossword');
+      if (!holder || !table) {
+        return;
+      }
+
+      // Measure the chrome rather than hard-coding it: clientWidth includes the
+      // viewport's own padding, and the holder adds its border on top. Both are
+      // independent of how wide the table currently is.
+      const style = getComputedStyle(viewport);
+      const padding = parseFloat(style.paddingLeft) + parseFloat(style.paddingRight);
+      const holderChrome = holder.offsetWidth - table.offsetWidth;
+      const available = viewport.clientWidth - padding - holderChrome - 2;
+
+      setFitSize(Math.max(12, Math.min(40, available / cols)));
+    };
+
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(viewport);
+    return () => observer.disconnect();
+  }, [cols]);
+
+  // Pinch-zoom scales --cell-size rather than transforming the grid, so the
+  // scroll container reflows to the real size and panning works natively.
+  //
+  // These are attached natively rather than as React props because React
+  // registers touchmove as passive, which makes preventDefault a no-op -- and
+  // without preventDefault, iOS Safari zooms the entire page instead. Safari
+  // also needs its own gesture events swallowed for the same reason.
+  const hasPuzzle = crossword !== null;
+  useEffect(() => {
+    const viewport = viewportRef.current;
+    if (!viewport) {
+      return;
+    }
+
+    function touchDistance(touches: TouchList) {
+      return Math.hypot(
+        touches[0].clientX - touches[1].clientX,
+        touches[0].clientY - touches[1].clientY);
+    }
+
+    function onTouchStart(e: TouchEvent) {
+      if (e.touches.length === 2) {
+        pinch.current = { distance: touchDistance(e.touches), zoom: zoomRef.current };
+      }
+    }
+
+    const onTouchMove = (e: TouchEvent) => {
+      if (e.touches.length !== 2 || !pinch.current) {
+        return;
+      }
+      e.preventDefault();
+
+      const scale = touchDistance(e.touches) / pinch.current.distance;
+      const previous = zoomRef.current;
+      const next = Math.min(4, Math.max(1, pinch.current.zoom * scale));
+      if (next === previous) {
+        return;
+      }
+
+      // Write the variable straight to the DOM during the gesture. Going
+      // through React state here would re-render the whole grid on every
+      // touchmove, which is far too slow to pinch against.
+      zoomRef.current = next;
+      viewport.style.setProperty('--zoom', String(next));
+
+      // Anchor the zoom on the pinch midpoint: whatever content sits under it
+      // should stay under it, instead of the grid growing away from its corner.
+      // A point at distance d from the scroll origin moves to d * ratio, so the
+      // scroll offset has to absorb the difference.
+      const bounds = viewport.getBoundingClientRect();
+      const midX = (e.touches[0].clientX + e.touches[1].clientX) / 2 - bounds.left;
+      const midY = (e.touches[0].clientY + e.touches[1].clientY) / 2 - bounds.top;
+      const ratio = next / previous;
+      viewport.scrollLeft = (viewport.scrollLeft + midX) * ratio - midX;
+      viewport.scrollTop = (viewport.scrollTop + midY) * ratio - midY;
+    };
+
+    function onTouchEnd(e: TouchEvent) {
+      if (e.touches.length < 2 && pinch.current) {
+        pinch.current = null;
+        setZoom(zoomRef.current);  // Commit, so React renders agree with the DOM.
+      }
+    }
+
+    function preventGesture(e: Event) {
+      e.preventDefault();
+    }
+
+    viewport.addEventListener('touchstart', onTouchStart, { passive: false });
+    viewport.addEventListener('touchmove', onTouchMove, { passive: false });
+    viewport.addEventListener('touchend', onTouchEnd);
+    viewport.addEventListener('touchcancel', onTouchEnd);
+    viewport.addEventListener('gesturestart', preventGesture);
+    viewport.addEventListener('gesturechange', preventGesture);
+
+    return () => {
+      viewport.removeEventListener('touchstart', onTouchStart);
+      viewport.removeEventListener('touchmove', onTouchMove);
+      viewport.removeEventListener('touchend', onTouchEnd);
+      viewport.removeEventListener('touchcancel', onTouchEnd);
+      viewport.removeEventListener('gesturestart', preventGesture);
+      viewport.removeEventListener('gesturechange', preventGesture);
+    };
+  }, [hasPuzzle]);
+
   if (!crossword) {
     return <div></div>;
   }
@@ -206,13 +363,23 @@ export function Crossword() {
         </div>
       </div>
 
-      <div className="crossword-holder">
-        <RenderCrossword
-          crossword={crossword}
-          position={position}
-          clue={currentClue}
-          onClick={setCell} />
+      <div className="crossword-viewport"
+           ref={viewportRef}
+           style={{ '--fit-size': `${fitSize}px` } as React.CSSProperties}>
+        <div className="crossword-holder">
+          <RenderCrossword
+            crossword={crossword}
+            position={position}
+            clue={currentClue}
+            onClick={setCell} />
+        </div>
       </div>
+
+      <OnScreenKeyboard
+        onKey={handleKey}
+        onToggleDirection={toggleDirection}
+        onMoveClue={moveToNextClue}
+        direction={currentClue?.direction} />
     </div>
   </>
 }

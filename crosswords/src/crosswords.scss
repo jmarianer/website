@@ -1,3 +1,7 @@
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
 body {
   align-items: center;
   background: linear-gradient(135deg, #f5f1e8 0%, #e8dcc6 100%);
@@ -6,7 +10,6 @@ body {
   font-family: 'Arial', sans-serif;
   margin: 0;
   min-height: 100vh;
-  box-sizing: border-box;
 }
 
 #root {
@@ -15,7 +18,6 @@ body {
   flex-direction: column;
   align-items: center;
   background-color: white;
-  box-sizing: border-box;
   min-height: 100vh;
   min-width: 50vw;
 
@@ -45,18 +47,24 @@ h1 {
 .crossword {
   border-collapse: collapse;
   position: relative;
+  // Overridden on narrow screens, where the grid is sized to fit the viewport
+  // using the column count published as --cols by RenderCrossword, scaled by
+  // --zoom which the pinch handler sets on .crossword-viewport.
+  --cell-size: 40px;
 
   td {
     border: 1px solid black;
-    height: 40px;
+    height: var(--cell-size);
     text-align: center;
-    width: 40px;
+    width: var(--cell-size);
     position: relative;
+    font-size: calc(var(--cell-size) * 0.55);
 
     .number {
-      font-size: 0.75rem;
+      font-size: calc(var(--cell-size) * 0.3);
       position: absolute;
       top: 1px;
+      left: 2px;
     }
   }
 
@@ -87,6 +95,48 @@ h1 {
 
   .word-boundary-across {
     border-right-width: 3px;
+  }
+}
+
+// Hidden by default; revealed on narrow screens by the media query below.
+.on-screen-keyboard {
+  display: none;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 1.5em;
+  width: 100%;
+  touch-action: manipulation;
+  user-select: none;
+
+  .key-row {
+    display: flex;
+    gap: 4px;
+    justify-content: center;
+  }
+
+  button {
+    flex: 1 1 0;
+    min-width: 0;
+    padding: 0.75em 0;
+    font-size: 1rem;
+    font-family: inherit;
+    border: 1px solid #c8bfa8;
+    border-radius: 5px;
+    background-color: #fdfbf6;
+    color: #2c3e50;
+    cursor: pointer;
+
+    &:active {
+      background-color: #4a90e2;
+      color: white;
+    }
+
+    &.action {
+      flex-grow: 1.6;
+      background-color: #e8dcc6;
+      font-size: 0.85rem;
+      white-space: nowrap;
+    }
   }
 }
 
@@ -163,6 +213,74 @@ h1 {
   }
 
   @media print {
+    display: none;
+  }
+}
+
+@media screen and (max-width: 700px) {
+  // The page itself does not scroll: the grid viewport takes the space left
+  // over and scrolls internally, so the keyboard never moves.
+  #root {
+    min-width: 0;
+    width: 100%;
+    padding: 12px 8px;
+    height: 100dvh;
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  h1 {
+    font-size: 1.3rem;
+    text-align: center;
+    margin: 0 0 0.4em;
+  }
+
+  .crossword {
+    // --fit-size is measured in JS against the space actually available, since
+    // that depends on the keyboard and header rather than on the viewport.
+    --cell-size: calc(var(--fit-size, 40px) * var(--zoom, 1));
+  }
+
+  .crossword-and-settings {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    flex: 1;
+    min-height: 0;
+  }
+
+  .crossword-viewport {
+    flex: 1;
+    min-height: 0;
+    width: 100%;
+    overflow: auto;
+    // Let the browser pan, but keep pinch for ourselves so the page as a whole
+    // (and therefore the keyboard) never zooms.
+    touch-action: pan-x pan-y;
+    display: flex;
+    justify-content: safe center;
+    align-items: safe center;
+    padding: 4px;
+  }
+
+  .crossword-holder {
+    flex: none;
+  }
+
+  .on-screen-keyboard {
+    display: flex;
+    flex: none;
+    margin-top: 0.75em;
+  }
+
+  .create-interface {
+    flex-direction: column;
+  }
+}
+
+@media print {
+  .on-screen-keyboard {
     display: none;
   }
 }
