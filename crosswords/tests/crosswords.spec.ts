@@ -65,10 +65,19 @@ test.describe('Creation validation', () => {
     await expect(page.getByTestId('symmetric').getByTestId('message')).toHaveText('Not rotationally symmetric');
   });
 
-  // TODO: Bug in the `isConnected` check in `Crossword.tsx`. Fix the bug, then unskip this test.
-  test.skip('Warns about disconnected components', async ({ page }) => {
+  test('Two different warnings', async ({ page }) => {
     await page.goto('/create');
     await page.getByRole('textbox').fill('xx.\n.xx');
+    await expect(page.getByRole('button', { name: 'Done' })).toBeDisabled();
+        await expect(page.getByTestId('no-clues').getByTestId('icon')).toHaveText('❌');
+    await expect(page.getByTestId('no-clues').getByTestId('message')).toHaveText('No clues found');
+    await expect(page.getByTestId('connected').getByTestId('icon')).toHaveText('⚠️');
+    await expect(page.getByTestId('connected').getByTestId('message')).toHaveText('White cells form multiple disconnected regions');
+  });
+
+  test('Warns about disconnected components', async ({ page }) => {
+    await page.goto("/create");
+    await page.getByRole('textbox').fill('..\nxx\n..');
     await expect(page.getByRole('button', { name: 'Done' })).toBeEnabled();
     await expect(page.getByTestId('connected').getByTestId('icon')).toHaveText('⚠️');
     await expect(page.getByTestId('connected').getByTestId('message')).toHaveText('White cells form multiple disconnected regions');

@@ -24,24 +24,22 @@ export function isConnected(puzzle: Puzzle): boolean {
   const cols = puzzle.cells[0].length;
   const visited: boolean[][] = puzzle.cells.map(row => row.map(() => false));
 
-  for (let r = 1; r < rows - 1; r++) {
-    for (let c = 1; c < cols - 1; c++) {
-      if (!puzzle.cells[r][c].isFillable() || visited[r][c]) continue;
-
-      const queue: [number, number][] = [[r, c]];
-      visited[r][c] = true;
-      while (queue.length > 0) {
-        const [cr, cc] = queue.shift()!;
-        for (const [dr, dc] of [[-1, 0], [1, 0], [0, -1], [0, 1]] as const) {
-          const nr = cr + dr;
-          const nc = cc + dc;
-          if (nr < 1 || nr >= rows - 1 || nc < 1 || nc >= cols - 1) continue;
-          if (!puzzle.cells[nr][nc].isFillable() || visited[nr][nc]) continue;
-          visited[nr][nc] = true;
-          queue.push([nr, nc]);
-        }
+  // Flood-fill from a single starting cell. If the grid is connected, that one
+  // pass reaches every other fillable cell, which is what we check at the end.
+  const start = puzzle.cells.flat().find(cell => cell.isFillable());
+  if (start) {
+    const queue: [number, number][] = [[start.position.row, start.position.col]];
+    visited[start.position.row][start.position.col] = true;
+    while (queue.length > 0) {
+      const [cr, cc] = queue.shift()!;
+      for (const [dr, dc] of [[-1, 0], [1, 0], [0, -1], [0, 1]] as const) {
+        const nr = cr + dr;
+        const nc = cc + dc;
+        if (nr < 1 || nr >= rows - 1 || nc < 1 || nc >= cols - 1) continue;
+        if (!puzzle.cells[nr][nc].isFillable() || visited[nr][nc]) continue;
+        visited[nr][nc] = true;
+        queue.push([nr, nc]);
       }
-      break;  // Only need to visit one component, since we check at the end if all fillable cells were visited
     }
   }
 
