@@ -1,15 +1,15 @@
 import { Cell, CellType, Clue, ClueDirection, Position, Puzzle } from './types';
 
 export function createPuzzle(templateStr: string): Puzzle {
-  let template = templateStr.split('\n').map((s) => s.replace(/(\r\n|\n|\r)/gm, ''));
+  const template = templateStr.split('\n').map((s) => s.replace(/(\r\n|\n|\r)/gm, ''));
 
   const rows = template.length + 2;
   const cols = Math.max(...template.map((f) => f.length)) + 2;
 
-  let puzzle = new Puzzle([], [])
+  const puzzle = new Puzzle([], [])
 
   for (let i = 0; i < rows; i++) {
-    let row: Cell[] = [];
+    const row: Cell[] = [];
     for (let j = 0; j < cols; j++) {
       row.push(new Cell(i, j));
     }
@@ -18,8 +18,8 @@ export function createPuzzle(templateStr: string): Puzzle {
 
   for (let i = 1; i < rows - 1; i++) {
     for (let j = 1; j < cols - 1; j++) {
-      let Cell = puzzle.cells[i][j];
-      let s = template[i - 1][j - 1];
+      const Cell = puzzle.cells[i][j];
+      const s = template[i - 1][j - 1];
       if (s === 'x' || s === undefined) {
         Cell.type = CellType.black;
       } else {
@@ -83,8 +83,8 @@ export function createPuzzle(templateStr: string): Puzzle {
     }
   }
 
-  for (let clue of puzzle.clues) {
-    let currentPosition = new Position(clue.initialPosition.row, clue.initialPosition.col);
+  for (const clue of puzzle.clues) {
+    const currentPosition = new Position(clue.initialPosition.row, clue.initialPosition.col);
     while (true) {
       const currentCell = puzzle.cells[currentPosition.row][currentPosition.col];
       if (!currentCell.isFillable()) {
