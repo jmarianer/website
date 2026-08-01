@@ -28,7 +28,7 @@ reactRoot.render(
           <Route path="admin" element={<GameAdmin />} />
           <Route path="join" element={<Join />} />
           <Route path="player/:userId" element={<GameInProgress />} />
-          <Route path="archive" element={<GameArchive />} />
+          <Route path="archive/*" element={<GameArchive />} />
         </Route>
       </Routes>
     </Router>

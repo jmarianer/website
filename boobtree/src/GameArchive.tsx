@@ -1,7 +1,9 @@
 import { cloneElement, ReactElement, useEffect, useState, useCallback } from "react";
+import { Navigate, useNavigate, useParams } from "react-router";
 import { useCurrentGame } from "./database";
 import { useSwipeable } from "react-swipeable";
 import { IMAGE_HEIGHT, IMAGE_WIDTH, useSize, Textfit } from "./utils";
+import { addressAtIndex, formatPath, parsePath, slideCount, slideIndex } from "./archiveAddress";
 
 const REFERENCE_HEIGHT = 600;
 const DRAWING_START = 200;
@@ -9,8 +11,16 @@ const TEXT_HEIGHT = 100;
 const TEXT_START = 400;
 
 export function GameArchive() {
-  const { game: { archive, players, totalRounds } } = useCurrentGame();
-  const [currentSlide, setCurrentSlide] = useState(0);
+  const { game } = useCurrentGame();
+  const { id: gameId, archive, players, totalRounds } = game;
+  const { '*': slidePath } = useParams();
+  const navigate = useNavigate();
+
+  // The current slide lives in the URL, so every slide is shareable.
+  const archiveRoot = `/game/${gameId}/archive`;
+  const address = parsePath(slidePath ?? '', game);
+  const totalSlides = slideCount(game);
+  const currentSlide = address ? slideIndex(address, game) : 0;
 
   const [archiveDiv, setArchiveDiv] = useState<HTMLDivElement | null>(null);
   const { height: slideHeight } = useSize(archiveDiv);
@@ -84,9 +94,6 @@ export function GameArchive() {
     }
 
     top *= scalingFactor;
-    if (slideHeight === 0 && slideNo > 0) {
-      top = 10_000;
-    }
 
     slides.push(cloneElement(contents, {
       className: 'slide',
@@ -168,13 +175,19 @@ export function GameArchive() {
       ⛓️‍💥The end⛓️‍💥
     </div>
   );
-  const totalSlides = slideNo;
 
+  function goToSlide(index: number) {
+    const clamped = Math.min(Math.max(index, 0), totalSlides - 1);
+    const path = formatPath(addressAtIndex(clamped, game));
+    // Replace rather than push, so Back still leaves the archive in one press
+    // instead of walking back through every slide.
+    navigate(`${archiveRoot}/${path}`, { replace: true });
+  }
   function nextSlide() {
-    setCurrentSlide((prev) => Math.min(prev + 1, totalSlides - 1));
+    goToSlide(currentSlide + 1);
   }
   function previousSlide() {
-    setCurrentSlide((prev) => Math.max(prev - 1, 0));
+    goToSlide(currentSlide - 1);
   }
 
   useEffect(() => {
@@ -192,7 +205,7 @@ export function GameArchive() {
     return () => {
       document.removeEventListener('keydown', handleKeyDown);
     };
-  }, []);
+  });
 
   const swipeHandlers = useSwipeable({
     onSwipedUp: nextSlide,
@@ -204,6 +217,17 @@ export function GameArchive() {
     setArchiveDiv(r);
     swipeHandlers.ref(r);
   }, []);
+
+  if (!address) {
+    return <Navigate to={archiveRoot} replace />;
+  }
+
+  // Slide positions are all relative to the measured height, so hold off until
+  // the container has been measured. Otherwise a deep link would render its
+  // slide in the wrong place and then visibly animate into position.
+  if (slideHeight === 0) {
+    return <div className="archive" ref={setArchiveRefs} />;
+  }
 
   return <div className="archive" {...swipeHandlers} ref={setArchiveRefs} >
     {slides}

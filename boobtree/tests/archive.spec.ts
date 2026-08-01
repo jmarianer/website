@@ -114,3 +114,50 @@ test('click navigation: controls work; prev hidden at start, next hidden at end'
   await expect(next).not.toBeVisible();
   await expect(prev).toBeVisible();
 });
+
+test('deep link: /archive/:chain/:picture lands directly on that picture', async ({ startedGame }) => {
+  const { adminPage, gameId, playerPages, playerNames } = await startedGame(3);
+  const [, , charlie] = playerNames;
+  await completeThreePlayerGame(playerPages, ['p1', 'p2', 'p3'], ['d1', 'd2', 'd3']);
+
+  // Chain 2, picture 2 is round index 1 (a drawing) by player (1 + 1) % 3 = Charlie.
+  await adminPage.goto(`/game/${gameId}/archive/2/2`);
+
+  const charlieDrewSlide = adminPage.locator('.slide').filter({ hasText: `${charlie} drew:` });
+  await expect(charlieDrewSlide).toBeInViewport();
+  await expect(charlieDrewSlide.locator(`img[alt*="drawing by ${charlie}"]`)).toBeVisible();
+
+  // And a chain title is reachable on its own.
+  await adminPage.goto(`/game/${gameId}/archive/3`);
+  await expect(adminPage.getByText(/Chain 3/)).toBeInViewport();
+});
+
+test('the URL follows the current slide', async ({ startedGame }) => {
+  const { adminPage, gameId, playerPages } = await startedGame(3);
+  await completeThreePlayerGame(playerPages, ['p1', 'p2', 'p3'], ['d1', 'd2', 'd3']);
+  await adminPage.getByRole('link', { name: 'View the archive' }).click();
+
+  // Chain 1: title, three pictures, then the summary; then chain 2's title.
+  for (const path of ['1/1', '1/2', '1/3', '1/summary', '2']) {
+    await adminPage.keyboard.press('ArrowDown');
+    await expect(adminPage).toHaveURL(new RegExp(`/game/${gameId}/archive/${path}$`));
+  }
+
+  await adminPage.keyboard.press('ArrowUp');
+  await expect(adminPage).toHaveURL(new RegExp(`/game/${gameId}/archive/1/summary$`));
+
+  // Back leaves the archive rather than stepping through slides.
+  await adminPage.goBack();
+  await expect(adminPage).toHaveURL(new RegExp(`/game/${gameId}/admin$`));
+});
+
+test('an address that names no slide redirects to the start of the archive', async ({ startedGame }) => {
+  const { adminPage, gameId, playerPages } = await startedGame(3);
+  await completeThreePlayerGame(playerPages, ['p1', 'p2', 'p3'], ['d1', 'd2', 'd3']);
+
+  for (const path of ['99', 'nonsense', '2/99']) {
+    await adminPage.goto(`/game/${gameId}/archive/${path}`);
+    await expect(adminPage).toHaveURL(new RegExp(`/game/${gameId}/archive$`));
+    await expect(adminPage.getByText(/Chain 1/)).toBeInViewport();
+  }
+});
