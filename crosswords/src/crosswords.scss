@@ -217,6 +217,47 @@ h1 {
   }
 }
 
+.settings {
+  align-self: flex-start;
+  vertical-align: middle;
+  margin-bottom: 3ex;
+
+  // Always expanded on desktop, where there is room, so the disclosure control
+  // itself is hidden. The media query below reveals it on small screens -- and
+  // must stay below it, since these selectors have equal specificity.
+  summary {
+    display: none;
+    cursor: pointer;
+    padding: 0.3em 0;
+    font-size: 0.95rem;
+    color: #2c3e50;
+  }
+
+  .actions {
+    margin-bottom: 1ex;
+
+    button:first-child {
+      margin-left: 0;
+    }
+  }
+
+  .setting {
+    display: inline-flex;
+    flex-direction: row;
+    align-items: center;
+    margin-right: 2em;
+
+    label {
+      margin-left: 0.5em;
+    }
+  }
+
+  @media print {
+    display: none;
+  }
+}
+
+// Mobile overrides last, so they win over the base rules above.
 @media screen and (max-width: 700px) {
   // The page itself does not scroll: the grid viewport takes the space left
   // over and scrolls internally, so the keyboard never moves.
@@ -274,6 +315,20 @@ h1 {
     margin-top: 0.75em;
   }
 
+  .settings {
+    align-self: stretch;
+    margin-bottom: 0.5ex;
+    flex: none;
+
+    summary {
+      display: list-item;
+    }
+
+    .setting {
+      margin: 0.4em 2em 0.4em 0;
+    }
+  }
+
   .create-interface {
     flex-direction: column;
   }
@@ -281,27 +336,6 @@ h1 {
 
 @media print {
   .on-screen-keyboard {
-    display: none;
-  }
-}
-
-.settings {
-  align-self: flex-start;
-  vertical-align: middle;
-  margin-bottom: 3ex;
-
-  .setting {
-    display: inline-flex;
-    flex-direction: row;
-    align-items: center;
-    margin-right: 2em;
-
-    label {
-      margin-left: 0.5em;
-    }
-  }
-
-  @media print {
     display: none;
   }
 }

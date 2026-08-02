@@ -8,6 +8,10 @@ import { OnScreenKeyboard } from "./OnScreenKeyboard";
 import { cast } from '@deepkit/type';
 import Switch from "react-switch";
 
+// Mirrors the breakpoint in crosswords.scss, where the on-screen keyboard
+// appears and vertical space becomes scarce.
+const COMPACT = '(max-width: 700px)';
+
 export function Crossword() {
   const {id} = useParams();
   const navigate = useNavigate();
@@ -18,6 +22,12 @@ export function Crossword() {
   const [skipFilledCells, setSkipFilledCells] = useState<boolean>(false);
   const [skipFinishedClues, setSkipFinishedClues] = useState<boolean>(false);
   const [shareLabel, setShareLabel] = useState<string>('Share');
+  // Collapsed on small screens, where the settings would otherwise eat the
+  // vertical space the grid needs. Controlled rather than left to the DOM so a
+  // re-render mid-solve cannot snap it shut again; kept in step with the
+  // breakpoint by the matchMedia effect below.
+  const [settingsOpen, setSettingsOpen] = useState<boolean>(
+    () => !window.matchMedia(COMPACT).matches);
   const [zoom, setZoom] = useState<number>(1);
   const [fitSize, setFitSize] = useState<number>(40);
   const pinch = useRef<{ distance: number, zoom: number } | null>(null);
@@ -223,6 +233,17 @@ export function Crossword() {
     viewportRef.current?.style.setProperty('--zoom', String(zoom));
   }, [zoom]);
 
+  // Re-sync when the window crosses the breakpoint. Without this, collapsing on
+  // a narrow window and then widening it leaves the settings closed with the
+  // disclosure control hidden, so there is no way to reopen them. Only fires on
+  // a crossing, so a manual toggle survives resizing within one size class.
+  useEffect(() => {
+    const compact = window.matchMedia(COMPACT);
+    const sync = () => setSettingsOpen(!compact.matches);
+    compact.addEventListener('change', sync);
+    return () => compact.removeEventListener('change', sync);
+  }, []);
+
   const cols = crossword?.cells[0]?.length ?? 0;
 
   // Fit the puzzle to the available width, so there is never horizontal
@@ -349,12 +370,14 @@ export function Crossword() {
   }
   return <>
     <h1>Joey's awesome crossword app</h1>
-    <div className="actions">
-      <button onClick={() => navigate(`/edit/${id}`)}>Edit</button>
-      <button onClick={share}>{shareLabel}</button>
-    </div>
     <div className="crossword-and-settings">
-      <div className="settings">
+      <details className="settings" open={settingsOpen}
+               onToggle={e => setSettingsOpen(e.currentTarget.open)}>
+        <summary>Settings</summary>
+        <div className="actions">
+          <button onClick={() => navigate(`/edit/${id}`)}>Edit</button>
+          <button onClick={share}>{shareLabel}</button>
+        </div>
         <div className="setting">
           <Switch id="skip-filled-cells" onChange={setSkipFilledCells} checked={skipFilledCells} aria-label="Skip filled cells" />
           <label htmlFor="skip-filled-cells">Skip filled cells</label>
@@ -363,7 +386,7 @@ export function Crossword() {
           <Switch id="skip-finished-clues" onChange={setSkipFinishedClues} checked={skipFinishedClues} aria-label="Skip finished clues" />
           <label htmlFor="skip-finished-clues">Skip finished clues</label>
         </div>
-      </div>
+      </details>
 
       <div className="crossword-viewport"
            ref={viewportRef}
