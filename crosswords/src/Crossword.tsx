@@ -5,6 +5,8 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Position, Puzzle, ClueDirection, Clue, Cell } from "./types";
 import { RenderCrossword } from "./RenderCrossword";
 import { OnScreenKeyboard } from "./OnScreenKeyboard";
+import { ColorPicker } from "./ColorPicker";
+import { loadOrAssignColor, saveColor, PaletteColor } from "./identity";
 import { cast } from '@deepkit/type';
 import Switch from "react-switch";
 
@@ -28,6 +30,7 @@ export function Crossword() {
   // breakpoint by the matchMedia effect below.
   const [settingsOpen, setSettingsOpen] = useState<boolean>(
     () => !window.matchMedia(COMPACT).matches);
+  const [color, setColor] = useState<PaletteColor>(loadOrAssignColor);
   const [zoom, setZoom] = useState<number>(1);
   const [fitSize, setFitSize] = useState<number>(40);
   const pinch = useRef<{ distance: number, zoom: number } | null>(null);
@@ -141,6 +144,11 @@ export function Crossword() {
         return;
       }
     }
+  }
+
+  function chooseColor(next: PaletteColor) {
+    saveColor(next);
+    setColor(next);
   }
 
   function toggleDirection() {
@@ -377,6 +385,9 @@ export function Crossword() {
         <div className="actions">
           <button onClick={() => navigate(`/edit/${id}`)}>Edit</button>
           <button onClick={share}>{shareLabel}</button>
+        </div>
+        <div className="setting">
+          <ColorPicker selected={color} onSelect={chooseColor} />
         </div>
         <div className="setting">
           <Switch id="skip-filled-cells" onChange={setSkipFilledCells} checked={skipFilledCells} aria-label="Skip filled cells" />

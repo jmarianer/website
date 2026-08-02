@@ -98,6 +98,27 @@ test.describe('Creation validation', () => {
   });
 });
 
+test.describe('Colour selection', () => {
+  test('Picking a colour survives a reload', async ({ crossword }) => {
+    const page = crossword.page;
+    await page.getByTestId('color-violet').click();
+    await expect(page.getByTestId('color-violet')).toHaveClass(/selected/);
+
+    await page.reload();
+    await expect(page.getByRole('grid')).toBeVisible();
+    await expect(page.getByTestId('color-violet')).toHaveClass(/selected/);
+  });
+
+  test('Exactly one colour is selected at a time', async ({ crossword }) => {
+    const page = crossword.page;
+    await page.getByTestId('color-teal').click();
+    await expect(page.locator('.swatch.selected')).toHaveCount(1);
+    await page.getByTestId('color-crimson').click();
+    await expect(page.locator('.swatch.selected')).toHaveCount(1);
+    await expect(page.getByTestId('color-crimson')).toHaveClass(/selected/);
+  });
+});
+
 test.describe('Basic keyboard interactions', () => {
   test('Arrow keys move selection', async ({ crossword }) => {
     await crossword.cell(1, 1).click();
