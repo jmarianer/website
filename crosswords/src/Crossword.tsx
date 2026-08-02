@@ -143,6 +143,22 @@ export function Crossword() {
     }
   }
 
+  // Shared by the physical keyboard and the on-screen keyboard. Both guard
+  // internally through setSolution and move, so they are safe to call directly.
+  function typeLetter(letter: string) {
+    setSolution(letter.toUpperCase());
+    moveToNextSpace();
+  }
+
+  function backspace() {
+    setSolution(' ');
+    if (currentClue?.direction === ClueDirection.across) {
+      move(0, -1);
+    } else {
+      move(-1, 0);
+    }
+  }
+
   function handleKeyDown(e: KeyboardEvent) {
     if (!position || !crossword) {
       return;
@@ -153,15 +169,7 @@ export function Crossword() {
     }
 
     e.preventDefault();
-    handleKey(e.key, e.shiftKey);
-  }
-
-  // Shared by the physical keyboard and the on-screen keyboard.
-  function handleKey(key: string, shift: boolean = false) {
-    if (!position || !crossword) {
-      return;
-    }
-
+    const key = e.key;
     if (key === ' ') {
       if (currentClue?.direction === ClueDirection.across) {
         set(child(dbRef, `cells/${position.row}/${position.col}/wordBoundaryAcross`), !cell?.wordBoundaryAcross);
@@ -170,8 +178,7 @@ export function Crossword() {
       }
     }
     else if (key.length === 1) {
-      setSolution(key.toUpperCase());
-      moveToNextSpace();
+      typeLetter(key);
     } else if (key === 'ArrowLeft') {
       move(0, -1);
     } else if (key === 'ArrowRight') {
@@ -181,14 +188,9 @@ export function Crossword() {
     } else if (key === 'ArrowDown') {
       move(1, 0);
     } else if (key === 'Backspace') {
-      setSolution(' ');
-      if (currentClue?.direction === ClueDirection.across) {
-        move(0, -1);
-      } else {
-        move(-1, 0);
-      }
+      backspace();
     } else if (key === 'Tab' || key === 'Enter') {
-      moveToNextClue(!shift);
+      moveToNextClue(!e.shiftKey);
     }
   }
 
@@ -376,7 +378,8 @@ export function Crossword() {
       </div>
 
       <OnScreenKeyboard
-        onKey={handleKey}
+        onLetter={typeLetter}
+        onBackspace={backspace}
         onToggleDirection={toggleDirection}
         onMoveClue={moveToNextClue}
         direction={currentClue?.direction} />

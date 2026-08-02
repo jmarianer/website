@@ -3,13 +3,14 @@ import { ClueDirection } from './types';
 const LETTER_ROWS = ['QWERTYUIOP', 'ASDFGHJKL', 'ZXCVBNM'];
 
 type Props = {
-  onKey: (key: string) => void;
+  onLetter: (letter: string) => void;
+  onBackspace: () => void;
   onToggleDirection: () => void;
   onMoveClue: (forward: boolean) => void;
   direction?: ClueDirection;
 }
 
-export function OnScreenKeyboard({ onKey, onToggleDirection, onMoveClue, direction }: Props) {
+export function OnScreenKeyboard({ onLetter, onBackspace, onToggleDirection, onMoveClue, direction }: Props) {
   // Act on pointer-down and swallow the event: that keeps focus on the document
   // so the physical keydown listener is unaffected, and avoids the double-fire
   // you'd get from handling both pointer and click on touch devices.
@@ -36,11 +37,11 @@ export function OnScreenKeyboard({ onKey, onToggleDirection, onMoveClue, directi
       {LETTER_ROWS.map(row =>
         <div className='key-row' key={row}>
           {[...row].map(letter =>
-            <button key={letter} tabIndex={-1} onPointerDown={press(() => onKey(letter))}>{letter}</button>
+            <button key={letter} tabIndex={-1} onPointerDown={press(() => onLetter(letter))}>{letter}</button>
           )}
           {row === LETTER_ROWS[LETTER_ROWS.length - 1] &&
             <button className='action' tabIndex={-1} aria-label='Backspace'
-                    onPointerDown={press(() => onKey('Backspace'))}>⌫</button>}
+                    onPointerDown={press(onBackspace)}>⌫</button>}
         </div>
       )}
     </div>
