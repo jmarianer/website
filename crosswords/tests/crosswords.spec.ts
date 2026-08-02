@@ -102,32 +102,34 @@ test.describe('Creation validation', () => {
 const ACTIVE = /(?:^|\s)active(?:\s|$)/;
 
 test.describe('Presence', () => {
-  test("Another solver's cursor shows as a ring, and ours does not", async ({ browser, crossword }) => {
+  test("Another solver's cursor shows a flourish, and ours does not", async ({ browser, crossword }) => {
     const second = await openCrossword(browser, crossword.id);
 
     await crossword.cell(1, 1).click();
     await second.cell(1, 3).click();
 
-    await expect(crossword.cell(1, 3)).toHaveCSS('box-shadow', /inset/);
-    // Our own position is already shown by .active, so it gets no ring.
-    await expect(crossword.cell(1, 1)).toHaveCSS('box-shadow', 'none');
+    await expect(crossword.cell(1, 3).getByTestId('flourish')).toHaveCount(1);
+    // Our own position is already shown by .active, so it gets no flourish.
+    await expect(crossword.cell(1, 1).getByTestId('flourish')).toHaveCount(0);
   });
 
-  test('Changing colour recolours the ring others see, on the first click', async ({ browser, crossword }) => {
-    const crimson = /rgb\(161, 29, 46\)/;   // #a11d2e
-    const violet = /rgb\(91, 45, 142\)/;    // #5b2d8e
+  test('Changing colour recolours the flourish others see, on the first click', async ({ browser, crossword }) => {
+    const red = 'rgb(211, 47, 47)';     // #d32f2f
+    const purple = 'rgb(106, 27, 154)'; // #6a1b9a
     const second = await openCrossword(browser, crossword.id);
 
     // Establish a known colour rather than relying on the random initial one,
     // so a stale publish cannot pass by coincidence.
-    await second.page.getByTestId('color-crimson').click();
+    await second.page.getByTestId('color-red').click();
     await second.cell(1, 3).click();
-    await expect(crossword.cell(1, 3)).toHaveCSS('box-shadow', crimson);
+    await expect(crossword.cell(1, 3).getByTestId('flourish'))
+      .toHaveCSS('background-color', red);
 
     // One click, not two: publishing must use the colour just chosen rather
     // than whatever React state still holds.
-    await second.page.getByTestId('color-violet').click();
-    await expect(crossword.cell(1, 3)).toHaveCSS('box-shadow', violet);
+    await second.page.getByTestId('color-purple').click();
+    await expect(crossword.cell(1, 3).getByTestId('flourish'))
+      .toHaveCSS('background-color', purple);
   });
 
   test('Together mode moves everyone to the same cell', async ({ browser, crossword }) => {
@@ -137,8 +139,8 @@ test.describe('Presence', () => {
 
     await crossword.cell(1, 1).click();
     await expect(second.cell(1, 1)).toHaveClass(ACTIVE);
-    // No ring: everyone is on the cell already, so .active says it.
-    await expect(second.cell(1, 1)).toHaveCSS('box-shadow', 'none');
+    // No flourish: everyone is on the cell already, so .active says it.
+    await expect(second.cell(1, 1).getByTestId('flourish')).toHaveCount(0);
 
     // And it is genuinely shared, not one-way.
     await second.cell(1, 3).click();
@@ -174,15 +176,31 @@ test.describe('Pencil marks', () => {
   });
 
   test('Letters are tinted with their author, and others see it', async ({ browser, crossword }) => {
-    const violet = 'rgb(91, 45, 142)';  // #5b2d8e
+    const purple = 'rgb(106, 27, 154)';  // #6a1b9a
     const second = await openCrossword(browser, crossword.id);
 
-    await second.page.getByTestId('color-violet').click();
+    await second.page.getByTestId('color-purple').click();
     await second.cell(1, 1).click();
     await second.press('A');
 
     await expect(crossword.cell(1, 1).getByTestId('solution')).toHaveText('A');
-    await expect(crossword.cell(1, 1).getByTestId('solution')).toHaveCSS('color', violet);
+    await expect(crossword.cell(1, 1).getByTestId('solution')).toHaveCSS('color', purple);
+  });
+
+  test('Pencil uses the lighter shade of the author colour', async ({ crossword }) => {
+    const page = crossword.page;
+    await page.getByTestId('color-purple').click();
+    await crossword.cell(1, 1).click();
+    await crossword.press('A');
+    await expect(crossword.cell(1, 1).getByTestId('solution'))
+      .toHaveCSS('color', 'rgb(106, 27, 154)');   // #6a1b9a, ink
+
+    await page.getByText('Pencil', { exact: true }).click({ force: true });
+    await crossword.press('B');
+    await expect(crossword.cell(1, 2).getByTestId('solution'))
+      .toHaveCSS('color', 'rgb(179, 139, 203)');  // #b38bcb, pencil
+    // Faded by colour, not by opacity, so nothing gets a compositing layer.
+    await expect(crossword.cell(1, 2).getByTestId('solution')).toHaveCSS('opacity', '1');
   });
 
   test('Clearing a cell drops its authorship and pencil mark', async ({ crossword }) => {
@@ -202,21 +220,21 @@ test.describe('Pencil marks', () => {
 test.describe('Colour selection', () => {
   test('Picking a colour survives a reload', async ({ crossword }) => {
     const page = crossword.page;
-    await page.getByTestId('color-violet').click();
-    await expect(page.getByTestId('color-violet')).toHaveClass(/selected/);
+    await page.getByTestId('color-purple').click();
+    await expect(page.getByTestId('color-purple')).toHaveClass(/selected/);
 
     await page.reload();
     await expect(page.getByRole('grid')).toBeVisible();
-    await expect(page.getByTestId('color-violet')).toHaveClass(/selected/);
+    await expect(page.getByTestId('color-purple')).toHaveClass(/selected/);
   });
 
   test('Exactly one colour is selected at a time', async ({ crossword }) => {
     const page = crossword.page;
-    await page.getByTestId('color-teal').click();
+    await page.getByTestId('color-green').click();
     await expect(page.locator('.swatch.selected')).toHaveCount(1);
-    await page.getByTestId('color-crimson').click();
+    await page.getByTestId('color-red').click();
     await expect(page.locator('.swatch.selected')).toHaveCount(1);
-    await expect(page.getByTestId('color-crimson')).toHaveClass(/selected/);
+    await expect(page.getByTestId('color-red')).toHaveClass(/selected/);
   });
 });
 

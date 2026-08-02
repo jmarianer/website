@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "@deepkit/type": "^1.0.15",
+    "@fontsource-variable/caveat": "^5.3.0",
     "dedent": "^1.7.2",
     "firebase": "^12.1.0",
     "react": "^19.1.1",

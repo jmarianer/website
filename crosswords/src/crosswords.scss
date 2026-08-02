@@ -1,5 +1,54 @@
+// Self-hosted rather than linked from Google's CDN: the site is static files in
+// a bucket, so a CDN link would add a third-party runtime dependency for a font
+// we can just ship. Variable, so one file covers 400 through 700.
+@use '@fontsource-variable/caveat';
+@use 'sass:map';
+
 *, *::before, *::after {
   box-sizing: border-box;
+}
+
+// Who wrote what. The roster lives in identity.ts; the values live here, because
+// a colour is a styling decision.
+//
+// The hues are boobtree's crayon box -- people ask for "red" and "pink", not for
+// "crimson" and "magenta" -- but not its values, which are CSS keywords chosen
+// for thick brush strokes. These have to read as a single glyph on white, where
+// CSS `yellow` is 1.07:1 and `pink` is 1.4:1.
+//
+// Ink clears 4.5:1 on white throughout, except orange at 3.84. Yellow is absent
+// for the same reason orange is the weakest entry: saturated warm colours are
+// intrinsically light, because green carries 0.72 of luminance, and yellow
+// cannot be darkened enough to read as text without becoming a brown. That is
+// also why the cell highlights must stay near-white -- a dark fill would take
+// the warm end below legibility.
+//
+// Pink is a magenta rather than a rose deliberately: lightening a rose moves it
+// *closer* to red, since brightness is not what separates them. Shifting hue
+// toward magenta roughly doubles the perceptual distance at the same lightness.
+//
+// Pencil shades are per-colour rather than an opacity on the ink. Opacity fades
+// every hue by the same proportion, which left orange at 2.03:1 while black was
+// still at 3.84:1; these are tuned to land near 2.8:1 on white so a pencil mark
+// is equally faint whoever wrote it. It also avoids `opacity` creating a
+// compositing layer, which clips Caveat's swashes to the glyph box.
+$palette: (
+  black:  (ink: #1c1c1c, pencil: #9a9a9a),
+  red:    (ink: #d32f2f, pencil: #e37c7c),
+  orange: (ink: #cc6600, pencil: #d78839),
+  green:  (ink: #2e7d32, pencil: #72a775),
+  blue:   (ink: #1565c0, pencil: #6a9dd7),
+  purple: (ink: #6a1b9a, pencil: #b38bcb),
+  pink:   (ink: #d81b8c, pencil: #e772b8),
+);
+
+// One class per colour, exposing both shades. Consumers pick which they want:
+// letters take --ink or --pencil, swatches and cursor flourishes take --ink.
+@each $name, $shades in $palette {
+  .color-#{$name} {
+    --ink: #{map.get($shades, ink)};
+    --pencil: #{map.get($shades, pencil)};
+  }
 }
 
 body {
@@ -59,6 +108,7 @@ h1 {
     width: var(--cell-size);
     position: relative;
     font-size: calc(var(--cell-size) * 0.55);
+    font-weight: bold;
 
     .number {
       font-size: calc(var(--cell-size) * 0.3);
@@ -81,12 +131,20 @@ h1 {
     background-color: white;
   }
 
+  // Backgrounds stay near-white and emphasis is carried by the outline instead.
+  // A dark fill costs contrast against every letter drawn on it, and the warm
+  // end of the palette cannot afford it: the old #f7dd8a active cell put orange
+  // at 3.20:1, worse than anything on plain white. Hue is irrelevant here --
+  // only lightness affects contrast -- so this is about how dark, not what
+  // colour. Outline rather than box-shadow so it composes with presence rings.
   .active-word {
-    background-color: #b3d0ff;
+    background-color: #f8f3e6;
   }
 
   .active {
-    background-color: #4a90e2;
+    background-color: #f8f3e6;
+    outline: 3px solid #2c3e50;
+    outline-offset: -3px;
   }
 
   .word-boundary-down {
@@ -97,18 +155,50 @@ h1 {
     border-right-width: 3px;
   }
 
-  // The author's hue is set inline; pencil is expressed as script and weight
-  // instead, so the two channels never contend for the same one.
-  //
-  // Named faces before the generic keyword deliberately: bare `cursive` resolves
-  // to Comic Sans on Windows and the very ornate Snell Roundhand on Apple.
-  // Bradley Hand and Segoe Script are casual handwriting and already installed.
+  // --ink and --pencil come from the color-* class the span carries. A letter
+  // with no author sets neither, which makes these declarations invalid at
+  // computed-value time and so falls back to the inherited colour -- exactly
+  // what unattributed letters should do.
+  .solution {
+    color: var(--ink);
+    position: relative;  // Above the corner flourishes.
+    z-index: 1;
+  }
+
+  // Caveat, self-hosted. The OS fallbacks stay behind it for the moment when the
+  // webfont has not arrived: bare `cursive` would resolve to Comic Sans on
+  // Windows and the ornate Snell Roundhand on Apple, so name faces first.
   .solution.pencil {
-    opacity: 0.55;
-    font-family: 'Bradley Hand', 'Segoe Script', cursive;
-    // These faces run small at a given size, so match the inked letters by eye
+    color: var(--pencil);
+    font-family: 'Caveat Variable', 'Bradley Hand', 'Segoe Script', cursive;
+    // Script faces run small at a given size, so match the inked letters by eye
     // rather than by metric. Relative, so it still tracks --cell-size.
     font-size: 130%;
+  }
+
+  // Other people's cursors, one per corner. Two corners is exactly the cap on
+  // how many we show, so they never stack or need ordering rules.
+  .flourish {
+    position: absolute;
+    width: calc(var(--cell-size) * 0.3);
+    height: calc(var(--cell-size) * 0.3);
+    background-color: var(--ink);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  // Top-right and bottom-left, not the other diagonal: the clue number lives in
+  // the top-left corner and a flourish there would sit right underneath it.
+  .flourish-1 {
+    top: 0;
+    right: 0;
+    clip-path: polygon(0 0, 100% 0, 100% 100%);
+  }
+
+  .flourish-2 {
+    bottom: 0;
+    left: 0;
+    clip-path: polygon(0 0, 0 100%, 100% 100%);
   }
 
   // Whose guess was whose is not the printer's business, but pencilled versus
@@ -116,7 +206,6 @@ h1 {
   @media print {
     .solution {
       color: black !important;
-      opacity: 1 !important;
     }
   }
 }
@@ -286,6 +375,7 @@ h1 {
       border: none;
       border-radius: 50%;
       cursor: pointer;
+      background-color: var(--ink);
 
       // Inner white gap plus an outer ring, so the marker reads on every swatch
       // regardless of how dark it is.

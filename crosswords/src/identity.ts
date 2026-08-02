@@ -1,25 +1,26 @@
 export type PaletteColor = {
+  // Also the CSS class: `color-${key}` carries the actual values.
   key: string;
   name: string;
-  hex: string;
 }
 
 // Your colour is your identity: there is no auth and no display name, and two
 // devices that pick the same colour are deliberately the same person.
 //
-// Deliberately no blue in the palette. The current cell is #4a90e2 and the
-// current word is #b3d0ff, so a blue letter would vanish into the highlight.
-// Every entry is dark enough to stay legible on white once pencil marks draw it
-// at reduced opacity.
+// This list is only the roster -- which colours exist, in what order, and what
+// to call them for a screen reader. The key doubles as the CSS class name. The
+// actual values live in the $palette map in crosswords.scss, along with the
+// reasoning about why they are what they are: a colour is a styling decision,
+// and keeping the hexes here would mean every visual change had to touch two
+// languages.
 export const PALETTE: PaletteColor[] = [
-  { key: 'slate',   name: 'Slate',   hex: '#2c3e50' },
-  { key: 'crimson', name: 'Crimson', hex: '#a11d2e' },
-  { key: 'amber',   name: 'Amber',   hex: '#9a5b00' },
-  { key: 'olive',   name: 'Olive',   hex: '#4f6b12' },
-  { key: 'forest',  name: 'Forest',  hex: '#15662f' },
-  { key: 'teal',    name: 'Teal',    hex: '#0a5f5c' },
-  { key: 'violet',  name: 'Violet',  hex: '#5b2d8e' },
-  { key: 'magenta', name: 'Magenta', hex: '#8e1f63' },
+  { key: 'black',  name: 'Black'  },
+  { key: 'red',    name: 'Red'    },
+  { key: 'orange', name: 'Orange' },
+  { key: 'green',  name: 'Green'  },
+  { key: 'blue',   name: 'Blue'   },
+  { key: 'purple', name: 'Purple' },
+  { key: 'pink',   name: 'Pink'   },
 ];
 
 const COLOR_STORAGE_KEY = 'crosswords:color';

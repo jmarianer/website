@@ -17,8 +17,7 @@ export function ColorPicker({ selected, onSelect }: Props) {
           aria-label={color.name}
           title={color.name}
           data-testid={`color-${color.key}`}
-          className={color.key === selected.key ? 'swatch selected' : 'swatch'}
-          style={{ backgroundColor: color.hex }}
+          className={`swatch color-${color.key}${color.key === selected.key ? ' selected' : ''}`}
           onClick={() => onSelect(color)} />
       )}
     </div>

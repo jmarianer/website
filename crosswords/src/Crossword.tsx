@@ -6,7 +6,7 @@ import { Position, Puzzle, ClueDirection, Clue, Cell, Cursor } from "./types";
 import { RenderCrossword } from "./RenderCrossword";
 import { OnScreenKeyboard } from "./OnScreenKeyboard";
 import { ColorPicker } from "./ColorPicker";
-import { loadOrAssignColor, saveColor, PaletteColor, clientId, findColor } from "./identity";
+import { loadOrAssignColor, saveColor, PaletteColor, clientId } from "./identity";
 import { cast } from '@deepkit/type';
 import Switch from "react-switch";
 
@@ -203,22 +203,23 @@ export function Crossword() {
     }
   }
 
-  // Cells that should show someone else's cursor, as a ring. Nothing to draw in
-  // Together mode: there is one cursor and everybody is already sitting on it,
-  // so every client renders it as its own .active cell.
-  const cursorRings = useMemo(() => {
-    const rings: Record<string, string[]> = {};
+  // Which cells should show someone else's cursor, and in whose colour. Palette
+  // keys rather than colours -- the stylesheet owns the values. Nothing to draw
+  // in Together mode: there is one cursor and everybody is already sitting on
+  // it, so every client renders it as its own .active cell.
+  const cursors = useMemo(() => {
+    const byCell: Record<string, string[]> = {};
     if (togetherMode) {
-      return rings;
+      return byCell;
     }
 
     for (const [who, cursor] of Object.entries(presence)) {
       if (who !== me) {
         const key = `${cursor.row}-${cursor.col}`;
-        (rings[key] ??= []).push(findColor(cursor.color).hex);
+        (byCell[key] ??= []).push(cursor.color);
       }
     }
-    return rings;
+    return byCell;
   }, [presence, togetherMode, me]);
 
   function toggleDirection() {
@@ -514,7 +515,7 @@ export function Crossword() {
             crossword={crossword}
             position={position}
             clue={currentClue}
-            cursorRings={cursorRings}
+            cursors={cursors}
             onClick={setCell} />
         </div>
       </div>
