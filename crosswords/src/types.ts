@@ -56,6 +56,8 @@ export class Position {
 
 export class Cell {
   public solution: string = '';
+  public author: string = '';
+  public isPencil: boolean = false;
   public type: CellType = CellType.empty;
   public clueNumber: number | null = null;
   public clues: Array<Clue> = [];

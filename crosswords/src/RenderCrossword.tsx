@@ -1,4 +1,5 @@
 import { Cell, CellType, Clue, Position, Puzzle } from "./types";
+import { findColor } from "./identity";
 import './crosswords.scss';
 
 type Props = {
@@ -60,7 +61,11 @@ function RenderCell({ cell, position, clue, onClick, rings }: CellProps) {
         style={rings?.length ? { boxShadow: ringShadow(rings) } : undefined}
         onClick={() => {if (onClick) onClick(cell)}}>
       {cell.clueNumber === undefined ? '' : <div className='number'>{cell.clueNumber}</div>}
-      <span className='solution' data-testid="solution">{cell.solution}</span>
+      <span className={cell.isPencil ? 'solution pencil' : 'solution'}
+            data-testid="solution"
+            style={cell.author ? { color: findColor(cell.author).hex } : undefined}>
+        {cell.solution}
+      </span>
     </td>
   );
 }

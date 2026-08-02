@@ -1,4 +1,4 @@
-import { child, onDisconnect, onValue, ref, remove, set } from "firebase/database";
+import { child, onDisconnect, onValue, ref, remove, set, update } from "firebase/database";
 import { useNavigate, useParams } from "react-router"
 import { database } from "./database";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -23,6 +23,8 @@ export function Crossword() {
   const [currentClue, setCurrentClue] = useState<Clue | undefined>(undefined);
   const [skipFilledCells, setSkipFilledCells] = useState<boolean>(false);
   const [skipFinishedClues, setSkipFinishedClues] = useState<boolean>(false);
+  // Local, not synced: whether *you* are pencilling is nobody else's business.
+  const [pencil, setPencil] = useState<boolean>(false);
   const [shareLabel, setShareLabel] = useState<string>('Share');
   // Collapsed on small screens, where the settings would otherwise eat the
   // vertical space the grid needs. Controlled rather than left to the DOM so a
@@ -55,11 +57,18 @@ export function Crossword() {
     setTimeout(() => setShareLabel('Share'), 2000);
   }
 
-  function setSolution(key: string) {
+  // One update rather than three writes, so a letter never briefly renders in
+  // the previous author's colour. Clearing a cell drops the authorship with it.
+  function setSolution(key: string, pencil: boolean = false) {
     if (!position || !crossword) {
       return;
     }
-    set(child(dbRef, `cells/${position.row}/${position.col}/solution`), key);
+    const written = key.trim().length > 0;
+    update(child(dbRef, `cells/${position.row}/${position.col}`), {
+      solution: key,
+      author: written ? color.key : '',
+      isPencil: written && pencil,
+    });
   }
 
   // Called only where *we* move the cursor, never when applying someone else's.
@@ -226,7 +235,7 @@ export function Crossword() {
   // Shared by the physical keyboard and the on-screen keyboard. Both guard
   // internally through setSolution and move, so they are safe to call directly.
   function typeLetter(letter: string) {
-    setSolution(letter.toUpperCase());
+    setSolution(letter.toUpperCase(), pencil);
     moveToNextSpace();
   }
 
@@ -478,6 +487,10 @@ export function Crossword() {
         </div>
         <div className="setting">
           <ColorPicker selected={color} onSelect={chooseColor} />
+        </div>
+        <div className="setting">
+          <Switch id="pencil" onChange={setPencil} checked={pencil} aria-label="Pencil" />
+          <label htmlFor="pencil">Pencil</label>
         </div>
         <div className="setting">
           <Switch id="together-mode" onChange={toggleTogetherMode} checked={togetherMode} aria-label="Together mode" />

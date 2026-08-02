@@ -160,6 +160,45 @@ test.describe('Presence', () => {
   });
 });
 
+test.describe('Pencil marks', () => {
+  test('Pencilled letters use the script face, inked ones do not', async ({ crossword }) => {
+    const page = crossword.page;
+    await crossword.cell(1, 1).click();
+    await crossword.press('A');
+
+    await page.getByText('Pencil', { exact: true }).click({ force: true });
+    await crossword.press('B');
+
+    await expect(crossword.cell(1, 2).getByTestId('solution')).toHaveCSS('font-family', /cursive/);
+    await expect(crossword.cell(1, 1).getByTestId('solution')).not.toHaveCSS('font-family', /cursive/);
+  });
+
+  test('Letters are tinted with their author, and others see it', async ({ browser, crossword }) => {
+    const violet = 'rgb(91, 45, 142)';  // #5b2d8e
+    const second = await openCrossword(browser, crossword.id);
+
+    await second.page.getByTestId('color-violet').click();
+    await second.cell(1, 1).click();
+    await second.press('A');
+
+    await expect(crossword.cell(1, 1).getByTestId('solution')).toHaveText('A');
+    await expect(crossword.cell(1, 1).getByTestId('solution')).toHaveCSS('color', violet);
+  });
+
+  test('Clearing a cell drops its authorship and pencil mark', async ({ crossword }) => {
+    const page = crossword.page;
+    await page.getByText('Pencil', { exact: true }).click({ force: true });
+    await crossword.cell(1, 1).click();
+    await crossword.press('A');
+    await expect(crossword.cell(1, 1).getByTestId('solution')).toHaveCSS('font-family', /cursive/);
+
+    // Back onto the letter, then delete it.
+    await crossword.cell(1, 1).click();
+    await crossword.press('Backspace');
+    await expect(crossword.cell(1, 1).getByTestId('solution')).not.toHaveCSS('font-family', /cursive/);
+  });
+});
+
 test.describe('Colour selection', () => {
   test('Picking a colour survives a reload', async ({ crossword }) => {
     const page = crossword.page;

@@ -96,6 +96,29 @@ h1 {
   .word-boundary-across {
     border-right-width: 3px;
   }
+
+  // The author's hue is set inline; pencil is expressed as script and weight
+  // instead, so the two channels never contend for the same one.
+  //
+  // Named faces before the generic keyword deliberately: bare `cursive` resolves
+  // to Comic Sans on Windows and the very ornate Snell Roundhand on Apple.
+  // Bradley Hand and Segoe Script are casual handwriting and already installed.
+  .solution.pencil {
+    opacity: 0.55;
+    font-family: 'Bradley Hand', 'Segoe Script', cursive;
+    // These faces run small at a given size, so match the inked letters by eye
+    // rather than by metric. Relative, so it still tracks --cell-size.
+    font-size: 130%;
+  }
+
+  // Whose guess was whose is not the printer's business, but pencilled versus
+  // inked is worth keeping, and the script carries that on its own.
+  @media print {
+    .solution {
+      color: black !important;
+      opacity: 1 !important;
+    }
+  }
 }
 
 // Hidden by default; revealed on narrow screens by the media query below.
