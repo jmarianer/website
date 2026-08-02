@@ -49,12 +49,21 @@ export function loadOrAssignColor(): PaletteColor {
   return assigned;
 }
 
+// Not crypto.randomUUID: that is only exposed in a secure context, so it is
+// missing when the dev server is reached over plain HTTP from a phone on the
+// LAN. getRandomValues carries no such restriction, and this is an opaque key
+// rather than something that needs to be a well-formed UUID.
+function randomId(): string {
+  const bytes = crypto.getRandomValues(new Uint8Array(16));
+  return Array.from(bytes, byte => byte.toString(16).padStart(2, '0')).join('');
+}
+
 // Per tab, not per browser: this identifies a presence slot, not a person. Two
 // tabs on one machine are legitimately two cursors, both wearing the same colour.
 export function clientId(): string {
   let id = sessionStorage.getItem(CLIENT_STORAGE_KEY);
   if (!id) {
-    id = crypto.randomUUID();
+    id = randomId();
     sessionStorage.setItem(CLIENT_STORAGE_KEY, id);
   }
   return id;

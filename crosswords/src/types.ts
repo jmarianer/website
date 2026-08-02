@@ -35,6 +35,18 @@ export class Clue {
   }
 }
 
+// Where somebody is looking. Stored under the puzzle but outside the Puzzle
+// class, so it is read straight off the snapshot rather than through deepkit.
+// The clue is identified by number and direction rather than by reference,
+// since the receiving end has to resolve it against its own Clue instances.
+export type Cursor = {
+  color: string;  // A palette key, not a hex.
+  row: number;
+  col: number;
+  clueNumber: number;
+  direction: ClueDirection;
+}
+
 export class Position {
   constructor(public row: number, public col: number) {
     this.row = row;

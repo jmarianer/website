@@ -6,6 +6,7 @@ type Props = {
   position?: Position;
   clue?: Clue;
   onClick?: (cell: Cell) => void;
+  cursorRings?: Record<string, string[]>;
 }
 
 type CellProps = {
@@ -13,11 +14,23 @@ type CellProps = {
   position?: Position;
   clue?: Clue;
   onClick?: (cell: Cell) => void;
+  rings?: string[];
+}
+
+// Other people's cursors are drawn as inset rings rather than a background,
+// because the background is already spent on .active and .active-word. Concentric
+// so that two people on one cell both stay visible; beyond two it is unreadable,
+// so the rest are dropped.
+function ringShadow(rings: string[]): string {
+  return rings
+    .slice(0, 2)
+    .map((hex, i) => `inset 0 0 0 ${(i + 1) * 3}px ${hex}`)
+    .join(', ');
 }
 
 // Declared at module scope on purpose: nesting this inside RenderCrossword makes
 // it a new component type on every render, which remounts every cell in the grid.
-function RenderCell({ cell, position, clue, onClick }: CellProps) {
+function RenderCell({ cell, position, clue, onClick, rings }: CellProps) {
   if (cell.type === CellType.black) {
     return <td className='black' />;
   }
@@ -42,14 +55,17 @@ function RenderCell({ cell, position, clue, onClick }: CellProps) {
   }
 
   return (
-    <td className={classList.join(' ')} data-testid={`cell-${cell.position.row}-${cell.position.col}`} onClick={() => {if (onClick) onClick(cell)}}>
+    <td className={classList.join(' ')}
+        data-testid={`cell-${cell.position.row}-${cell.position.col}`}
+        style={rings?.length ? { boxShadow: ringShadow(rings) } : undefined}
+        onClick={() => {if (onClick) onClick(cell)}}>
       {cell.clueNumber === undefined ? '' : <div className='number'>{cell.clueNumber}</div>}
       <span className='solution' data-testid="solution">{cell.solution}</span>
     </td>
   );
 }
 
-export function RenderCrossword({crossword, position, clue, onClick}: Props) {
+export function RenderCrossword({crossword, position, clue, onClick, cursorRings}: Props) {
   return (
     <table className='crossword' role='grid'
            style={{ '--cols': crossword.cells[0]?.length || 1 } as React.CSSProperties}>
@@ -57,7 +73,8 @@ export function RenderCrossword({crossword, position, clue, onClick}: Props) {
         {crossword.cells.map((row, i) =>
           <tr key={i}>
             {row.map((cell, j) =>
-              <RenderCell key={j} cell={cell} position={position} clue={clue} onClick={onClick} />
+              <RenderCell key={j} cell={cell} position={position} clue={clue} onClick={onClick}
+                          rings={cursorRings?.[`${cell.position.row}-${cell.position.col}`]} />
             )}
           </tr>
         )}

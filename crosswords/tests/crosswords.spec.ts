@@ -98,6 +98,68 @@ test.describe('Creation validation', () => {
   });
 });
 
+// `active` on its own -- /active/ would also match `active-word`.
+const ACTIVE = /(?:^|\s)active(?:\s|$)/;
+
+test.describe('Presence', () => {
+  test("Another solver's cursor shows as a ring, and ours does not", async ({ browser, crossword }) => {
+    const second = await openCrossword(browser, crossword.id);
+
+    await crossword.cell(1, 1).click();
+    await second.cell(1, 3).click();
+
+    await expect(crossword.cell(1, 3)).toHaveCSS('box-shadow', /inset/);
+    // Our own position is already shown by .active, so it gets no ring.
+    await expect(crossword.cell(1, 1)).toHaveCSS('box-shadow', 'none');
+  });
+
+  test('Changing colour recolours the ring others see, on the first click', async ({ browser, crossword }) => {
+    const crimson = /rgb\(161, 29, 46\)/;   // #a11d2e
+    const violet = /rgb\(91, 45, 142\)/;    // #5b2d8e
+    const second = await openCrossword(browser, crossword.id);
+
+    // Establish a known colour rather than relying on the random initial one,
+    // so a stale publish cannot pass by coincidence.
+    await second.page.getByTestId('color-crimson').click();
+    await second.cell(1, 3).click();
+    await expect(crossword.cell(1, 3)).toHaveCSS('box-shadow', crimson);
+
+    // One click, not two: publishing must use the colour just chosen rather
+    // than whatever React state still holds.
+    await second.page.getByTestId('color-violet').click();
+    await expect(crossword.cell(1, 3)).toHaveCSS('box-shadow', violet);
+  });
+
+  test('Together mode moves everyone to the same cell', async ({ browser, crossword }) => {
+    const second = await openCrossword(browser, crossword.id);
+    // Click the label rather than the switch, which is visually hidden.
+    await crossword.page.getByText('Together mode').click({ force: true });
+
+    await crossword.cell(1, 1).click();
+    await expect(second.cell(1, 1)).toHaveClass(ACTIVE);
+    // No ring: everyone is on the cell already, so .active says it.
+    await expect(second.cell(1, 1)).toHaveCSS('box-shadow', 'none');
+
+    // And it is genuinely shared, not one-way.
+    await second.cell(1, 3).click();
+    await expect(crossword.cell(1, 3)).toHaveClass(ACTIVE);
+  });
+
+  test('Leaving Together mode lets cursors move independently again', async ({ browser, crossword }) => {
+    const second = await openCrossword(browser, crossword.id);
+    const toggle = crossword.page.getByText('Together mode');
+
+    await toggle.click({ force: true });
+    await crossword.cell(1, 1).click();
+    await expect(second.cell(1, 1)).toHaveClass(ACTIVE);
+
+    await toggle.click({ force: true });
+    await second.cell(1, 3).click();
+    await expect(second.cell(1, 3)).toHaveClass(ACTIVE);
+    await expect(crossword.cell(1, 1)).toHaveClass(ACTIVE);
+  });
+});
+
 test.describe('Colour selection', () => {
   test('Picking a colour survives a reload', async ({ crossword }) => {
     const page = crossword.page;

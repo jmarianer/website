@@ -1,12 +1,12 @@
-import { child, onValue, ref, set } from "firebase/database";
+import { child, onDisconnect, onValue, ref, remove, set } from "firebase/database";
 import { useNavigate, useParams } from "react-router"
 import { database } from "./database";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Position, Puzzle, ClueDirection, Clue, Cell } from "./types";
+import { Position, Puzzle, ClueDirection, Clue, Cell, Cursor } from "./types";
 import { RenderCrossword } from "./RenderCrossword";
 import { OnScreenKeyboard } from "./OnScreenKeyboard";
 import { ColorPicker } from "./ColorPicker";
-import { loadOrAssignColor, saveColor, PaletteColor } from "./identity";
+import { loadOrAssignColor, saveColor, PaletteColor, clientId, findColor } from "./identity";
 import { cast } from '@deepkit/type';
 import Switch from "react-switch";
 
@@ -31,6 +31,10 @@ export function Crossword() {
   const [settingsOpen, setSettingsOpen] = useState<boolean>(
     () => !window.matchMedia(COMPACT).matches);
   const [color, setColor] = useState<PaletteColor>(loadOrAssignColor);
+  const [presence, setPresence] = useState<Record<string, Cursor>>({});
+  const [togetherMode, setTogetherMode] = useState<boolean>(false);
+  const [sharedCursor, setSharedCursor] = useState<Cursor | null>(null);
+  const me = useMemo(() => clientId(), []);
   const [zoom, setZoom] = useState<number>(1);
   const [fitSize, setFitSize] = useState<number>(40);
   const pinch = useRef<{ distance: number, zoom: number } | null>(null);
@@ -58,22 +62,42 @@ export function Crossword() {
     set(child(dbRef, `cells/${position.row}/${position.col}/solution`), key);
   }
 
+  // Called only where *we* move the cursor, never when applying someone else's.
+  // `using` is explicit because callers may be publishing a colour that state
+  // does not know about yet: setColor is asynchronous, so reading `color` here
+  // during a colour change would publish the previous one.
+  function publishCursor(at: Position, clue: Clue | undefined, using: PaletteColor = color) {
+    if (!clue) {
+      return;
+    }
+    const cursor: Cursor = {
+      color: using.key,
+      row: at.row,
+      col: at.col,
+      clueNumber: clue.clueNumber,
+      direction: clue.direction,
+    };
+    set(child(dbRef, `presence/${me}`), cursor);
+    if (togetherMode) {
+      set(child(dbRef, 'sharedCursor'), cursor);
+    }
+  }
+
   function setCell(cell: Cell) {
-    if (position === cell.position) {
-      if (cell.clues.length > 1 && currentClue?.equals(cell.clues[0])) {
-        setCurrentClue(cell.clues[1]);
-      } else {
-        setCurrentClue(cell.clues[0]);
-      }
+    if (position?.row === cell.position.row && position?.col === cell.position.col) {
+      const next = (cell.clues.length > 1 && currentClue?.equals(cell.clues[0]))
+        ? cell.clues[1]
+        : cell.clues[0];
+      setCurrentClue(next);
+      publishCursor(cell.position, next);
       return;
     }
 
+    const matching = cell.clues?.filter(clue => clue.direction === currentClue?.direction);
+    const next = matching?.length ? matching[0] : cell.clues?.[0];
     setPosition(cell.position);
-    if (cell.clues?.some(clue => clue.direction === currentClue?.direction)) {
-      setCurrentClue(cell.clues.filter(clue => clue.direction === currentClue?.direction)[0]);
-    } else {
-      setCurrentClue(cell.clues?.[0]);
-    }
+    setCurrentClue(next);
+    publishCursor(cell.position, next);
   }
 
   function move(drow: number, dcol: number) {
@@ -141,6 +165,7 @@ export function Crossword() {
       if (!newClue.isComplete(crossword) || !skipFinishedClues || crossword.isComplete()) {
         setCurrentClue(newClue);
         setPosition(newClue.initialPosition);
+        publishCursor(newClue.initialPosition, newClue);
         return;
       }
     }
@@ -149,15 +174,52 @@ export function Crossword() {
   function chooseColor(next: PaletteColor) {
     saveColor(next);
     setColor(next);
+    if (position && currentClue) {
+      publishCursor(position, currentClue, next);
+    }
   }
+
+  function toggleTogetherMode(on: boolean) {
+    set(child(dbRef, 'togetherMode'), on);
+    // Entering adopts whatever the toggler was looking at. Leaving needs
+    // nothing: everyone's local cursor is already sitting on the shared one.
+    if (on && position && currentClue) {
+      set(child(dbRef, 'sharedCursor'), {
+        color: color.key,
+        row: position.row,
+        col: position.col,
+        clueNumber: currentClue.clueNumber,
+        direction: currentClue.direction,
+      });
+    }
+  }
+
+  // Cells that should show someone else's cursor, as a ring. Nothing to draw in
+  // Together mode: there is one cursor and everybody is already sitting on it,
+  // so every client renders it as its own .active cell.
+  const cursorRings = useMemo(() => {
+    const rings: Record<string, string[]> = {};
+    if (togetherMode) {
+      return rings;
+    }
+
+    for (const [who, cursor] of Object.entries(presence)) {
+      if (who !== me) {
+        const key = `${cursor.row}-${cursor.col}`;
+        (rings[key] ??= []).push(findColor(cursor.color).hex);
+      }
+    }
+    return rings;
+  }, [presence, togetherMode, me]);
 
   function toggleDirection() {
     if (!cell || cell.clues.length < 2) {
       return;
     }
     const other = cell.clues.find(clue => clue.direction !== currentClue?.direction);
-    if (other) {
+    if (other && position) {
       setCurrentClue(other);
+      publishCursor(position, other);
     }
   }
 
@@ -224,9 +286,37 @@ export function Crossword() {
           }
         }
       }
-      setCrossword(cast<Puzzle>(puzzle));
+
+      // Presence rides on the same node and the same subscription, so it has to
+      // come off the raw snapshot: only cells and clues are handed to the cast.
+      setPresence(puzzle.presence ?? {});
+      setTogetherMode(puzzle.togetherMode ?? false);
+      setSharedCursor(puzzle.sharedCursor ?? null);
+      setCrossword(cast<Puzzle>({ cells: puzzle.cells, clues: puzzle.clues }));
     });
   }, [dbRef]);
+
+  useEffect(() => {
+    const mine = child(dbRef, `presence/${me}`);
+    onDisconnect(mine).remove();
+    return () => { remove(mine); };
+  }, [dbRef, me]);
+
+  useEffect(() => {
+    if (!togetherMode || !sharedCursor || !crossword) {
+      return;
+    }
+    if (position?.row === sharedCursor.row
+        && position?.col === sharedCursor.col
+        && currentClue?.clueNumber === sharedCursor.clueNumber
+        && currentClue?.direction === sharedCursor.direction) {
+      return;
+    }
+    setPosition(new Position(sharedCursor.row, sharedCursor.col));
+    setCurrentClue(crossword.clues.find(clue =>
+      clue.clueNumber === sharedCursor.clueNumber
+      && clue.direction === sharedCursor.direction));
+  }, [togetherMode, sharedCursor, crossword, position, currentClue]);
 
   useEffect(() => {
     document.addEventListener('keydown', handleKeyDown);
@@ -390,6 +480,10 @@ export function Crossword() {
           <ColorPicker selected={color} onSelect={chooseColor} />
         </div>
         <div className="setting">
+          <Switch id="together-mode" onChange={toggleTogetherMode} checked={togetherMode} aria-label="Together mode" />
+          <label htmlFor="together-mode">Together mode</label>
+        </div>
+        <div className="setting">
           <Switch id="skip-filled-cells" onChange={setSkipFilledCells} checked={skipFilledCells} aria-label="Skip filled cells" />
           <label htmlFor="skip-filled-cells">Skip filled cells</label>
         </div>
@@ -407,6 +501,7 @@ export function Crossword() {
             crossword={crossword}
             position={position}
             clue={currentClue}
+            cursorRings={cursorRings}
             onClick={setCell} />
         </div>
       </div>
