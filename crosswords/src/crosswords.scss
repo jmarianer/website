@@ -210,6 +210,42 @@ h1 {
   }
 }
 
+// The look of a key, shared by the on-screen keyboard and the desktop controls
+// above the grid, so the two read as the same kind of thing.
+.key {
+  padding: 0.75em 0;
+  font-size: 1rem;
+  font-family: inherit;
+  border: 1px solid #c8bfa8;
+  border-radius: 5px;
+  background-color: #fdfbf6;
+  color: #2c3e50;
+  cursor: pointer;
+
+  &:active {
+    background-color: #4a90e2;
+    color: white;
+  }
+
+  &:focus-visible {
+    outline: 2px solid #2c3e50;
+    outline-offset: 2px;
+  }
+
+  // Latching keys have to look held down rather than merely pressed.
+  &[aria-pressed='true'] {
+    background-color: #2c3e50;
+    border-color: #2c3e50;
+    color: white;
+  }
+}
+
+.key-action {
+  background-color: #e8dcc6;
+  font-size: 0.85rem;
+  white-space: nowrap;
+}
+
 // Hidden by default; revealed on narrow screens by the media query below.
 .on-screen-keyboard {
   display: none;
@@ -226,29 +262,13 @@ h1 {
     justify-content: center;
   }
 
-  button {
+  .key {
     flex: 1 1 0;
     min-width: 0;
-    padding: 0.75em 0;
-    font-size: 1rem;
-    font-family: inherit;
-    border: 1px solid #c8bfa8;
-    border-radius: 5px;
-    background-color: #fdfbf6;
-    color: #2c3e50;
-    cursor: pointer;
+  }
 
-    &:active {
-      background-color: #4a90e2;
-      color: white;
-    }
-
-    &.action {
-      flex-grow: 1.6;
-      background-color: #e8dcc6;
-      font-size: 0.85rem;
-      white-space: nowrap;
-    }
+  .key-action {
+    flex-grow: 1.6;
   }
 }
 
@@ -329,58 +349,233 @@ h1 {
   }
 }
 
-.settings {
-  align-self: flex-start;
-  vertical-align: middle;
-  margin-bottom: 3ex;
+// The heading and the one button that opens everything you set once. Also the
+// positioning context the settings menu is anchored to.
+.title-bar {
+  position: relative;
+  align-self: stretch;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
 
-  // Always expanded on desktop, where there is room, so the disclosure control
-  // itself is hidden. The media query below reveals it on small screens -- and
-  // must stay below it, since these selectors have equal specificity.
-  summary {
-    display: none;
+  .menu-trigger {
+    flex: none;
+    width: 34px;
+    height: 34px;
+    font: inherit;
+    font-size: 1.1rem;
+    line-height: 1;
     cursor: pointer;
-    padding: 0.3em 0;
-    font-size: 0.95rem;
+    border-radius: 6px;
+    border: 1px solid #ddd3bf;
+    background-color: white;
     color: #2c3e50;
+
+    &:hover {
+      background-color: #f7f3e9;
+    }
+
+    &:focus-visible {
+      outline: 2px solid #2c3e50;
+      outline-offset: 2px;
+    }
+
+    @media print {
+      display: none;
+    }
+  }
+}
+
+// The controls used many times per puzzle, sitting above the grid on desktop.
+// Hidden on mobile, where the on-screen keyboard carries them within reach of a
+// thumb instead.
+.puzzle-bar {
+  align-self: flex-end;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 2ex;
+
+  .key {
+    padding: 0.45em 0.9em;
   }
 
-  .actions {
-    margin-bottom: 1ex;
+  @media print {
+    display: none;
+  }
+}
 
-    button:first-child {
-      margin-left: 0;
+.settings-menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  z-index: 10;
+  width: 288px;
+  background-color: white;
+  border: 1px solid #ddd3bf;
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(44, 62, 80, 0.16);
+  overflow: hidden;
+  text-align: left;
+  color: #2c3e50;
+
+  .menu-section {
+    padding: 14px 16px 12px;
+    border-bottom: 1px solid #f0ebdf;
+  }
+
+  .section-label {
+    // A system mono stack rather than a webfont: the designer's IBM Plex Mono
+    // is not worth a second font download for four words of section heading.
+    font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+    font-size: 10px;
+    font-weight: 500;
+    line-height: 1;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #6b6459;
+    margin-bottom: 12px;
+  }
+
+  .toggle-rows {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  // The whole row is the hit target, not just the switch.
+  .toggle-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    background: none;
+    border: 0;
+    padding: 0;
+    text-align: left;
+    cursor: pointer;
+    font: inherit;
+    color: inherit;
+
+    &:focus-visible {
+      outline: 2px solid #2c3e50;
+      outline-offset: 2px;
     }
   }
 
-  .setting {
-    display: inline-flex;
-    flex-direction: row;
-    align-items: center;
-    margin-right: 2em;
+  // aria-checked is the single source of truth for both state and styling.
+  .switch {
+    width: 34px;
+    height: 20px;
+    border-radius: 999px;
+    background-color: #e0d8c6;
+    position: relative;
+    flex: none;
+    margin-top: 2px;
 
-    label {
-      margin-left: 0.5em;
+    .knob {
+      position: absolute;
+      top: 2px;
+      left: 2px;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background-color: white;
+      transition: left 0.12s ease;
     }
+  }
+
+  [aria-checked='true'] .switch {
+    background-color: #2c3e50;
+
+    .knob {
+      left: 16px;
+    }
+  }
+
+  .toggle-label {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    line-height: 1.3;
+  }
+
+  .toggle-description,
+  .menu-note {
+    display: block;
+    font-size: 11px;
+    font-weight: 400;
+    line-height: 1.45;
+    color: #6b6459;
+    margin-top: 2px;
+  }
+
+  .menu-note {
+    margin-top: 9px;
   }
 
   .color-picker {
     display: flex;
-    gap: 5px;
+    align-items: center;
+    gap: 9px;
 
     .swatch {
-      width: 24px;
-      height: 24px;
+      width: 26px;
+      height: 26px;
       padding: 0;
-      border: none;
+      border: 0;
       border-radius: 50%;
       cursor: pointer;
       background-color: var(--ink);
 
-      // Inner white gap plus an outer ring, so the marker reads on every swatch
-      // regardless of how dark it is.
       &.selected {
-        box-shadow: inset 0 0 0 2px white, 0 0 0 2px #2c3e50;
+        box-shadow: 0 0 0 2px white, 0 0 0 4px #2c3e50;
+      }
+
+      // Faded to show it is spoken for, but still selectable: taking someone
+      // else's colour is how you say "this is also me, on my other device".
+      &.taken {
+        opacity: 0.28;
+      }
+
+      &:focus-visible {
+        outline: 2px solid #2c3e50;
+        outline-offset: 3px;
+      }
+    }
+  }
+
+  // Least reversible last.
+  .menu-actions {
+    padding: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+
+    button {
+      padding: 10px 8px;
+      border: 0;
+      border-radius: 6px;
+      background: none;
+      text-align: left;
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 13px;
+      font-weight: 500;
+      line-height: 1;
+      color: #2c3e50;
+
+      &:hover {
+        background-color: #f7f3e9;
+      }
+
+      &:focus-visible {
+        outline: 2px solid #2c3e50;
+        outline-offset: 2px;
+      }
+
+      &.destructive {
+        color: #d32f2f;
       }
     }
   }
@@ -448,17 +643,44 @@ h1 {
     margin-top: 0.75em;
   }
 
-  .settings {
-    align-self: stretch;
-    margin-bottom: 0.5ex;
-    flex: none;
+  // Pencil and the word break move into the keyboard's action row here, so this
+  // bar has nothing left to hold and should not cost the grid a row.
+  .puzzle-bar {
+    display: none;
+  }
 
-    summary {
-      display: list-item;
+  // Static, so the sheet below is positioned against the viewport rather than
+  // against the heading.
+  .title-bar {
+    position: static;
+  }
+
+  // A bottom sheet rather than a popover: anchoring a 288px panel to a button on
+  // a phone leaves it floating in the middle of the grid.
+  .settings-menu {
+    position: fixed;
+    top: auto;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    width: 100%;
+    border-radius: 16px 16px 0 0;
+    border-bottom: 0;
+    max-height: 85dvh;
+    overflow-y: auto;
+
+    // Every tappable row clears 44px.
+    .toggle-row {
+      padding: 12px 8px;
     }
 
-    .setting {
-      margin: 0.4em 2em 0.4em 0;
+    .menu-actions button {
+      padding: 14px 8px;
+    }
+
+    .color-picker .swatch {
+      width: 30px;
+      height: 30px;
     }
   }
 

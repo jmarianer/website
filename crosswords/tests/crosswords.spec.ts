@@ -120,13 +120,16 @@ test.describe('Presence', () => {
 
     // Establish a known colour rather than relying on the random initial one,
     // so a stale publish cannot pass by coincidence.
+    await second.openMenu();
     await second.page.getByTestId('color-red').click();
+    await second.closeMenu();
     await second.cell(1, 3).click();
     await expect(crossword.cell(1, 3).getByTestId('flourish'))
       .toHaveCSS('background-color', red);
 
     // One click, not two: publishing must use the colour just chosen rather
     // than whatever React state still holds.
+    await second.openMenu();
     await second.page.getByTestId('color-purple').click();
     await expect(crossword.cell(1, 3).getByTestId('flourish'))
       .toHaveCSS('background-color', purple);
@@ -134,8 +137,10 @@ test.describe('Presence', () => {
 
   test('Together mode moves everyone to the same cell', async ({ browser, crossword }) => {
     const second = await openCrossword(browser, crossword.id);
-    // Click the label rather than the switch, which is visually hidden.
-    await crossword.page.getByText('Together mode').click({ force: true });
+    await crossword.openMenu();
+    await crossword.toggle('Together mode').click();
+
+    await crossword.closeMenu();
 
     await crossword.cell(1, 1).click();
     await expect(second.cell(1, 1)).toHaveClass(ACTIVE);
@@ -149,13 +154,16 @@ test.describe('Presence', () => {
 
   test('Leaving Together mode lets cursors move independently again', async ({ browser, crossword }) => {
     const second = await openCrossword(browser, crossword.id);
-    const toggle = crossword.page.getByText('Together mode');
 
-    await toggle.click({ force: true });
+    await crossword.openMenu();
+    await crossword.toggle('Together mode').click();
+    await crossword.closeMenu();
     await crossword.cell(1, 1).click();
     await expect(second.cell(1, 1)).toHaveClass(ACTIVE);
 
-    await toggle.click({ force: true });
+    await crossword.openMenu();
+    await crossword.toggle('Together mode').click();
+    await crossword.closeMenu();
     await second.cell(1, 3).click();
     await expect(second.cell(1, 3)).toHaveClass(ACTIVE);
     await expect(crossword.cell(1, 1)).toHaveClass(ACTIVE);
@@ -168,7 +176,7 @@ test.describe('Pencil marks', () => {
     await crossword.cell(1, 1).click();
     await crossword.press('A');
 
-    await page.getByText('Pencil', { exact: true }).click({ force: true });
+    await page.getByRole('button', { name: 'Pencil' }).click();
     await crossword.press('B');
 
     await expect(crossword.cell(1, 2).getByTestId('solution')).toHaveCSS('font-family', /cursive/);
@@ -179,7 +187,9 @@ test.describe('Pencil marks', () => {
     const purple = 'rgb(106, 27, 154)';  // #6a1b9a
     const second = await openCrossword(browser, crossword.id);
 
+    await second.openMenu();
     await second.page.getByTestId('color-purple').click();
+    await second.closeMenu();
     await second.cell(1, 1).click();
     await second.press('A');
 
@@ -189,13 +199,15 @@ test.describe('Pencil marks', () => {
 
   test('Pencil uses the lighter shade of the author colour', async ({ crossword }) => {
     const page = crossword.page;
+    await crossword.openMenu();
     await page.getByTestId('color-purple').click();
+    await crossword.closeMenu();
     await crossword.cell(1, 1).click();
     await crossword.press('A');
     await expect(crossword.cell(1, 1).getByTestId('solution'))
       .toHaveCSS('color', 'rgb(106, 27, 154)');   // #6a1b9a, ink
 
-    await page.getByText('Pencil', { exact: true }).click({ force: true });
+    await page.getByRole('button', { name: 'Pencil' }).click();
     await crossword.press('B');
     await expect(crossword.cell(1, 2).getByTestId('solution'))
       .toHaveCSS('color', 'rgb(179, 139, 203)');  // #b38bcb, pencil
@@ -205,7 +217,7 @@ test.describe('Pencil marks', () => {
 
   test('Clearing a cell drops its authorship and pencil mark', async ({ crossword }) => {
     const page = crossword.page;
-    await page.getByText('Pencil', { exact: true }).click({ force: true });
+    await page.getByRole('button', { name: 'Pencil' }).click();
     await crossword.cell(1, 1).click();
     await crossword.press('A');
     await expect(crossword.cell(1, 1).getByTestId('solution')).toHaveCSS('font-family', /cursive/);
@@ -220,16 +232,19 @@ test.describe('Pencil marks', () => {
 test.describe('Colour selection', () => {
   test('Picking a colour survives a reload', async ({ crossword }) => {
     const page = crossword.page;
+    await crossword.openMenu();
     await page.getByTestId('color-purple').click();
     await expect(page.getByTestId('color-purple')).toHaveClass(/selected/);
 
     await page.reload();
     await expect(page.getByRole('grid')).toBeVisible();
+    await crossword.openMenu();
     await expect(page.getByTestId('color-purple')).toHaveClass(/selected/);
   });
 
   test('Exactly one colour is selected at a time', async ({ crossword }) => {
     const page = crossword.page;
+    await crossword.openMenu();
     await page.getByTestId('color-green').click();
     await expect(page.locator('.swatch.selected')).toHaveCount(1);
     await page.getByTestId('color-red').click();
@@ -299,8 +314,10 @@ test.describe('Basic keyboard interactions', () => {
 });
 
 test.describe('Toggles', () => {
-  test('Skip filled cells off', async ({ page, crossword }) => {
-    await expect(page.getByRole('switch', { name: 'Skip filled cells' })).not.toBeChecked();
+  test('Skip filled cells off', async ({ crossword }) => {
+    await crossword.openMenu();
+    await expect(crossword.toggle('Skip filled cells')).toHaveAttribute('aria-checked', 'false');
+    await crossword.closeMenu();
     await crossword.cell(1, 1).click();
     await crossword.press('A', 'B');
     await crossword.cell(1, 4).click();
@@ -310,10 +327,11 @@ test.describe('Toggles', () => {
     await expect(crossword.cell(1, 4)).toHaveClass(/active/);
   });
 
-  test('Skip filled cells on', async ({ page, crossword }) => {
-    // Click the label instead of the switch itself since the switch is hidden.
-    await page.getByText('Skip filled cells').click({ force: true });
-    await expect(page.getByRole('switch', { name: 'Skip filled cells' })).toBeChecked();
+  test('Skip filled cells on', async ({ crossword }) => {
+    await crossword.openMenu();
+    await crossword.toggle('Skip filled cells').click();
+    await expect(crossword.toggle('Skip filled cells')).toHaveAttribute('aria-checked', 'true');
+    await crossword.closeMenu();
     await crossword.cell(1, 1).click();
     await crossword.press('A', 'B');
     await crossword.cell(1, 4).click();
@@ -323,20 +341,44 @@ test.describe('Toggles', () => {
     await expect(crossword.cell(1, 5)).toHaveClass(/active/);
   });
 
-  test('Skip finished clues off', async ({ page, crossword }) => {
-    await expect(page.getByRole('switch', { name: 'Skip finished clues' })).not.toBeChecked();
+  test('Skip finished clues off', async ({ crossword }) => {
+    await crossword.openMenu();
+    await expect(crossword.toggle('Skip finished clues')).toHaveAttribute('aria-checked', 'false');
+    await crossword.closeMenu();
     await crossword.cell(1, 1).click();
     await crossword.press('A', 'B', 'C', 'D', 'E', 'Tab', 'Tab', 'Tab');
     await expect(crossword.cell(1, 1)).toHaveClass(/active/);
   });
 
-  test('Skip finished clues on', async ({ page, crossword }) => {
-    // Click the label instead of the switch itself since the switch is hidden.
-    await page.getByText('Skip finished clues').click({ force: true });
-    await expect(page.getByRole('switch', { name: 'Skip finished clues' })).toBeChecked();
+  test('Skip finished clues on', async ({ crossword }) => {
+    await crossword.openMenu();
+    await crossword.toggle('Skip finished clues').click();
+    await expect(crossword.toggle('Skip finished clues')).toHaveAttribute('aria-checked', 'true');
+    await crossword.closeMenu();
     await crossword.cell(1, 1).click();
     await crossword.press('A', 'B', 'C', 'D', 'E', 'Tab', 'Tab', 'Tab');
     await expect(crossword.cell(5, 1)).toHaveClass(/active/);
+  });
+
+  test('The Break button marks a boundary without a physical keyboard', async ({ crossword }) => {
+    const button = crossword.page.getByRole('button', { name: 'Toggle word boundary' });
+
+    // (1,1) is in both an across and a down clue, so the direction can be
+    // flipped by clicking it twice.
+    await crossword.cell(1, 1).click();
+    await button.click();
+    await expect(crossword.cell(1, 1)).toHaveClass(/word-boundary-across/);
+
+    // Same button, and it follows the clue you are on rather than offering a
+    // choice, so it marks the other edge once the direction flips.
+    await crossword.cell(1, 1).click();
+    await button.click();
+    await expect(crossword.cell(1, 1)).toHaveClass(/word-boundary-down/);
+    await expect(crossword.cell(1, 1)).toHaveClass(/word-boundary-across/);
+
+    // And it is a toggle, not a one-way set.
+    await button.click();
+    await expect(crossword.cell(1, 1)).not.toHaveClass(/word-boundary-down/);
   });
 
   test('Space toggles word boundary across', async ({ crossword }) => {

@@ -24,6 +24,24 @@ export class Crossword {
       await this.page.keyboard.press(key);
     }
   }
+
+  // Everything you set once lives behind the ⋯ button. Toggling something does
+  // not close the menu, so one call covers several changes.
+  async openMenu() {
+    await this.page.getByRole('button', { name: 'Puzzle settings' }).click();
+    await expect(this.page.getByRole('menu')).toBeVisible();
+  }
+
+  // The menu overlays the grid, so it has to be dismissed before the cells
+  // underneath it can be reached again.
+  async closeMenu() {
+    await this.page.keyboard.press('Escape');
+    await expect(this.page.getByRole('menu')).toBeHidden();
+  }
+
+  toggle(name: string): Locator {
+    return this.page.getByRole('menuitemcheckbox', { name });
+  }
 }
 
 export const test = base.extend<Fixtures>({

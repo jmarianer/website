@@ -5,14 +5,9 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Position, Puzzle, ClueDirection, Clue, Cell, Cursor } from "./types";
 import { RenderCrossword } from "./RenderCrossword";
 import { OnScreenKeyboard } from "./OnScreenKeyboard";
-import { ColorPicker } from "./ColorPicker";
+import { SettingsMenu } from "./SettingsMenu";
 import { loadOrAssignColor, saveColor, PaletteColor, clientId } from "./identity";
 import { cast } from '@deepkit/type';
-import Switch from "react-switch";
-
-// Mirrors the breakpoint in crosswords.scss, where the on-screen keyboard
-// appears and vertical space becomes scarce.
-const COMPACT = '(max-width: 700px)';
 
 export function Crossword() {
   const {id} = useParams();
@@ -26,12 +21,9 @@ export function Crossword() {
   // Local, not synced: whether *you* are pencilling is nobody else's business.
   const [pencil, setPencil] = useState<boolean>(false);
   const [shareLabel, setShareLabel] = useState<string>('Share');
-  // Collapsed on small screens, where the settings would otherwise eat the
-  // vertical space the grid needs. Controlled rather than left to the DOM so a
-  // re-render mid-solve cannot snap it shut again; kept in step with the
-  // breakpoint by the matchMedia effect below.
-  const [settingsOpen, setSettingsOpen] = useState<boolean>(
-    () => !window.matchMedia(COMPACT).matches);
+  // A popover on desktop, a bottom sheet on mobile, closed by default on both.
+  const [settingsOpen, setSettingsOpen] = useState<boolean>(false);
+  const menuAnchor = useRef<HTMLDivElement>(null);
   const [color, setColor] = useState<PaletteColor>(loadOrAssignColor);
   const [presence, setPresence] = useState<Record<string, Cursor>>({});
   const [togetherMode, setTogetherMode] = useState<boolean>(false);
@@ -188,6 +180,17 @@ export function Crossword() {
     }
   }
 
+  // Editing rebuilds the puzzle from its template, which drops every answer, so
+  // it asks first rather than being a direct action.
+  function editPuzzle() {
+    const filled = crossword?.cells.flat().some(cell => cell.isFillable() && !cell.isEmpty());
+    if (filled && !window.confirm(
+      'Editing the grid clears every answer in this puzzle. Continue?')) {
+      return;
+    }
+    navigate(`/edit/${id}`);
+  }
+
   function toggleTogetherMode(on: boolean) {
     set(child(dbRef, 'togetherMode'), on);
     // Entering adopts whatever the toggler was looking at. Leaving needs
@@ -222,15 +225,26 @@ export function Crossword() {
     return byCell;
   }, [presence, togetherMode, me]);
 
-  function toggleDirection() {
-    if (!cell || cell.clues.length < 2) {
+  // Colours other people are wearing, so the picker can show them as spoken for.
+  const takenColors = useMemo(
+    () => new Set(Object.entries(presence)
+      .filter(([who]) => who !== me)
+      .map(([, cursor]) => cursor.color)),
+    [presence, me]);
+
+  // Which edge gets marked follows from the clue you are on, so this needs no
+  // direction of its own -- exactly how the space bar has always behaved.
+  function toggleWordBoundary() {
+    if (!position || !cell) {
       return;
     }
-    const other = cell.clues.find(clue => clue.direction !== currentClue?.direction);
-    if (other && position) {
-      setCurrentClue(other);
-      publishCursor(position, other);
-    }
+    const edge = currentClue?.direction === ClueDirection.across
+      ? 'wordBoundaryAcross'
+      : 'wordBoundaryDown';
+    const current = currentClue?.direction === ClueDirection.across
+      ? cell.wordBoundaryAcross
+      : cell.wordBoundaryDown;
+    set(child(dbRef, `cells/${position.row}/${position.col}/${edge}`), !current);
   }
 
   // Shared by the physical keyboard and the on-screen keyboard. Both guard
@@ -250,7 +264,9 @@ export function Crossword() {
   }
 
   function handleKeyDown(e: KeyboardEvent) {
-    if (!position || !crossword) {
+    // While the menu is open it owns the keyboard -- otherwise typing would fill
+    // in letters behind it, and Escape would be swallowed before closing it.
+    if (!position || !crossword || settingsOpen) {
       return;
     }
 
@@ -261,11 +277,7 @@ export function Crossword() {
     e.preventDefault();
     const key = e.key;
     if (key === ' ') {
-      if (currentClue?.direction === ClueDirection.across) {
-        set(child(dbRef, `cells/${position.row}/${position.col}/wordBoundaryAcross`), !cell?.wordBoundaryAcross);
-      } else {
-        set(child(dbRef, `cells/${position.row}/${position.col}/wordBoundaryDown`), !cell?.wordBoundaryDown);
-      }
+      toggleWordBoundary();
     }
     else if (key.length === 1) {
       typeLetter(key);
@@ -341,16 +353,33 @@ export function Crossword() {
     viewportRef.current?.style.setProperty('--zoom', String(zoom));
   }, [zoom]);
 
-  // Re-sync when the window crosses the breakpoint. Without this, collapsing on
-  // a narrow window and then widening it leaves the settings closed with the
-  // disclosure control hidden, so there is no way to reopen them. Only fires on
-  // a crossing, so a manual toggle survives resizing within one size class.
+  // The menu closes on an outside click and on Escape, per its interaction
+  // contract. Escape is handled here rather than in handleKeyDown because that
+  // one bails out entirely while the menu is open.
   useEffect(() => {
-    const compact = window.matchMedia(COMPACT);
-    const sync = () => setSettingsOpen(!compact.matches);
-    compact.addEventListener('change', sync);
-    return () => compact.removeEventListener('change', sync);
-  }, []);
+    if (!settingsOpen) {
+      return;
+    }
+
+    function onPointerDown(e: PointerEvent) {
+      if (!menuAnchor.current?.contains(e.target as Node)) {
+        setSettingsOpen(false);
+      }
+    }
+
+    function onKeyDown(e: KeyboardEvent) {
+      if (e.key === 'Escape') {
+        setSettingsOpen(false);
+      }
+    }
+
+    document.addEventListener('pointerdown', onPointerDown);
+    document.addEventListener('keydown', onKeyDown);
+    return () => {
+      document.removeEventListener('pointerdown', onPointerDown);
+      document.removeEventListener('keydown', onKeyDown);
+    };
+  }, [settingsOpen]);
 
   const cols = crossword?.cells[0]?.length ?? 0;
 
@@ -476,36 +505,44 @@ export function Crossword() {
   if (!crossword) {
     return <div></div>;
   }
+  const breakArrow = currentClue?.direction === ClueDirection.down ? '↓' : '→';
+
   return <>
-    <h1>Joey's awesome crossword app</h1>
+    <div className="title-bar" ref={menuAnchor}>
+      <h1>Joey's awesome crossword app</h1>
+      <button type="button" className="menu-trigger" aria-haspopup="menu"
+              aria-expanded={settingsOpen} aria-label="Puzzle settings"
+              onClick={() => setSettingsOpen(!settingsOpen)}>⋯</button>
+
+      <SettingsMenu
+          open={settingsOpen}
+          onClose={() => setSettingsOpen(false)}
+          color={color}
+          taken={takenColors}
+          onSelectColor={chooseColor}
+          skipFilledCells={skipFilledCells}
+          onSkipFilledCells={setSkipFilledCells}
+          skipFinishedClues={skipFinishedClues}
+          onSkipFinishedClues={setSkipFinishedClues}
+          togetherMode={togetherMode}
+          onTogetherMode={toggleTogetherMode}
+          shareLabel={shareLabel}
+          onShare={share}
+          onEdit={editPuzzle} />
+    </div>
+
     <div className="crossword-and-settings">
-      <details className="settings" open={settingsOpen}
-               onToggle={e => setSettingsOpen(e.currentTarget.open)}>
-        <summary>Settings</summary>
-        <div className="actions">
-          <button onClick={() => navigate(`/edit/${id}`)}>Edit</button>
-          <button onClick={share}>{shareLabel}</button>
-        </div>
-        <div className="setting">
-          <ColorPicker selected={color} onSelect={chooseColor} />
-        </div>
-        <div className="setting">
-          <Switch id="pencil" onChange={setPencil} checked={pencil} aria-label="Pencil" />
-          <label htmlFor="pencil">Pencil</label>
-        </div>
-        <div className="setting">
-          <Switch id="together-mode" onChange={toggleTogetherMode} checked={togetherMode} aria-label="Together mode" />
-          <label htmlFor="together-mode">Together mode</label>
-        </div>
-        <div className="setting">
-          <Switch id="skip-filled-cells" onChange={setSkipFilledCells} checked={skipFilledCells} aria-label="Skip filled cells" />
-          <label htmlFor="skip-filled-cells">Skip filled cells</label>
-        </div>
-        <div className="setting">
-          <Switch id="skip-finished-clues" onChange={setSkipFinishedClues} checked={skipFinishedClues} aria-label="Skip finished clues" />
-          <label htmlFor="skip-finished-clues">Skip finished clues</label>
-        </div>
-      </details>
+      {/* Hidden on mobile, where the on-screen keyboard carries them instead. */}
+      <div className="puzzle-bar">
+        <button type="button" className="key key-action" aria-pressed={pencil}
+                onClick={() => setPencil(!pencil)}>
+          <span aria-hidden="true">✎</span> Pencil
+        </button>
+        <button type="button" className="key key-action" aria-label="Toggle word boundary"
+                onClick={toggleWordBoundary}>
+          Break <span aria-hidden="true">{breakArrow}</span>
+        </button>
+      </div>
 
       <div className="crossword-viewport"
            ref={viewportRef}
@@ -523,9 +560,11 @@ export function Crossword() {
       <OnScreenKeyboard
         onLetter={typeLetter}
         onBackspace={backspace}
-        onToggleDirection={toggleDirection}
         onMoveClue={moveToNextClue}
-        direction={currentClue?.direction} />
+        onToggleWordBoundary={toggleWordBoundary}
+        onTogglePencil={() => setPencil(!pencil)}
+        pencil={pencil}
+        breakArrow={breakArrow} />
     </div>
   </>
 }
