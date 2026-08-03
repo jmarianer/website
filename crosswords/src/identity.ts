@@ -36,18 +36,21 @@ export function saveColor(color: PaletteColor) {
   localStorage.setItem(COLOR_STORAGE_KEY, color.key);
 }
 
-// Picks at random on a first visit rather than defaulting everyone to the same
-// swatch. Once presence exists this should prefer a colour nobody is using.
-export function loadOrAssignColor(): PaletteColor {
+// Null when this browser has never picked one, which is what tells the caller it
+// still has to choose.
+export function loadColor(): PaletteColor | null {
   const stored = localStorage.getItem(COLOR_STORAGE_KEY);
-  const existing = PALETTE.find(color => color.key === stored);
-  if (existing) {
-    return existing;
-  }
+  return PALETTE.find(color => color.key === stored) ?? null;
+}
 
-  const assigned = PALETTE[Math.floor(Math.random() * PALETTE.length)];
-  saveColor(assigned);
-  return assigned;
+// Prefers a colour nobody else is wearing, and picks at random among those
+// rather than taking the first: two people opening the link at the same moment
+// would otherwise reliably choose the same one. Falls back to the whole palette
+// once it is exhausted -- a collision is legal, just not the default.
+export function pickColor(taken: Set<string>): PaletteColor {
+  const free = PALETTE.filter(color => !taken.has(color.key));
+  const choices = free.length > 0 ? free : PALETTE;
+  return choices[Math.floor(Math.random() * choices.length)];
 }
 
 // Not crypto.randomUUID: that is only exposed in a secure context, so it is

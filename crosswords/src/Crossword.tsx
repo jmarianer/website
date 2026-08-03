@@ -6,7 +6,7 @@ import { Position, Puzzle, ClueDirection, Clue, Cell, Cursor } from "./types";
 import { RenderCrossword } from "./RenderCrossword";
 import { OnScreenKeyboard } from "./OnScreenKeyboard";
 import { SettingsMenu } from "./SettingsMenu";
-import { loadOrAssignColor, saveColor, PaletteColor, clientId } from "./identity";
+import { loadColor, pickColor, saveColor, PaletteColor, clientId } from "./identity";
 import { cast } from '@deepkit/type';
 
 export function Crossword() {
@@ -24,7 +24,13 @@ export function Crossword() {
   // A popover on desktop, a bottom sheet on mobile, closed by default on both.
   const [settingsOpen, setSettingsOpen] = useState<boolean>(false);
   const menuAnchor = useRef<HTMLDivElement>(null);
-  const [color, setColor] = useState<PaletteColor>(loadOrAssignColor);
+  // A first visit wears a provisional colour until the first snapshot says which
+  // ones are free; only then is one chosen and persisted. That cannot happen in
+  // this initialiser, which runs before any presence data exists.
+  const storedColor = useMemo(() => loadColor(), []);
+  const [color, setColor] = useState<PaletteColor>(() => storedColor ?? pickColor(new Set()));
+  const colorSettled = useRef<boolean>(storedColor !== null);
+  const claimedColor = useRef<string | null>(null);
   const [presence, setPresence] = useState<Record<string, Cursor>>({});
   const [togetherMode, setTogetherMode] = useState<boolean>(false);
   const [sharedCursor, setSharedCursor] = useState<Cursor | null>(null);
@@ -217,7 +223,9 @@ export function Crossword() {
     }
 
     for (const [who, cursor] of Object.entries(presence)) {
-      if (who !== me) {
+      // Somebody who has opened the puzzle but not yet moved has claimed a
+      // colour without having a position, so there is nothing to draw for them.
+      if (who !== me && cursor.row !== undefined && cursor.col !== undefined) {
         const key = `${cursor.row}-${cursor.col}`;
         (byCell[key] ??= []).push(cursor.color);
       }
@@ -231,6 +239,31 @@ export function Crossword() {
       .filter(([who]) => who !== me)
       .map(([, cursor]) => cursor.color)),
     [presence, me]);
+
+  // Settle on a colour once the first snapshot has told us what is free. Guarded
+  // by a ref rather than by state so it happens exactly once: an existing choice
+  // is never revised, even if somebody else is already wearing it.
+  useEffect(() => {
+    if (colorSettled.current || !crossword) {
+      return;
+    }
+    colorSettled.current = true;
+    const chosen = pickColor(takenColors);
+    saveColor(chosen);
+    setColor(chosen);
+  }, [crossword, takenColors]);
+
+  // Claim the colour in presence straight away, rather than waiting for the
+  // first cursor move to publish it. Otherwise everyone who has opened the
+  // puzzle but not yet started solving is invisible to the picker, and two
+  // people arriving together would both see a free palette.
+  useEffect(() => {
+    if (!crossword || claimedColor.current === color.key) {
+      return;
+    }
+    claimedColor.current = color.key;
+    update(child(dbRef, `presence/${me}`), { color: color.key });
+  }, [crossword, color, dbRef, me]);
 
   // Which edge gets marked follows from the clue you are on, so this needs no
   // direction of its own -- exactly how the space bar has always behaved.

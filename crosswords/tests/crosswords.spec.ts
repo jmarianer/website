@@ -1,4 +1,5 @@
 import { test, PUZZLE_TEMPLATE, openCrossword } from './fixtures';
+import { PALETTE } from '../src/identity';
 import { expect } from '@playwright/test';
 
 test('Crosswords creation', async ({ page }) => {
@@ -230,6 +231,40 @@ test.describe('Pencil marks', () => {
 });
 
 test.describe('Colour selection', () => {
+  test('Colours are handed out without collisions until the palette runs out', async ({ browser, crossword }) => {
+    // Enough solvers to use up the palette exactly. Asserting against one other
+    // client would be a weak test: picking at random would avoid a single taken
+    // colour six times in seven anyway, so only filling the palette shows that
+    // the choice is actually informed by who is already here.
+    const chosen = new Set<string>();
+    let client = crossword;
+
+    for (let i = 0; i < PALETTE.length; i++) {
+      // Each context has its own storage, so every one of them has to choose.
+      if (i > 0) {
+        client = await openCrossword(browser, crossword.id);
+      }
+      await client.openMenu();
+      const selected = await client.page.locator('.swatch.selected').getAttribute('data-testid');
+      chosen.add(selected!);
+      await client.closeMenu();
+    }
+
+    expect(chosen.size).toBe(PALETTE.length);
+  });
+
+  test('Claiming a colour needs no cursor movement', async ({ browser, crossword }) => {
+    await crossword.openMenu();
+    await crossword.page.getByTestId('color-blue').click();
+    await crossword.closeMenu();
+
+    // Neither side has touched a cell, so this only passes if presence carries
+    // the colour before any cursor exists.
+    const second = await openCrossword(browser, crossword.id);
+    await second.openMenu();
+    await expect(second.page.getByTestId('color-blue')).toHaveClass(/taken/);
+  });
+
   test('Picking a colour survives a reload', async ({ crossword }) => {
     const page = crossword.page;
     await crossword.openMenu();
