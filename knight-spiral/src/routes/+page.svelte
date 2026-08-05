@@ -12,8 +12,16 @@
 	let colorCount = $state(DEFAULT_COLOR_COUNT);
 	let debouncedColorCount = $state(DEFAULT_COLOR_COUNT);
 
-	let placements = $state.raw<PlacedPiece[]>([]);
+	// Mutated in place rather than reassigned+copied per batch: copying the
+	// whole accumulated array on every batch made total main-thread work
+	// O(pieces²). placementsCount is the reactive signal Board watches for
+	// redraws — its value happens to be placements.length, but the write is
+	// what matters, not the read.
+	// svelte-ignore non_reactive_update
+	let placements: PlacedPiece[] = [];
+	let placementsCount = $state(0);
 	let generating = $state(false);
+	let lastGenerationMs = $state<number | null>(null);
 
 	$effect(() => {
 		const value = colorCount;
@@ -29,16 +37,20 @@
 		const colors = debouncedColorCount;
 
 		placements = [];
+		placementsCount = 0;
 		generating = true;
+		const startedAt = performance.now();
 
 		client.generate(
 			{ colorCount: colors, pieceCount: MAX_TOTAL_PIECES },
 			{
 				onBatch: (batch) => {
-					placements = [...placements, ...batch];
+					placements.push(...batch);
+					placementsCount = placements.length;
 				},
 				onDone: () => {
 					generating = false;
+					lastGenerationMs = Math.round(performance.now() - startedAt);
 				}
 			}
 		);
@@ -64,12 +76,14 @@
 		{#if generating}
 			<span class="status">
 				generating…
-				<progress class="progress" value={placements.length} max={MAX_TOTAL_PIECES}></progress>
+				<progress class="progress" value={placementsCount} max={MAX_TOTAL_PIECES}></progress>
 			</span>
+		{:else if lastGenerationMs !== null}
+			<span class="status">generation complete in {lastGenerationMs}ms</span>
 		{/if}
 	</header>
 	<main>
-		<Board {placements} />
+		<Board {placements} count={placementsCount} />
 	</main>
 </div>
 

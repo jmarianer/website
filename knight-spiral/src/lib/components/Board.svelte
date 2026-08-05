@@ -3,7 +3,12 @@
 	import type { PlacedPiece } from '$lib/generate';
 	import { COLOR_PALETTE } from '$lib/constants';
 
-	let { placements }: { placements: PlacedPiece[] } = $props();
+	// `placements` is mutated in place by the caller rather than reassigned
+	// per batch (reassigning would mean copying the whole array every time,
+	// which is O(pieces²) overall). `count` is the reactive signal that
+	// tells this effect new pieces have arrived — reading `placements`
+	// itself wouldn't, since it's a plain array, not $state.
+	let { placements, count }: { placements: PlacedPiece[]; count: number } = $props();
 
 	let canvas: HTMLCanvasElement;
 	let container: HTMLDivElement;
@@ -118,8 +123,9 @@
 		return () => resizeObserver.disconnect();
 	});
 
-	// Pure render: reacts to placements/centerX/centerY/scale, never writes them.
+	// Pure render: reacts to count/centerX/centerY/scale, never writes them.
 	$effect(() => {
+		const _count = count; // dependency: redraw whenever placements grows
 		draw();
 	});
 </script>

@@ -16,8 +16,17 @@ export const KNIGHT_OFFSET: Offset = { a: 1, b: 2 };
  */
 export const MAX_TOTAL_PIECES = 50_000;
 
-/** How many placements the worker streams back per progress message. */
-export const GENERATION_BATCH_SIZE = 500;
+/**
+ * Batch size floor for streaming progress: below this piece count, batches
+ * are exactly this size. Above it, batch size scales up with pieceCount
+ * (see generate.worker.ts) so the number of batches — and therefore the
+ * main thread's total accumulation/redraw work — stays roughly constant
+ * instead of growing with piece count.
+ */
+export const GENERATION_MIN_BATCH_SIZE = 500;
+
+/** Target number of progress batches per generation, at any piece count. */
+export const GENERATION_TARGET_BATCH_COUNT = 50;
 
 export const COLOR_PALETTE = [
 	'#1a1a1a', // black
