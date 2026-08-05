@@ -7,9 +7,6 @@ type Props = {
   onToggleWordBoundary: () => void;
   onTogglePencil: () => void;
   pencil: boolean;
-  // Which edge a word break would mark, which follows from the current clue.
-  // Also the only remaining indicator of direction now that the across/down
-  // button is gone -- tapping a cell twice still flips it.
   breakArrow: string;
 }
 
