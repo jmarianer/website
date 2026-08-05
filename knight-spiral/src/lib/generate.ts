@@ -1,6 +1,5 @@
 import { SpiralCache } from './spiral';
 import { leaperAttackOffsets, type Offset } from './leaper';
-import { KNIGHT_OFFSET } from './constants';
 
 export interface PlacedPiece {
 	index: number;
@@ -30,10 +29,11 @@ function cellKey(x: number, y: number): number {
 }
 
 /**
- * Places `pieceCount` pieces round-robin across `colorCount` colors,
- * starting with color 0 at the spiral's origin. Each subsequent piece goes
- * on the lowest-indexed spiral cell that is unoccupied and unattacked by
- * any piece of a different color.
+ * Places `pieceCount` pieces round-robin across the colors implied by
+ * `offsetsByColor` (one leaper offset per color; its length is the color
+ * count), starting with color 0 at the spiral's origin. Each subsequent
+ * piece goes on the lowest-indexed spiral cell that is unoccupied and
+ * unattacked by any piece of a different color.
  *
  * Each color tracks its own search pointer rather than rescanning from
  * index 0 every time: a cell's validity for a given color only ever gets
@@ -52,12 +52,12 @@ function cellKey(x: number, y: number): number {
  * returned at the end — lets a caller (e.g. a worker) stream progress.
  */
 export function generatePlacements(
-	colorCount: number,
+	offsetsByColor: Offset[],
 	pieceCount: number,
-	offsetsByColor: Offset[] = Array.from({ length: colorCount }, () => KNIGHT_OFFSET),
 	onBatch?: (batch: PlacedPiece[]) => void,
 	batchSize = 500
 ): PlacedPiece[] {
+	const colorCount = offsetsByColor.length;
 	const spiral = new SpiralCache();
 	const attackVectorsByColor = offsetsByColor.map(leaperAttackOffsets);
 

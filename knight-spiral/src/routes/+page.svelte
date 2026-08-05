@@ -1,16 +1,13 @@
 <script lang="ts">
 	import Board from '$lib/components/Board.svelte';
+	import PieceEditor from '$lib/components/PieceEditor.svelte';
 	import { GenerationClient } from '$lib/generate-client';
 	import type { PlacedPiece } from '$lib/generate';
-	import {
-		DEFAULT_COLOR_COUNT,
-		MIN_COLOR_COUNT,
-		MAX_COLOR_COUNT,
-		MAX_TOTAL_PIECES
-	} from '$lib/constants';
+	import type { Offset } from '$lib/leaper';
+	import { DEFAULT_PIECES, MAX_TOTAL_PIECES } from '$lib/constants';
 
-	let colorCount = $state(DEFAULT_COLOR_COUNT);
-	let debouncedColorCount = $state(DEFAULT_COLOR_COUNT);
+	let pieces = $state<Offset[]>(DEFAULT_PIECES.map((o) => ({ ...o })));
+	let debouncedPieces = $state<Offset[]>(DEFAULT_PIECES.map((o) => ({ ...o })));
 
 	// Mutated in place rather than reassigned+copied per batch: copying the
 	// whole accumulated array on every batch made total main-thread work
@@ -24,9 +21,9 @@
 	let lastGenerationMs = $state<number | null>(null);
 
 	$effect(() => {
-		const value = colorCount;
+		const snapshot = pieces.map((o) => ({ ...o })); // deep read: registers on any edit
 		const timeout = setTimeout(() => {
-			debouncedColorCount = value;
+			debouncedPieces = snapshot;
 		}, 200);
 		return () => clearTimeout(timeout);
 	});
@@ -34,7 +31,9 @@
 	const client = new GenerationClient();
 
 	$effect(() => {
-		const colors = debouncedColorCount;
+		// Plain objects, not $state proxies — postMessage can't structured-clone
+		// a Svelte reactive proxy across the worker boundary.
+		const offsetsByColor = debouncedPieces.map((o) => ({ a: o.a, b: o.b }));
 
 		placements = [];
 		placementsCount = 0;
@@ -42,7 +41,7 @@
 		const startedAt = performance.now();
 
 		client.generate(
-			{ colorCount: colors, pieceCount: MAX_TOTAL_PIECES },
+			{ offsetsByColor, pieceCount: MAX_TOTAL_PIECES },
 			{
 				onBatch: (batch) => {
 					placements.push(...batch);
@@ -62,17 +61,7 @@
 <div class="page">
 	<header>
 		<h1>Knight Spiral</h1>
-		<label>
-			Colors
-			<input
-				type="range"
-				min={MIN_COLOR_COUNT}
-				max={MAX_COLOR_COUNT}
-				step="1"
-				bind:value={colorCount}
-			/>
-			<span class="value">{colorCount}</span>
-		</label>
+		<PieceEditor bind:pieces />
 		{#if generating}
 			<span class="status">
 				generating…
@@ -105,21 +94,6 @@
 	h1 {
 		font-size: 1.1rem;
 		font-weight: 600;
-		color: var(--ink);
-	}
-
-	label {
-		display: flex;
-		align-items: center;
-		gap: 0.5rem;
-		color: var(--ink-2);
-		font-size: 0.9rem;
-	}
-
-	.value {
-		min-width: 1.5ch;
-		text-align: right;
-		font-family: var(--mono);
 		color: var(--ink);
 	}
 

@@ -12,12 +12,20 @@ function countNonBackgroundPixels(data: Uint8ClampedArray): number {
 	return count;
 }
 
+async function waitForGenerationComplete(page: import('@playwright/test').Page) {
+	await page.waitForFunction(
+		() => document.querySelector('.status')?.textContent?.includes('complete'),
+		{ timeout: 30000 }
+	);
+}
+
 test('renders the knight spiral and responds to pan/zoom without errors', async ({ page }) => {
 	const errors: string[] = [];
 	page.on('pageerror', (error) => errors.push(error.message));
 
 	await page.goto(BASE_URL);
 	await expect(page.locator('h1')).toHaveText('Knight Spiral');
+	await waitForGenerationComplete(page);
 
 	const canvas = page.locator('canvas');
 	await expect(canvas).toBeVisible();
@@ -45,17 +53,23 @@ test('renders the knight spiral and responds to pan/zoom without errors', async 
 	await page.mouse.wheel(0, -200);
 	await page.waitForTimeout(50);
 
-	// Increase the color count and confirm the pattern regenerates.
-	const slider = page.locator('input[type="range"]');
-	await slider.fill('5');
-	await expect(page.locator('.value')).toHaveText('5');
-	await page.waitForTimeout(300); // debounce
+	// Reconfigure pieces via the notation field and confirm the list follows
+	// and the pattern regenerates.
+	const notationInput = page.locator('.notation input');
+	await notationInput.fill('N,W,F,D,C');
+	await expect(page.locator('.piece')).toHaveCount(5);
+	await notationInput.blur();
+	await waitForGenerationComplete(page);
 
 	const updatedPixels = await canvas.evaluate((el: HTMLCanvasElement) => {
 		const ctx = el.getContext('2d')!;
 		return Array.from(ctx.getImageData(0, 0, el.width, el.height).data);
 	});
 	expect(countNonBackgroundPixels(Uint8ClampedArray.from(updatedPixels))).toBeGreaterThan(0);
+
+	// Changing a piece via the list updates the notation field to match.
+	await page.locator('.piece select').first().selectOption('A');
+	await expect(notationInput).toHaveValue('A,W,F,D,C');
 
 	expect(errors).toEqual([]);
 });

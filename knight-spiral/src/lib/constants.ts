@@ -2,10 +2,11 @@ import type { Offset } from './leaper';
 
 export const MIN_COLOR_COUNT = 2;
 export const MAX_COLOR_COUNT = 8;
-export const DEFAULT_COLOR_COUNT = 2;
 
-/** Knight: the only piece type available in v1. */
 export const KNIGHT_OFFSET: Offset = { a: 1, b: 2 };
+
+/** Starting configuration: two knights, matching the original spec. */
+export const DEFAULT_PIECES: Offset[] = [KNIGHT_OFFSET, KNIGHT_OFFSET];
 
 /**
  * Total pieces generated, split round-robin across colors, regardless of

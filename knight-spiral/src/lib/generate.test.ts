@@ -4,15 +4,19 @@ import { generateSpiral } from './spiral';
 import { leaperAttackOffsets, type Offset } from './leaper';
 import { KNIGHT_OFFSET } from './constants';
 
+function knights(colorCount: number): Offset[] {
+	return Array.from({ length: colorCount }, () => KNIGHT_OFFSET);
+}
+
 describe('generatePlacements', () => {
 	it('starts with color 0 at the origin', () => {
-		const placements = generatePlacements(2, 1);
+		const placements = generatePlacements(knights(2), 1);
 		expect(placements).toEqual([{ index: 0, x: 0, y: 0, color: 0 }]);
 	});
 
 	it('streams the same pieces via onBatch, in order, as it returns directly', () => {
 		const batches: ReturnType<typeof generatePlacements>[] = [];
-		const placements = generatePlacements(3, 137, undefined, (batch) => batches.push(batch), 10);
+		const placements = generatePlacements(knights(3), 137, (batch) => batches.push(batch), 10);
 
 		expect(batches.flat()).toEqual(placements);
 		// All batches but the last should be exactly batchSize.
@@ -23,12 +27,12 @@ describe('generatePlacements', () => {
 	});
 
 	it('cycles through colors round-robin', () => {
-		const placements = generatePlacements(3, 7);
+		const placements = generatePlacements(knights(3), 7);
 		expect(placements.map((p) => p.color)).toEqual([0, 1, 2, 0, 1, 2, 0]);
 	});
 
 	it('matches the hand-verified opening for two knights', () => {
-		const placements = generatePlacements(2, 4);
+		const placements = generatePlacements(knights(2), 4);
 		expect(placements).toEqual([
 			{ index: 0, x: 0, y: 0, color: 0 },
 			{ index: 1, x: 1, y: 0, color: 1 },
@@ -37,11 +41,22 @@ describe('generatePlacements', () => {
 		]);
 	});
 
-	for (const colorCount of [2, 3, 5, 8]) {
-		it(`places ${colorCount} colors of knights on distinct cells, none attacking a different color, each at the lowest legal spiral index at the time it was placed`, () => {
+	const scenarios: [label: string, offsetsByColor: Offset[]][] = [
+		['2 knights', knights(2)],
+		['3 knights', knights(3)],
+		['5 knights', knights(5)],
+		['8 knights', knights(8)],
+		[
+			'mixed pieces (wazir, ferz, knight, dabbaba)',
+			[{ a: 0, b: 1 }, { a: 1, b: 1 }, KNIGHT_OFFSET, { a: 0, b: 2 }]
+		]
+	];
+
+	for (const [label, offsetsByColor] of scenarios) {
+		it(`places ${label} on distinct cells, none attacking a different color, each at the lowest legal spiral index at the time it was placed`, () => {
 			const pieceCount = 80;
-			const placements = generatePlacements(colorCount, pieceCount);
-			const offsetsByColor: Offset[] = Array.from({ length: colorCount }, () => KNIGHT_OFFSET);
+			const colorCount = offsetsByColor.length;
+			const placements = generatePlacements(offsetsByColor, pieceCount);
 			const attackVectorsByColor = offsetsByColor.map(leaperAttackOffsets);
 			const spiral = generateSpiral(20000);
 
