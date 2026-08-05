@@ -1,6 +1,7 @@
 <script lang="ts">
 	import {
 		NAMED_LEAPERS,
+		NAMED_LEAPER_NAMES,
 		letterForOffset,
 		formatNotation,
 		parseNotation,
@@ -84,7 +85,7 @@
 				<span class="swatch" style:background={COLOR_PALETTE[i % COLOR_PALETTE.length]}></span>
 				<select value={letterOrCustom(piece)} onchange={(e) => setLetter(i, e.currentTarget.value)}>
 					{#each NAMED_LEAPERS as [letter, offset] (letter)}
-						<option value={letter}>{letter} ({offset.a},{offset.b})</option>
+						<option value={letter}>{NAMED_LEAPER_NAMES[letter]} ({offset.a},{offset.b})</option>
 					{/each}
 					<option value="CUSTOM" disabled>Custom</option>
 				</select>

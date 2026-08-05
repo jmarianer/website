@@ -20,6 +20,19 @@ export const NAMED_LEAPERS: [letter: string, offset: Offset][] = [
 	['G', { a: 1, b: 4 }] // Giraffe
 ];
 
+/** Full names for display, keyed by the same letters as NAMED_LEAPERS. */
+export const NAMED_LEAPER_NAMES: Record<string, string> = {
+	W: 'Wazir',
+	F: 'Ferz',
+	D: 'Dabbaba',
+	N: 'Knight',
+	A: 'Alfil',
+	H: 'Threeleaper',
+	C: 'Camel',
+	Z: 'Zebra',
+	G: 'Giraffe'
+};
+
 const NAMED_LEAPERS_BY_LETTER = new Map(NAMED_LEAPERS.map(([letter, offset]) => [letter, offset]));
 const NAMED_LEAPERS_BY_OFFSET = new Map(
 	NAMED_LEAPERS.map(([letter, offset]) => [offsetKey(offset), letter])
