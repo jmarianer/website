@@ -9,15 +9,15 @@ export const KNIGHT_OFFSET: Offset = { a: 1, b: 2 };
 
 /**
  * Total pieces generated, split round-robin across colors, regardless of
- * color count. v1 keeps this a fixed budget rather than exposing it as a
- * parameter — the generator rescans from scratch on every placement, so
- * pushing this much higher will get noticeably slower before it gets
- * incorrect. If that becomes the seam to widen, switch generate.ts from a
- * full rescan to per-color monotonic search pointers (attack/occupancy
- * status only ever gets stricter, never loosens, so a pointer never needs
- * to rewind) before raising this.
+ * color count. Deliberately still a fixed budget rather than a UI
+ * parameter — generation runs in a worker (generate.worker.ts) with
+ * per-color search pointers, so this can be raised further if 50k pieces
+ * ever stops being enough picture.
  */
-export const MAX_TOTAL_PIECES = 300;
+export const MAX_TOTAL_PIECES = 50_000;
+
+/** How many placements the worker streams back per progress message. */
+export const GENERATION_BATCH_SIZE = 500;
 
 export const COLOR_PALETTE = [
 	'#1a1a1a', // black

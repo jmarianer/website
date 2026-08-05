@@ -10,6 +10,18 @@ describe('generatePlacements', () => {
 		expect(placements).toEqual([{ index: 0, x: 0, y: 0, color: 0 }]);
 	});
 
+	it('streams the same pieces via onBatch, in order, as it returns directly', () => {
+		const batches: ReturnType<typeof generatePlacements>[] = [];
+		const placements = generatePlacements(3, 137, undefined, (batch) => batches.push(batch), 10);
+
+		expect(batches.flat()).toEqual(placements);
+		// All batches but the last should be exactly batchSize.
+		for (const batch of batches.slice(0, -1)) {
+			expect(batch).toHaveLength(10);
+		}
+		expect(batches.at(-1)!.length).toBe(137 % 10);
+	});
+
 	it('cycles through colors round-robin', () => {
 		const placements = generatePlacements(3, 7);
 		expect(placements.map((p) => p.color)).toEqual([0, 1, 2, 0, 1, 2, 0]);

@@ -1,9 +1,9 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
+	import { onMount, untrack } from 'svelte';
 	import type { PlacedPiece } from '$lib/generate';
 	import { COLOR_PALETTE } from '$lib/constants';
 
-	let { placements }: { placements: PlacedPiece[] } = $props();
+	let { placements, generationId }: { placements: PlacedPiece[]; generationId: number } = $props();
 
 	let canvas: HTMLCanvasElement;
 	let container: HTMLDivElement;
@@ -12,11 +12,19 @@
 	let centerX = $state(0);
 	let centerY = $state(0);
 
-	const MIN_SCALE = 4;
 	const MAX_SCALE = 120;
 	const FIT_MARGIN_CELLS = 2;
 
-	function boundingBox(pieces: PlacedPiece[]) {
+	let lastFitGenerationId = -1;
+
+	interface Box {
+		minX: number;
+		maxX: number;
+		minY: number;
+		maxY: number;
+	}
+
+	function boundingBox(pieces: PlacedPiece[]): Box {
 		let minX = 0;
 		let maxX = 0;
 		let minY = 0;
@@ -30,19 +38,37 @@
 		return { minX, maxX, minY, maxY };
 	}
 
-	function fitToBounds() {
-		if (!container || placements.length === 0) return;
-		const { minX, maxX, minY, maxY } = boundingBox(placements);
-		const width = maxX - minX + 1 + FIT_MARGIN_CELLS * 2;
-		const height = maxY - minY + 1 + FIT_MARGIN_CELLS * 2;
+	function visibleBounds(): Box {
+		const rect = container.getBoundingClientRect();
+		return {
+			minX: centerX - rect.width / 2 / scale,
+			maxX: centerX + rect.width / 2 / scale,
+			minY: centerY - rect.height / 2 / scale,
+			maxY: centerY + rect.height / 2 / scale
+		};
+	}
+
+	function exceedsVisibleBounds(box: Box): boolean {
+		const visible = visibleBounds();
+		return (
+			box.minX < visible.minX ||
+			box.maxX > visible.maxX ||
+			box.minY < visible.minY ||
+			box.maxY > visible.maxY
+		);
+	}
+
+	function fitToBounds(box: Box) {
+		if (!container) return;
+		const width = box.maxX - box.minX + 1 + FIT_MARGIN_CELLS * 2;
+		const height = box.maxY - box.minY + 1 + FIT_MARGIN_CELLS * 2;
 		const rect = container.getBoundingClientRect();
 		if (rect.width === 0 || rect.height === 0) return;
 
 		const fitScale = Math.min(rect.width / width, rect.height / height);
-		scale = Math.min(MAX_SCALE, Math.max(MIN_SCALE, fitScale));
-		centerX = (minX + maxX) / 2;
-		centerY = (minY + maxY) / 2;
-		draw();
+		scale = Math.min(MAX_SCALE, fitScale);
+		centerX = (box.minX + box.maxX) / 2;
+		centerY = (box.minY + box.maxY) / 2;
 	}
 
 	function draw() {
@@ -100,7 +126,6 @@
 		lastPointerY = event.clientY;
 		centerX -= dx / scale;
 		centerY += dy / scale;
-		draw();
 	}
 
 	function onPointerUp(event: PointerEvent) {
@@ -118,12 +143,11 @@
 		const boardY = centerY - (pointerY - rect.height / 2) / scale;
 
 		const zoomFactor = Math.exp(-event.deltaY * 0.001);
-		const newScale = Math.min(MAX_SCALE, Math.max(MIN_SCALE, scale * zoomFactor));
+		const newScale = Math.min(MAX_SCALE, scale * zoomFactor);
 
 		centerX = boardX - (pointerX - rect.width / 2) / newScale;
 		centerY = boardY + (pointerY - rect.height / 2) / newScale;
 		scale = newScale;
-		draw();
 	}
 
 	onMount(() => {
@@ -132,8 +156,25 @@
 		return () => resizeObserver.disconnect();
 	});
 
+	// Decides whether the (possibly newly grown) pattern needs a fit. Reads
+	// centerX/centerY/scale untracked since this effect also writes them via
+	// fitToBounds — tracking a self-written dependency here would make the
+	// effect re-trigger itself.
 	$effect(() => {
-		fitToBounds();
+		if (placements.length === 0) return;
+
+		const box = boundingBox(placements);
+		const isNewGeneration = generationId !== lastFitGenerationId;
+		const needsRefit = isNewGeneration || untrack(() => exceedsVisibleBounds(box));
+		if (needsRefit) {
+			fitToBounds(box);
+			lastFitGenerationId = generationId;
+		}
+	});
+
+	// Pure render: reacts to placements/centerX/centerY/scale, never writes them.
+	$effect(() => {
+		draw();
 	});
 </script>
 

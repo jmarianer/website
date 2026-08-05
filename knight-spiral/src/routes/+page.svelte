@@ -1,10 +1,21 @@
 <script lang="ts">
+	import { untrack } from 'svelte';
 	import Board from '$lib/components/Board.svelte';
-	import { generatePlacements } from '$lib/generate';
-	import { DEFAULT_COLOR_COUNT, MIN_COLOR_COUNT, MAX_COLOR_COUNT } from '$lib/constants';
+	import { GenerationClient } from '$lib/generate-client';
+	import type { PlacedPiece } from '$lib/generate';
+	import {
+		DEFAULT_COLOR_COUNT,
+		MIN_COLOR_COUNT,
+		MAX_COLOR_COUNT,
+		MAX_TOTAL_PIECES
+	} from '$lib/constants';
 
 	let colorCount = $state(DEFAULT_COLOR_COUNT);
 	let debouncedColorCount = $state(DEFAULT_COLOR_COUNT);
+
+	let placements = $state.raw<PlacedPiece[]>([]);
+	let generationId = $state(0);
+	let generating = $state(false);
 
 	$effect(() => {
 		const value = colorCount;
@@ -14,7 +25,29 @@
 		return () => clearTimeout(timeout);
 	});
 
-	let placements = $derived(generatePlacements(debouncedColorCount));
+	const client = new GenerationClient();
+
+	$effect(() => {
+		const colors = debouncedColorCount;
+
+		placements = [];
+		generationId = untrack(() => generationId) + 1;
+		generating = true;
+
+		client.generate(
+			{ colorCount: colors, pieceCount: MAX_TOTAL_PIECES },
+			{
+				onBatch: (batch) => {
+					placements = [...placements, ...batch];
+				},
+				onDone: () => {
+					generating = false;
+				}
+			}
+		);
+
+		return () => client.cancel();
+	});
 </script>
 
 <div class="page">
@@ -31,9 +64,12 @@
 			/>
 			<span class="value">{colorCount}</span>
 		</label>
+		{#if generating}
+			<span class="status">generating…</span>
+		{/if}
 	</header>
 	<main>
-		<Board {placements} />
+		<Board {placements} {generationId} />
 	</main>
 </div>
 
@@ -71,6 +107,12 @@
 		text-align: right;
 		font-family: var(--mono);
 		color: var(--ink);
+	}
+
+	.status {
+		color: var(--ink-3);
+		font-size: 0.85rem;
+		font-style: italic;
 	}
 
 	main {
