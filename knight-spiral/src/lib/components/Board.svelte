@@ -17,7 +17,12 @@
 	let centerX = $state(0);
 	let centerY = $state(0);
 
+	const MIN_SCALE = 1;
 	const MAX_SCALE = 120;
+
+	function clampScale(value: number): number {
+		return Math.min(MAX_SCALE, Math.max(MIN_SCALE, value));
+	}
 
 	/** The view never auto-fits to content — only this initial default, and
 	 *  whatever the user pans/zooms to from there. */
@@ -28,7 +33,7 @@
 		centerY = 0;
 		const rect = container.getBoundingClientRect();
 		if (rect.width === 0 || rect.height === 0) return;
-		scale = Math.min(MAX_SCALE, Math.min(rect.width, rect.height) / DEFAULT_BOX_CELLS);
+		scale = clampScale(Math.min(rect.width, rect.height) / DEFAULT_BOX_CELLS);
 	}
 
 	function draw() {
@@ -49,7 +54,7 @@
 
 		const originX = rect.width / 2;
 		const originY = rect.height / 2;
-		const cellSize = Math.max(scale, 1);
+		const cellSize = scale;
 
 		// Snap each cell edge to a pixel boundary shared with its neighbor
 		// (both sides of the edge between cell x and x+1 round the same
@@ -109,7 +114,7 @@
 		const boardY = centerY - (pointerY - rect.height / 2) / scale;
 
 		const zoomFactor = Math.exp(-event.deltaY * 0.001);
-		const newScale = Math.min(MAX_SCALE, scale * zoomFactor);
+		const newScale = clampScale(scale * zoomFactor);
 
 		centerX = boardX - (pointerX - rect.width / 2) / newScale;
 		centerY = boardY + (pointerY - rect.height / 2) / newScale;
