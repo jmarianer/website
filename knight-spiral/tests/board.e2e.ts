@@ -71,5 +71,33 @@ test('renders the knight spiral and responds to pan/zoom without errors', async 
 	await page.locator('.piece select').first().selectOption('A');
 	await expect(notationInput).toHaveValue('A,W,F,D,C');
 
+	// The URL hash follows the settled config.
+	await page.waitForFunction(() => location.hash === '#A,W,F,D,C');
+
+	expect(errors).toEqual([]);
+});
+
+test('loads piece configuration from the URL hash', async ({ page }) => {
+	const errors: string[] = [];
+	page.on('pageerror', (error) => errors.push(error.message));
+
+	await page.goto(`${BASE_URL}/#N,(1,4),C,Z`);
+	await waitForGenerationComplete(page);
+	// (1,4) canonicalizes to the named leaper G (Giraffe).
+	await expect(page.locator('.notation input')).toHaveValue('N,G,C,Z');
+	await expect(page.locator('.piece')).toHaveCount(4);
+
+	expect(errors).toEqual([]);
+});
+
+test('falls back to the default config when the URL hash is invalid', async ({ page }) => {
+	const errors: string[] = [];
+	page.on('pageerror', (error) => errors.push(error.message));
+
+	await page.goto(`${BASE_URL}/#garbage,,,nope`);
+	await waitForGenerationComplete(page);
+	await expect(page.locator('.notation input')).toHaveValue('N,N');
+	await page.waitForFunction(() => location.hash === '#N,N');
+
 	expect(errors).toEqual([]);
 });

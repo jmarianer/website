@@ -1,13 +1,43 @@
 <script lang="ts">
+	import { onMount } from 'svelte';
 	import Board from '$lib/components/Board.svelte';
 	import PieceEditor from '$lib/components/PieceEditor.svelte';
 	import { GenerationClient } from '$lib/generate-client';
 	import type { PlacedPiece } from '$lib/generate';
-	import type { Offset } from '$lib/leaper';
-	import { DEFAULT_PIECES, MAX_TOTAL_PIECES } from '$lib/constants';
+	import { formatNotation, parseNotation, type Offset } from '$lib/leaper';
+	import {
+		DEFAULT_PIECES,
+		MAX_TOTAL_PIECES,
+		MIN_COLOR_COUNT,
+		MAX_COLOR_COUNT
+	} from '$lib/constants';
 
 	let pieces = $state<Offset[]>(DEFAULT_PIECES.map((o) => ({ ...o })));
 	let debouncedPieces = $state<Offset[]>(DEFAULT_PIECES.map((o) => ({ ...o })));
+
+	// The URL hash is a shareable/bookmarkable mirror of the notation field.
+	// Read once on load (a malformed or out-of-range hash is ignored, keeping
+	// the default); written back on every settled change via replaceState so
+	// it doesn't spam browser history.
+	onMount(() => {
+		const hash = window.location.hash.slice(1);
+		if (!hash) return;
+		const result = parseNotation(hash);
+		if (
+			result.ok &&
+			result.offsets.length >= MIN_COLOR_COUNT &&
+			result.offsets.length <= MAX_COLOR_COUNT
+		) {
+			pieces = result.offsets;
+		}
+	});
+
+	$effect(() => {
+		const hash = `#${formatNotation(debouncedPieces)}`;
+		if (window.location.hash !== hash) {
+			history.replaceState(null, '', hash);
+		}
+	});
 
 	// Mutated in place rather than reassigned+copied per batch: copying the
 	// whole accumulated array on every batch made total main-thread work
