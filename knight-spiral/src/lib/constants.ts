@@ -14,7 +14,7 @@ export const KNIGHT_OFFSET: Offset = { a: 1, b: 2 };
  * per-color search pointers, so this can be raised further if 50k pieces
  * ever stops being enough picture.
  */
-export const MAX_TOTAL_PIECES = 50_000;
+export const MAX_TOTAL_PIECES = 1_000_000;
 
 /**
  * Batch size floor for streaming progress: below this piece count, batches
