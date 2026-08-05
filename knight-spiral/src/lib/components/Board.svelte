@@ -24,6 +24,46 @@
 		return Math.min(MAX_SCALE, Math.max(MIN_SCALE, value));
 	}
 
+	// Spatial index so draw() only touches pieces near the viewport instead of
+	// all of them every frame — at a million pieces, scanning the full array
+	// on every pan/zoom event is the difference between smooth and unusable.
+	// Built incrementally (only the newly-arrived slice gets bucketed each
+	// time) so indexing stays O(pieces) overall rather than O(pieces) *per
+	// redraw*.
+	const CHUNK_SIZE = 32; // cells per chunk side
+	const CHUNK_KEY_OFFSET = 1_000_000;
+	function chunkKey(cx: number, cy: number): number {
+		return (cx + CHUNK_KEY_OFFSET) * (2 * CHUNK_KEY_OFFSET) + (cy + CHUNK_KEY_OFFSET);
+	}
+
+	// Deliberately a plain Map, not SvelteMap: this is a perf-sensitive
+	// internal cache, not something the template reacts to — reactivity is
+	// driven by `count` instead, so a reactive Map here would only add proxy
+	// overhead to the hot path this exists to speed up.
+	// eslint-disable-next-line svelte/prefer-svelte-reactivity
+	let chunks = new Map<number, PlacedPiece[]>();
+	let indexedCount = 0;
+	let indexedPlacements: PlacedPiece[] | null = null;
+
+	function ensureIndexed() {
+		if (placements !== indexedPlacements) {
+			chunks = new Map();
+			indexedCount = 0;
+			indexedPlacements = placements;
+		}
+		for (let i = indexedCount; i < placements.length; i++) {
+			const p = placements[i];
+			const key = chunkKey(Math.floor(p.x / CHUNK_SIZE), Math.floor(p.y / CHUNK_SIZE));
+			let bucket = chunks.get(key);
+			if (!bucket) {
+				bucket = [];
+				chunks.set(key, bucket);
+			}
+			bucket.push(p);
+		}
+		indexedCount = placements.length;
+	}
+
 	/** The view never auto-fits to content — only this initial default, and
 	 *  whatever the user pans/zooms to from there. */
 	const DEFAULT_BOX_CELLS = 100;
@@ -40,6 +80,8 @@
 		if (!canvas) return;
 		const ctx = canvas.getContext('2d');
 		if (!ctx) return;
+
+		ensureIndexed();
 
 		const rect = canvas.getBoundingClientRect();
 		const dpr = window.devicePixelRatio || 1;
@@ -65,16 +107,36 @@
 		const boardXToPixel = (gx: number) => Math.round(originX + (gx - centerX) * cellSize);
 		const boardYToPixel = (gy: number) => Math.round(originY - (gy - centerY) * cellSize);
 
-		for (const p of placements) {
-			const left = boardXToPixel(p.x - 0.5);
-			const right = boardXToPixel(p.x + 0.5);
-			const top = boardYToPixel(p.y + 0.5);
-			const bottom = boardYToPixel(p.y - 0.5);
-			if (right < 0 || left > rect.width || bottom < 0 || top > rect.height) {
-				continue;
+		// Only walk chunks overlapping the viewport (padded by one chunk) —
+		// at large piece counts almost all of the board is off-screen, and
+		// this is what keeps per-frame cost proportional to what's visible
+		// instead of to total piece count.
+		const visibleMinX = centerX - rect.width / 2 / scale;
+		const visibleMaxX = centerX + rect.width / 2 / scale;
+		const visibleMinY = centerY - rect.height / 2 / scale;
+		const visibleMaxY = centerY + rect.height / 2 / scale;
+		const minChunkX = Math.floor(visibleMinX / CHUNK_SIZE) - 1;
+		const maxChunkX = Math.floor(visibleMaxX / CHUNK_SIZE) + 1;
+		const minChunkY = Math.floor(visibleMinY / CHUNK_SIZE) - 1;
+		const maxChunkY = Math.floor(visibleMaxY / CHUNK_SIZE) + 1;
+
+		for (let cx = minChunkX; cx <= maxChunkX; cx++) {
+			for (let cy = minChunkY; cy <= maxChunkY; cy++) {
+				const bucket = chunks.get(chunkKey(cx, cy));
+				if (!bucket) continue;
+
+				for (const p of bucket) {
+					const left = boardXToPixel(p.x - 0.5);
+					const right = boardXToPixel(p.x + 0.5);
+					const top = boardYToPixel(p.y + 0.5);
+					const bottom = boardYToPixel(p.y - 0.5);
+					if (right < 0 || left > rect.width || bottom < 0 || top > rect.height) {
+						continue;
+					}
+					ctx.fillStyle = COLOR_PALETTE[p.color % COLOR_PALETTE.length];
+					ctx.fillRect(left, top, right - left, bottom - top);
+				}
 			}
-			ctx.fillStyle = COLOR_PALETTE[p.color % COLOR_PALETTE.length];
-			ctx.fillRect(left, top, right - left, bottom - top);
 		}
 	}
 
