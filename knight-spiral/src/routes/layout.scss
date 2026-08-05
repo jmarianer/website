@@ -1,0 +1,90 @@
+/* Reset */
+*,
+*::before,
+*::after {
+	box-sizing: border-box;
+}
+
+* {
+	margin: 0;
+	padding: 0;
+}
+
+button,
+input,
+select,
+textarea {
+	font: inherit;
+}
+
+img,
+svg {
+	display: block;
+}
+
+/* Themes */
+@mixin light {
+	--paper-1: #f5f1e8;
+	--paper-2: #e8dcc6;
+	--card: #ffffff;
+	--ink: #2c3e50;
+	--ink-2: #4a5b6e;
+	--ink-3: #8696a8;
+	--ink-4: #b8c2cd;
+	--line: #d9d4c5; /* warm hairline, harmonizes with cream */
+	--line-2: #ebe6d8;
+	--accent: #4a90e2;
+	--accent-soft: #b3d0ff;
+	--chip-bg: #f0ece0;
+	--shadow-card: 0 8px 25px rgba(44, 62, 80, 0.12);
+	--shadow-soft: 0 1px 0 rgba(44, 62, 80, 0.04);
+}
+
+@mixin dark {
+	--paper-1: #1a2230;
+	--paper-2: #0f1620;
+	--card: #1c2738;
+	--ink: #e8eef5;
+	--ink-2: #b8c2cd;
+	--ink-3: #7d8b9c;
+	--ink-4: #4d5a6c;
+	--line: #2c3a4e;
+	--line-2: #243043;
+	--accent: #6ba6ea;
+	--accent-soft: #2a4a78;
+	--chip-bg: #243043;
+	--shadow-card: 0 8px 25px rgba(0, 0, 0, 0.4);
+	--shadow-soft: 0 1px 0 rgba(0, 0, 0, 0.2);
+}
+
+/* Root */
+:root {
+	--stroke: #0000ff;
+	--bad: #c0392b;
+	--dup: #b27a00;
+	--good: #1f8a5b;
+	--mono: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+	--sans: 'Arial', 'Helvetica Neue', Helvetica, sans-serif;
+	--radius: 4px;
+	--radius-lg: 12px;
+
+	background: linear-gradient(135deg, var(--paper-1) 0%, var(--paper-2) 100%);
+
+	&[data-theme='light'] {
+		@include light;
+	}
+
+	&[data-theme='dark'] {
+		@include dark;
+	}
+
+	&:not([data-theme='light'], [data-theme='dark']) {
+		@media (prefers-color-scheme: light) {
+			@include light;
+		}
+
+		@media (prefers-color-scheme: dark) {
+			@include dark;
+		}
+	}
+}
