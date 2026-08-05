@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { untrack } from 'svelte';
 	import Board from '$lib/components/Board.svelte';
 	import { GenerationClient } from '$lib/generate-client';
 	import type { PlacedPiece } from '$lib/generate';
@@ -14,7 +13,6 @@
 	let debouncedColorCount = $state(DEFAULT_COLOR_COUNT);
 
 	let placements = $state.raw<PlacedPiece[]>([]);
-	let generationId = $state(0);
 	let generating = $state(false);
 
 	$effect(() => {
@@ -31,7 +29,6 @@
 		const colors = debouncedColorCount;
 
 		placements = [];
-		generationId = untrack(() => generationId) + 1;
 		generating = true;
 
 		client.generate(
@@ -65,11 +62,14 @@
 			<span class="value">{colorCount}</span>
 		</label>
 		{#if generating}
-			<span class="status">generating…</span>
+			<span class="status">
+				generating…
+				<progress class="progress" value={placements.length} max={MAX_TOTAL_PIECES}></progress>
+			</span>
 		{/if}
 	</header>
 	<main>
-		<Board {placements} {generationId} />
+		<Board {placements} />
 	</main>
 </div>
 
@@ -110,9 +110,18 @@
 	}
 
 	.status {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
 		color: var(--ink-3);
 		font-size: 0.85rem;
 		font-style: italic;
+	}
+
+	.progress {
+		width: 8rem;
+		height: 0.4rem;
+		accent-color: var(--accent);
 	}
 
 	main {
