@@ -16,6 +16,7 @@ locals {
     "quickerpass.joeym.org",
     "wordsearch.joeym.org",
     "lok-solver.joeym.org",
+    "knight-spiral.joeym.org",
   ])
 }
 
