@@ -77,6 +77,86 @@ test('renders the knight spiral and responds to pan/zoom without errors', async 
 	expect(errors).toEqual([]);
 });
 
+test('pinch-to-zoom in and back out with two simulated touch pointers', async ({ page }) => {
+	const errors: string[] = [];
+	page.on('pageerror', (error) => errors.push(error.message));
+
+	await page.goto(BASE_URL);
+	await waitForGenerationComplete(page);
+
+	const canvas = page.locator('canvas');
+
+	function scanlineTransitions() {
+		return canvas.evaluate((el: HTMLCanvasElement) => {
+			const ctx = el.getContext('2d')!;
+			const { width, height } = el;
+			const y = Math.floor(height / 2);
+			const row = ctx.getImageData(0, y, width, 1).data;
+			let transitions = 0;
+			let last: string | null = null;
+			for (let x = 0; x < width; x++) {
+				const i = x * 4;
+				const color = `${row[i]},${row[i + 1]},${row[i + 2]},${row[i + 3]}`;
+				if (last !== null && color !== last) transitions++;
+				last = color;
+			}
+			return transitions;
+		});
+	}
+
+	function dispatchPointer(type: string, id: number, x: number, y: number) {
+		return canvas.evaluate(
+			(el, { type, id, x, y }) => {
+				const rect = el.getBoundingClientRect();
+				el.dispatchEvent(
+					new PointerEvent(type, {
+						pointerId: id,
+						pointerType: 'touch',
+						clientX: rect.left + x,
+						clientY: rect.top + y,
+						bubbles: true,
+						cancelable: true
+					})
+				);
+			},
+			{ type, id, x, y }
+		);
+	}
+
+	const box = (await canvas.boundingBox())!;
+	const cx = box.width / 2;
+	const cy = box.height / 2;
+
+	const before = await scanlineTransitions();
+
+	// Pinch out (fingers spread apart) should zoom in: fewer, larger cells
+	// crossed by the same scanline.
+	await dispatchPointer('pointerdown', 1, cx - 20, cy);
+	await dispatchPointer('pointerdown', 2, cx + 20, cy);
+	for (let d = 20; d <= 200; d += 20) {
+		await dispatchPointer('pointermove', 1, cx - d, cy);
+		await dispatchPointer('pointermove', 2, cx + d, cy);
+	}
+	await dispatchPointer('pointerup', 1, cx - 200, cy);
+	await dispatchPointer('pointerup', 2, cx + 200, cy);
+	const afterZoomIn = await scanlineTransitions();
+	expect(afterZoomIn).toBeLessThan(before);
+
+	// Pinch back in (fingers come together) should zoom back out.
+	await dispatchPointer('pointerdown', 3, cx - 200, cy);
+	await dispatchPointer('pointerdown', 4, cx + 200, cy);
+	for (let d = 200; d >= 20; d -= 20) {
+		await dispatchPointer('pointermove', 3, cx - d, cy);
+		await dispatchPointer('pointermove', 4, cx + d, cy);
+	}
+	await dispatchPointer('pointerup', 3, cx - 20, cy);
+	await dispatchPointer('pointerup', 4, cx + 20, cy);
+	const afterZoomOut = await scanlineTransitions();
+	expect(afterZoomOut).toBeGreaterThan(afterZoomIn);
+
+	expect(errors).toEqual([]);
+});
+
 test('loads piece configuration from the URL hash', async ({ page }) => {
 	const errors: string[] = [];
 	page.on('pageerror', (error) => errors.push(error.message));

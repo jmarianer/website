@@ -140,30 +140,88 @@
 		}
 	}
 
-	let dragging = false;
-	let lastPointerX = 0;
-	let lastPointerY = 0;
+	// Tracks every finger/pointer currently down, keyed by pointerId — needed
+	// (rather than a single "dragging" flag + last position) to support
+	// two-finger pinch-to-zoom alongside single-finger pan. Plain Map, not
+	// $state: purely internal gesture bookkeeping, never read by rendering.
+	// eslint-disable-next-line svelte/prefer-svelte-reactivity
+	const activePointers = new Map<number, { x: number; y: number }>();
+	let lastPinchDistance = 0;
+	let lastPinchMidX = 0;
+	let lastPinchMidY = 0;
+
+	function canvasPoint(event: PointerEvent): { x: number; y: number } {
+		const rect = canvas.getBoundingClientRect();
+		return { x: event.clientX - rect.left, y: event.clientY - rect.top };
+	}
+
+	/** Distance and midpoint between the first two active pointers. */
+	function pinchState() {
+		const [a, b] = [...activePointers.values()];
+		return {
+			distance: Math.hypot(b.x - a.x, b.y - a.y),
+			midX: (a.x + b.x) / 2,
+			midY: (a.y + b.y) / 2
+		};
+	}
 
 	function onPointerDown(event: PointerEvent) {
-		dragging = true;
-		lastPointerX = event.clientX;
-		lastPointerY = event.clientY;
-		canvas.setPointerCapture(event.pointerId);
+		activePointers.set(event.pointerId, canvasPoint(event));
+		// Best-effort: keeps receiving events if a finger drags outside the
+		// canvas, but our own tracking above doesn't depend on it succeeding.
+		try {
+			canvas.setPointerCapture(event.pointerId);
+		} catch {
+			// Ignored.
+		}
+
+		// A second finger just landed: (re)baseline the pinch gesture from
+		// its current distance/midpoint so the next move doesn't jump.
+		if (activePointers.size === 2) {
+			({ distance: lastPinchDistance, midX: lastPinchMidX, midY: lastPinchMidY } = pinchState());
+		}
 	}
 
 	function onPointerMove(event: PointerEvent) {
-		if (!dragging) return;
-		const dx = event.clientX - lastPointerX;
-		const dy = event.clientY - lastPointerY;
-		lastPointerX = event.clientX;
-		lastPointerY = event.clientY;
-		centerX -= dx / scale;
-		centerY += dy / scale;
+		if (!activePointers.has(event.pointerId)) return;
+		const rect = canvas.getBoundingClientRect();
+
+		if (activePointers.size === 1) {
+			const previous = activePointers.get(event.pointerId)!;
+			const current = canvasPoint(event);
+			activePointers.set(event.pointerId, current);
+			centerX -= (current.x - previous.x) / scale;
+			centerY += (current.y - previous.y) / scale;
+			return;
+		}
+
+		// Two (or more, extras ignored) fingers down: pinch-to-zoom, anchored
+		// on the midpoint, plus whatever pan falls out of the midpoint moving.
+		activePointers.set(event.pointerId, canvasPoint(event));
+		const { distance, midX, midY } = pinchState();
+
+		const boardX = centerX + (lastPinchMidX - rect.width / 2) / scale;
+		const boardY = centerY - (lastPinchMidY - rect.height / 2) / scale;
+
+		const zoomFactor = lastPinchDistance > 0 ? distance / lastPinchDistance : 1;
+		const newScale = clampScale(scale * zoomFactor);
+
+		centerX = boardX - (midX - rect.width / 2) / newScale;
+		centerY = boardY + (midY - rect.height / 2) / newScale;
+		scale = newScale;
+
+		lastPinchDistance = distance;
+		lastPinchMidX = midX;
+		lastPinchMidY = midY;
 	}
 
 	function onPointerUp(event: PointerEvent) {
-		dragging = false;
-		canvas.releasePointerCapture(event.pointerId);
+		try {
+			canvas.releasePointerCapture(event.pointerId);
+		} catch {
+			// Ignored: already released, or capture never succeeded.
+		}
+		activePointers.delete(event.pointerId);
 	}
 
 	function onWheel(event: WheelEvent) {
