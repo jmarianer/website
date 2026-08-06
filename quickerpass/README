@@ -1,13 +1,13 @@
 # Install
-npm install
+pnpm install
 
 # Serve on localhost
-npm run dev
+pnpm dev
 
 # Serve on local network
-npm run dev -- --host 192.xxx.xxx.xxx
+pnpm dev -- --host 192.xxx.xxx.xxx
 
 # Deploy
-npm run build
+pnpm build
 gcloud storage cp -r dist/* gs://quickerpass-joeym-org
 gcloud compute url-maps invalidate-cdn-cache url-map --path "/*" --async

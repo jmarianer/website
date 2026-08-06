@@ -1,0 +1,17 @@
+packages:
+  - boobtree
+  - combinators
+  - crosswords
+  - knight-spiral
+  - lok-solver
+  - quickerpass
+  - wordsearch
+allowBuilds:
+  '@deepkit/type-compiler': true
+  '@deepkit/vite': true
+  '@firebase/util': true
+  '@parcel/watcher': true
+  canvas: true
+  esbuild: true
+  protobufjs: true
+  re2: true

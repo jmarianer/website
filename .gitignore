@@ -7,3 +7,4 @@ terraform.tfstate
 terraform.tfstate.backup
 error-context.md
 .last-run.json
+node_modules

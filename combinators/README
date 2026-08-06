@@ -1,9 +1,9 @@
 # Install
-npm install
+pnpm install
 
 # Serve
-npm start
+pnpm start
 
 # Deploy
-npm run build
+pnpm build
 gcloud storage cp -r dist/* gs://combinators-joeym-org

@@ -1,10 +1,10 @@
 # Install
-npm install
+pnpm install
 
 # Serve on localhost
-npm start
+pnpm start
 
 # Deploy
-npm run build
+pnpm build
 gcloud storage cp -r dist/* gs://knight-spiral-joeym-org
 gcloud compute url-maps invalidate-cdn-cache url-map --path "/*" --async
