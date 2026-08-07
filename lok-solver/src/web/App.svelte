@@ -1,8 +1,9 @@
 <script lang="ts">
-  import { applyMove } from '../core/apply.js';
   import { parseGrid } from '../core/grid.js';
   import type { SolveProgress } from '../core/solver.js';
-  import type { Grid, Move } from '../core/types.js';
+  import type { Grid } from '../core/types.js';
+  import { Playback } from './playback.svelte.js';
+  import { describeMove, replayTo, routePoints, type Solution } from './render.js';
   import { SolverClient } from './solver-client.js';
 
   let input = $state(`  A
@@ -17,88 +18,16 @@ TLAOTX
   X* K
   T`);
 
-  let solution = $state<{ initialGrid: Grid; moves: Move[] } | null>(null);
+  let solution = $state<Solution | null>(null);
   let solveError = $state<string | null>(null);
   let solving = $state(false);
   let solveProgress = $state<SolveProgress | null>(null);
-  let step = $state(0);
 
   const solverClient = new SolverClient();
-
-  // Animation clock: animElapsed is ms since the current move's animation started, or null when settled.
-  // animMoveLength is the route length of the move currently being animated.
-  let animElapsed = $state<number | null>(null);
-  let animMoveLength = $state<number>(0);
-  let animRAF: number | null = null;
-  const ANIM_MS = 250;
-
-  let playing = $state(false);
-
-  function clearAnim(): void {
-    if (animRAF !== null) {
-      cancelAnimationFrame(animRAF);
-      animRAF = null;
-    }
-    animElapsed = null;
-  }
-
-  function advance(): void {
-    if (!solution || step >= solution.moves.length) {
-      playing = false;
-      clearAnim();
-      return;
-    }
-    clearAnim();
-    const move = solution.moves[step]!;
-    step++;
-    animMoveLength = move.route.length;
-    animElapsed = 0;
-    // Total duration: one unit of pre-roll wait + one unit per cell visited.
-    const totalDuration = (move.route.length + 1) * ANIM_MS;
-    const startTime = performance.now();
-    const frame = (now: number): void => {
-      const elapsed = now - startTime;
-      if (elapsed >= totalDuration) {
-        if (playing) {
-          advance();
-        } else {
-          animElapsed = null;
-          animRAF = null;
-        }
-        return;
-      }
-      animElapsed = elapsed;
-      animRAF = requestAnimationFrame(frame);
-    };
-    animRAF = requestAnimationFrame(frame);
-  }
-
-  function goBack(): void {
-    playing = false;
-    clearAnim();
-    if (step > 0) step--;
-  }
-
-  function reset(): void {
-    playing = false;
-    clearAnim();
-    step = 0;
-  }
-
-  function togglePlay(): void {
-    if (!solution) return;
-    if (playing) {
-      playing = false;
-      return;
-    }
-    // If we're at the end, restart from the beginning before playing.
-    if (step >= solution.moves.length) step = 0;
-    playing = true;
-    if (animElapsed === null) advance();
-  }
+  const playback = new Playback(() => solution);
 
   function handleSolve(): void {
-    clearAnim();
+    playback.reset();
     solving = true;
     solveError = null;
     solution = null;
@@ -114,7 +43,6 @@ TLAOTX
           solveError = 'No solution.';
         } else {
           solution = res;
-          step = 0;
         }
       },
       onError: (msg) => {
@@ -131,115 +59,24 @@ TLAOTX
     solveProgress = null;
   }
 
-  // Discrete cell index for darkening (and gating "are we animating?"). null = settled.
-  const animProgress = $derived.by((): number | null => {
-    if (animElapsed === null) return null;
-    const frac = animElapsed / ANIM_MS - 1;
-    if (frac < 0) return -1;
-    return Math.min(Math.floor(frac), animMoveLength - 1);
-  });
+  const currentGrid = $derived.by((): Grid | null =>
+    solution ? replayTo(solution, playback.step, playback.animProgress) : null
+  );
 
-  // Continuous progress for line growth. Values:
-  //   -1 = pre-roll wait (no line)
-  //    0 = cursor at route[0] (single dot)
-  //    K (integer) = cursor at route[K]
-  //    K + frac = cursor frac of the way from route[K] toward route[K+1]
-  // When settled, returns route.length-1 so the full line stays drawn.
-  const lineFraction = $derived.by((): number => {
-    if (animElapsed === null) {
-      return currentMove ? currentMove.route.length - 1 : -1;
-    }
-    return animElapsed / ANIM_MS - 1;
-  });
-
-  const currentGrid = $derived.by((): Grid | null => {
-    if (!solution) return null;
-    // While animating move N, step is already N+1 and we render the pre-move
-    // grid plus partial route blackening. When settled, render the full grid at step.
-    const baseStep = animProgress !== null ? step - 1 : step;
-    let g = solution.initialGrid;
-    for (let i = 0; i < baseStep; i++) g = applyMove(g, solution.moves[i]!);
-
-    if (animProgress !== null) {
-      const move = solution.moves[step - 1]!;
-      const newCells = g.cells.map((row) => [...row]);
-      for (let i = 0; i <= animProgress; i++) {
-        const p = move.route[i]!;
-        const cell = newCells[p.r]![p.c]!;
-        if (cell === null || cell.sym === 'X') continue;
-        newCells[p.r]![p.c] = { sym: cell.sym, col: 'B' };
-      }
-      return { ...g, cells: newCells };
-    }
-
-    return g;
-  });
-
-  const currentMove = $derived(solution && step > 0 ? solution.moves[step - 1] : null);
-
-  function describeMove(m: Move): string {
-    switch (m.word) {
-      case 'LOK':
-        return `LOK · target (${m.target.r},${m.target.c})`;
-      case 'TLAK':
-        return `TLAK · targets (${m.first.r},${m.first.c}) → (${m.second.r},${m.second.c})`;
-      case 'TA':
-        return `TA · symbol ${m.symbol}`;
-      case 'BE':
-        return `BE · (${m.star.r},${m.star.c}) → ${m.newLetter}`;
-    }
-  }
+  const routeLine = $derived(
+    playback.currentMove ? routePoints(playback.currentMove.route, playback.lineFraction) : ''
+  );
 
   function isOnRoute(r: number, c: number): boolean {
-    if (!currentMove) return false;
-    const end = animProgress !== null ? animProgress : currentMove.route.length - 1;
+    const move = playback.currentMove;
+    if (!move) return false;
+    const end = playback.animProgress !== null ? playback.animProgress : move.route.length - 1;
     for (let i = 0; i <= end; i++) {
-      const p = currentMove.route[i]!;
+      const p = move.route[i]!;
       if (p.r === r && p.c === c) return true;
     }
     return false;
   }
-
-  // Pixel geometry — must match the CSS for .grid / .cell / .label.
-  const CELL_SIZE = 32; // 2rem
-  const CELL_GAP = 1;
-  const LABEL_SIZE = 24; // 1.5rem
-  const GRID_INSET = 2 + 1; // border (2px) + padding (1px)
-
-  function cellCenter(r: number, c: number): { x: number; y: number } {
-    return {
-      x: GRID_INSET + LABEL_SIZE + CELL_GAP + c * (CELL_SIZE + CELL_GAP) + CELL_SIZE / 2,
-      y: GRID_INSET + LABEL_SIZE + CELL_GAP + r * (CELL_SIZE + CELL_GAP) + CELL_SIZE / 2
-    };
-  }
-
-  const routePoints = $derived.by((): string => {
-    if (!currentMove || lineFraction < 0) return '';
-    const route = currentMove.route;
-    const completed = Math.floor(lineFraction);
-    const partial = lineFraction - completed;
-    const pts: { x: number; y: number }[] = [];
-    const lastFull = Math.min(completed, route.length - 1);
-    for (let i = 0; i <= lastFull; i++) {
-      pts.push(cellCenter(route[i]!.r, route[i]!.c));
-    }
-    // Partial segment from the last full point toward the next cell.
-    if (completed + 1 < route.length && partial > 0) {
-      const a = pts[pts.length - 1]!;
-      const next = cellCenter(route[completed + 1]!.r, route[completed + 1]!.c);
-      pts.push({
-        x: a.x + (next.x - a.x) * partial,
-        y: a.y + (next.y - a.y) * partial
-      });
-    }
-    if (pts.length === 0) return '';
-    // Duplicate the point so stroke-linecap=round renders a visible dot for length-1 routes.
-    if (pts.length === 1) {
-      const p = pts[0]!;
-      return `${p.x},${p.y} ${p.x},${p.y}`;
-    }
-    return pts.map((p) => `${p.x},${p.y}`).join(' ');
-  });
 </script>
 
 <main>
@@ -275,19 +112,28 @@ TLAOTX
   {#if solution && currentGrid}
     <section class="output">
       <div class="controls">
-        <button onclick={reset} disabled={step === 0 && !playing}>⏮ Reset</button>
-        <button onclick={goBack} disabled={step === 0 || playing}>|◀ Prev</button>
-        <span class="counter">Move {step} / {solution.moves.length}</span>
-        <button onclick={advance} disabled={step === solution.moves.length || playing}
-          >Next ▶|</button
+        <button onclick={() => playback.reset()} disabled={playback.step === 0 && !playback.playing}
+          >⏮ Reset</button
         >
-        <button onclick={togglePlay}>
-          {playing ? '⏸ Pause' : step >= solution.moves.length ? '↻ Replay' : '▶ Play'}
+        <button onclick={() => playback.goBack()} disabled={playback.step === 0 || playback.playing}
+          >|◀ Prev</button
+        >
+        <span class="counter">Move {playback.step} / {solution.moves.length}</span>
+        <button
+          onclick={() => playback.advance()}
+          disabled={playback.step === solution.moves.length || playback.playing}>Next ▶|</button
+        >
+        <button onclick={() => playback.togglePlay()}>
+          {playback.playing
+            ? '⏸ Pause'
+            : playback.step >= solution.moves.length
+              ? '↻ Replay'
+              : '▶ Play'}
         </button>
       </div>
 
-      {#if currentMove}
-        <p class="move-desc">{describeMove(currentMove)}</p>
+      {#if playback.currentMove}
+        <p class="move-desc">{describeMove(playback.currentMove)}</p>
       {:else}
         <p class="move-desc">Initial state.</p>
       {/if}
@@ -316,9 +162,9 @@ TLAOTX
             {/each}
           {/each}
         </div>
-        {#if routePoints}
+        {#if routeLine}
           <svg class="route-line" aria-hidden="true">
-            <polyline points={routePoints} />
+            <polyline points={routeLine} />
           </svg>
         {/if}
       </div>
