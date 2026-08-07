@@ -1,10 +1,66 @@
+# Jekyll site
 _site
 _drafts
-*.swp
 .jekyll-cache/
+
+# Terraform
 .terraform
 terraform.tfstate
 terraform.tfstate.backup
+
+# Misc
+*.swp
 error-context.md
 .last-run.json
+
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Dependencies
 node_modules
+
+# Build output
+dist
+dist-*
+build
+.svelte-kit
+.output
+.vercel
+.netlify
+.wrangler
+tsconfig.tsbuildinfo
+
+# Env
+.env
+.env.*
+!.env.example
+!.env.test
+*.local
+
+# Test artifacts
+test-results
+trace.zip
+
+# Vite
+vite.config.js.timestamp-*
+vite.config.ts.timestamp-*
+
+# Editor
+**/.vscode/*
+!**/.vscode/extensions.json
+.idea
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# OS
+.DS_Store
+Thumbs.db

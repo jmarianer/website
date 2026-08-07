@@ -10,7 +10,8 @@
     "cli": "tsx src/cli/main.ts",
     "start": "BROWSER=open vite dev --open",
     "build": "vite build",
-    "lint": "prettier --check . && eslint ."
+    "lint": "prettier --check --ignore-path ../.gitignore . && eslint .",
+    "format": "prettier --write --ignore-path ../.gitignore ."
   },
   "devDependencies": {
     "@eslint/compat": "^2.0.4",
