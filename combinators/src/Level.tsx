@@ -3,7 +3,6 @@ import { CombinatorExpression, parseExpression } from './combinators';
 import { allBasicCombinators, reduce, substitute, type BasicCombinator } from "./reduce";
 import { levels } from './levels';
 import { Link, useParams } from 'react-router';
-import { pick, reverse } from 'lodash';
 import { showAllowedCombinators, ShowReductions } from './utils';
 
 function tryIt(inputExpr: CombinatorExpression, source: string, target: string, basicCombinators: Record<string, BasicCombinator>) {
@@ -25,7 +24,8 @@ function tryIt(inputExpr: CombinatorExpression, source: string, target: string, 
       const common = sourceReductions[sourceReductions.length-1].toString();
       targetReductions.length = targetReductions.findIndex(e => e.toString() === common);
 
-      const reductions = [...sourceReductions, ...reverse(targetReductions), target];
+      targetReductions.reverse();
+      const reductions = [...sourceReductions, ...targetReductions, target];
 
       return <div className='win'>
         <span>Success!</span>
@@ -47,7 +47,9 @@ export function Level() {
   const {id: stringId} = useParams();
   const id = parseInt(stringId!, 10);
   const {description, source, target, title, allowedCombinators: allowedCombinatorNames } = levels[id - 1];
-  const allowedCombinators = pick(allBasicCombinators, allowedCombinatorNames.split(''));
+  const allowedCombinators = Object.fromEntries(
+    allowedCombinatorNames.split('').map(name => [name, allBasicCombinators[name]])
+  );
 
   const [exprString, setExprString] = useState('');
   const [results, setResults] = useState(<></>);

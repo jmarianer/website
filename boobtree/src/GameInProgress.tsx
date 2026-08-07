@@ -2,8 +2,9 @@ import Switch from "react-switch";
 import { useCurrentGame } from "./database";
 import { createRef, useEffect, useRef, useState } from "react";
 import { Canvas, FabricImage, PencilBrush } from "fabric";
-import { range } from "lodash";
 import { IMAGE_HEIGHT, IMAGE_WIDTH, useSize } from "./utils";
+
+const THICKNESS_OPTIONS = [1, 3, 5, 7, 9, 11, 13, 15];
 
 function createBlankImageDataURL(width: number, height: number): string {
   const canvas = document.createElement('canvas');
@@ -148,7 +149,7 @@ function DrawingRound() {
       ))}
     </div>
     <div id="thickness-picker">
-      {range(1, 17, 2).map(t => (
+      {THICKNESS_OPTIONS.map(t => (
         <div
           key={t}
           className={`swatch-container ${color}` + (t === thickness ? " active" : "")}

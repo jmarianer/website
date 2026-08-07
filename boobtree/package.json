@@ -32,6 +32,7 @@
     "@deepkit/vite": "^1.0.15",
     "@playwright/test": "^1.59.1",
     "firebase-tools": "^11.30.0",
+    "@types/node": "^24.6.0",
     "@types/react": "^19.1.10",
     "@types/react-dom": "^19.1.7",
     "@types/reveal.js": "^5.2.0",
