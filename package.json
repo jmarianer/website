@@ -6,6 +6,7 @@
   "scripts": {
     "build": "pnpm -r --if-present run build",
     "check": "pnpm -r --if-present run check",
+    "deploy": "sh scripts/deploy.sh",
     "format": "pnpm -r --if-present run format",
     "lint": "pnpm -r --if-present run lint",
     "test": "pnpm -r --if-present run test"
