@@ -12,7 +12,7 @@ export function useSize(elt: Element | null): DOMRectReadOnly {
     }
 
     const resizeObserver = new ResizeObserver(entries => {
-      for (let entry of entries) {
+      for (const entry of entries) {
         setSize(entry.contentRect);
       }
     });

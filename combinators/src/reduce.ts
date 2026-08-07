@@ -48,7 +48,7 @@ function reduceOnce(e: CombinatorExpression, basicCombinators: Record<string, Ba
 }
 
 function getArgs(e: CombinatorExpression): CombinatorExpression[] {
-  let args: CombinatorExpression[] = [];
+  const args: CombinatorExpression[] = [];
   while (e instanceof Application) {
     args.unshift(e.right);
     e = e.left;
@@ -70,7 +70,7 @@ export function substitute(expr: CombinatorExpression, substitutions: Record<str
 const MAX_REDUCTIONS = 10;
 
 export function reduce(expr: CombinatorExpression, basicCombinators: Record<string, BasicCombinator>): CombinatorExpression[] {
-  let ret: CombinatorExpression[] = [];
+  const ret: CombinatorExpression[] = [];
   while (expr && ret.length < MAX_REDUCTIONS) {
     ret.push(expr);
     expr = reduceOnce(expr, basicCombinators);

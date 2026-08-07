@@ -50,7 +50,7 @@ export function Level() {
   const allowedCombinators = pick(allBasicCombinators, allowedCombinatorNames.split(''));
 
   const [exprString, setExprString] = useState('');
-  let [results, setResults] = useState(<></>);
+  const [results, setResults] = useState(<></>);
 
   return (
     <>

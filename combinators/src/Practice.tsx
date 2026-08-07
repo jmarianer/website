@@ -6,7 +6,7 @@ import { Link } from 'react-router';
 
 function Practice() {
   const [exprString, setExprString] = useState('');
-  let [results, setResults] = useState(<></>);
+  const [results, setResults] = useState(<></>);
 
   return (
     <>
