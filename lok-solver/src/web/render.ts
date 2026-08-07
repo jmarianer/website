@@ -33,7 +33,7 @@ export function replayTo(
       const p = move.route[i]!;
       const cell = newCells[p.r]![p.c]!;
       if (cell === null || cell.sym === 'X') continue;
-      newCells[p.r]![p.c] = { sym: cell.sym, col: 'B' };
+      newCells[p.r]![p.c] = { ...cell, col: 'B' };
     }
     return { ...g, cells: newCells };
   }

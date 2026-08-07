@@ -103,4 +103,21 @@ describe('applyMove', () => {
     });
     expect(formatGrid(after)).toBe('beO');
   });
+
+  it('BE: keeps the star pencil flag on the written letter, through blackening', () => {
+    const grid = parseGrid('BE*');
+    const written = applyMove(grid, {
+      word: 'BE',
+      route: [
+        { r: 0, c: 0 },
+        { r: 0, c: 1 }
+      ],
+      star: { r: 0, c: 2 },
+      newLetter: 'O'
+    });
+    expect(written.cells[0]![2]).toEqual({ sym: 'O', col: 'W', pencil: true });
+    // Blackening the penciled letter (e.g. a later LOK) keeps the flag.
+    const blackened = applyMove(written, { word: 'LOK', route: [], target: { r: 0, c: 2 } });
+    expect(blackened.cells[0]![2]).toEqual({ sym: 'O', col: 'B', pencil: true });
+  });
 });

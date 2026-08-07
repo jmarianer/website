@@ -30,7 +30,12 @@ export type CellSymbol = Letter | '*';
 
 export type Color = 'W' | 'B';
 
-export type Cell = null | { sym: CellSymbol; col: Color };
+/**
+ * `pencil` marks cells that began life as a `*`: any letter BE writes there is
+ * penciled in, and the UI renders it in a handwriting font. Invisible to the
+ * solver (formatGrid ignores it) and static per position.
+ */
+export type Cell = null | { sym: CellSymbol; col: Color; pencil?: boolean };
 
 export type Grid = {
   rows: number;

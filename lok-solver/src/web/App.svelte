@@ -181,6 +181,7 @@ TLAOTX
                   class:black={cell.col === 'B'}
                   class:star={cell.sym === '*'}
                   class:x={cell.sym === 'X'}
+                  class:pencil={cell.pencil}
                   class:route={isOnRoute(r, c)}
                   style="grid-row: {r + 2}; grid-column: {c + 2}"
                 >
@@ -372,5 +373,11 @@ TLAOTX
   .cell.black {
     background: #222;
     color: white;
+  }
+  /* Letters written into a former star by BE look penciled in by hand. */
+  .cell.pencil {
+    font-family: 'Bradley Hand', 'Segoe Print', 'Comic Sans MS', cursive;
+    font-size: 1.3rem;
+    color: blue;
   }
 </style>

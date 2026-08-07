@@ -3,7 +3,7 @@ import type { Cell, Coord, Grid, Move } from './types.js';
 function blackenAt(cells: Cell[][], { r, c }: Coord): void {
   const cell = cells[r]![c]!;
   if (cell === null || cell.col === 'B') return;
-  cells[r]![c] = { sym: cell.sym, col: 'B' };
+  cells[r]![c] = { ...cell, col: 'B' };
 }
 
 function blackenRouteLetters(cells: Cell[][], route: ReadonlyArray<Coord>): void {
@@ -44,13 +44,17 @@ export function applyMove(grid: Grid, move: Move): Grid {
         for (let ci = 0; ci < row.length; ci++) {
           const cell = row[ci]!;
           if (cell === null || cell.col !== 'W' || cell.sym !== sym) continue;
-          row[ci] = { sym: cell.sym, col: 'B' };
+          row[ci] = { ...cell, col: 'B' };
         }
       }
       break;
     }
     case 'BE':
-      cells[move.star.r]![move.star.c] = { sym: move.newLetter, col: 'W' };
+      // Spread keeps the star's pencil flag on the letter written over it.
+      cells[move.star.r]![move.star.c] = {
+        ...cells[move.star.r]![move.star.c]!,
+        sym: move.newLetter
+      };
       break;
   }
 

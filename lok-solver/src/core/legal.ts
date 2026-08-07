@@ -38,7 +38,7 @@ function blackenRouteLetters(grid: Grid, route: ReadonlyArray<Coord>): Grid {
   for (const { r, c } of route) {
     const cell = newCells[r]![c]!;
     if (cell === null || cell.sym === 'X') continue;
-    newCells[r]![c] = { sym: cell.sym, col: 'B' };
+    newCells[r]![c] = { ...cell, col: 'B' };
   }
   return { ...grid, cells: newCells };
 }

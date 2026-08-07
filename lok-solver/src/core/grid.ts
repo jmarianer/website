@@ -5,8 +5,8 @@ const LOWER = /^[a-z]$/;
 
 function parseChar(ch: string): Cell {
   if (ch === ' ') return null;
-  if (ch === '*') return { sym: '*', col: 'W' };
-  if (ch === '.') return { sym: '*', col: 'B' };
+  if (ch === '*') return { sym: '*', col: 'W', pencil: true };
+  if (ch === '.') return { sym: '*', col: 'B', pencil: true };
   if (UPPER.test(ch)) return { sym: ch as Letter, col: 'W' };
   if (LOWER.test(ch)) return { sym: ch.toUpperCase() as Letter, col: 'B' };
   throw new Error(`parseGrid: unexpected character ${JSON.stringify(ch)}`);
