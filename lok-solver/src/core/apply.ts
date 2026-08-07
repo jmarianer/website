@@ -15,16 +15,16 @@ function blackenRouteLetters(cells: Cell[][], route: ReadonlyArray<Coord>): void
 }
 
 /*
-  * Returns a new grid with the move applied, leaving the input grid unmodified.
-  *
-  * The entire route is blackened first, then the specific effect of the move is
-  * applied as follows:
-  *
-  * LOK: blacken the target cell.
-  * TLAK: blacken the two target cells.
-  * TA: blacken all white cells matching the selected symbol.
-  * BE: place a new white letter at the star.
-  */
+ * Returns a new grid with the move applied, leaving the input grid unmodified.
+ *
+ * The entire route is blackened first, then the specific effect of the move is
+ * applied as follows:
+ *
+ * LOK: blacken the target cell.
+ * TLAK: blacken the two target cells.
+ * TA: blacken all white cells matching the selected symbol.
+ * BE: place a new white letter at the star.
+ */
 export function applyMove(grid: Grid, move: Move): Grid {
   // Deep-copy the rows once, then mutate freely below.
   const cells: Cell[][] = grid.cells.map((row) => [...row]);

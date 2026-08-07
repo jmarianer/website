@@ -1,6 +1,30 @@
 export type Letter =
-  | 'A' | 'B' | 'C' | 'D' | 'E' | 'F' | 'G' | 'H' | 'I' | 'J' | 'K' | 'L' | 'M'
-  | 'N' | 'O' | 'P' | 'Q' | 'R' | 'S' | 'T' | 'U' | 'V' | 'W' | 'X' | 'Y' | 'Z';
+  | 'A'
+  | 'B'
+  | 'C'
+  | 'D'
+  | 'E'
+  | 'F'
+  | 'G'
+  | 'H'
+  | 'I'
+  | 'J'
+  | 'K'
+  | 'L'
+  | 'M'
+  | 'N'
+  | 'O'
+  | 'P'
+  | 'Q'
+  | 'R'
+  | 'S'
+  | 'T'
+  | 'U'
+  | 'V'
+  | 'W'
+  | 'X'
+  | 'Y'
+  | 'Z';
 
 export type CellSymbol = Letter | '*';
 
@@ -21,7 +45,7 @@ export type Word = 'LOK' | 'TLAK' | 'TA' | 'BE';
 export type Direction = 'N' | 'S' | 'E' | 'W';
 
 export type Move =
-  | { word: 'LOK';  route: Coord[]; target: Coord }
+  | { word: 'LOK'; route: Coord[]; target: Coord }
   | { word: 'TLAK'; route: Coord[]; first: Coord; direction: 'N' | 'E'; second: Coord }
-  | { word: 'TA';   route: Coord[]; symbol: CellSymbol }
-  | { word: 'BE';   route: Coord[]; star: Coord; newLetter: Letter };
+  | { word: 'TA'; route: Coord[]; symbol: CellSymbol }
+  | { word: 'BE'; route: Coord[]; star: Coord; newLetter: Letter };

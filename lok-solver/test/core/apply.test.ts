@@ -7,8 +7,12 @@ describe('applyMove', () => {
     const grid = parseGrid('LOK*');
     const after = applyMove(grid, {
       word: 'LOK',
-      route: [{ r: 0, c: 0 }, { r: 0, c: 1 }, { r: 0, c: 2 }],
-      target: { r: 0, c: 3 },
+      route: [
+        { r: 0, c: 0 },
+        { r: 0, c: 1 },
+        { r: 0, c: 2 }
+      ],
+      target: { r: 0, c: 3 }
     });
     expect(formatGrid(after)).toBe('lok.');
   });
@@ -17,8 +21,12 @@ describe('applyMove', () => {
     const grid = parseGrid('LOKM');
     const after = applyMove(grid, {
       word: 'LOK',
-      route: [{ r: 0, c: 0 }, { r: 0, c: 1 }, { r: 0, c: 2 }],
-      target: { r: 0, c: 3 },
+      route: [
+        { r: 0, c: 0 },
+        { r: 0, c: 1 },
+        { r: 0, c: 2 }
+      ],
+      target: { r: 0, c: 3 }
     });
     expect(formatGrid(after)).toBe('lokm');
   });
@@ -27,8 +35,13 @@ describe('applyMove', () => {
     const grid = parseGrid('LXOKM');
     const after = applyMove(grid, {
       word: 'LOK',
-      route: [{ r: 0, c: 0 }, { r: 0, c: 1 }, { r: 0, c: 2 }, { r: 0, c: 3 }],
-      target: { r: 0, c: 4 },
+      route: [
+        { r: 0, c: 0 },
+        { r: 0, c: 1 },
+        { r: 0, c: 2 },
+        { r: 0, c: 3 }
+      ],
+      target: { r: 0, c: 4 }
     });
     expect(formatGrid(after)).toBe('lXokm');
   });
@@ -38,11 +51,14 @@ describe('applyMove', () => {
     const after = applyMove(grid, {
       word: 'TLAK',
       route: [
-        { r: 0, c: 0 }, { r: 0, c: 1 }, { r: 0, c: 2 }, { r: 0, c: 3 },
+        { r: 0, c: 0 },
+        { r: 0, c: 1 },
+        { r: 0, c: 2 },
+        { r: 0, c: 3 }
       ],
       first: { r: 0, c: 4 },
       direction: 'E',
-      second: { r: 0, c: 5 },
+      second: { r: 0, c: 5 }
     });
     expect(formatGrid(after)).toBe('tlak..');
   });
@@ -52,8 +68,11 @@ describe('applyMove', () => {
     const grid = parseGrid('TAA\nA  ');
     const after = applyMove(grid, {
       word: 'TA',
-      route: [{ r: 0, c: 0 }, { r: 0, c: 1 }],
-      symbol: 'A',
+      route: [
+        { r: 0, c: 0 },
+        { r: 0, c: 1 }
+      ],
+      symbol: 'A'
     });
     expect(formatGrid(after)).toBe(['taa', 'a  '].join('\n'));
   });
@@ -62,8 +81,11 @@ describe('applyMove', () => {
     const grid = parseGrid('TA**');
     const after = applyMove(grid, {
       word: 'TA',
-      route: [{ r: 0, c: 0 }, { r: 0, c: 1 }],
-      symbol: '*',
+      route: [
+        { r: 0, c: 0 },
+        { r: 0, c: 1 }
+      ],
+      symbol: '*'
     });
     expect(formatGrid(after)).toBe('ta..');
   });
@@ -72,9 +94,12 @@ describe('applyMove', () => {
     const grid = parseGrid('BE*');
     const after = applyMove(grid, {
       word: 'BE',
-      route: [{ r: 0, c: 0 }, { r: 0, c: 1 }],
+      route: [
+        { r: 0, c: 0 },
+        { r: 0, c: 1 }
+      ],
       star: { r: 0, c: 2 },
-      newLetter: 'O',
+      newLetter: 'O'
     });
     expect(formatGrid(after)).toBe('beO');
   });

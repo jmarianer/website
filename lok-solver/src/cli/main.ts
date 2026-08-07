@@ -33,11 +33,17 @@ function main(): void {
   console.log();
 
   const start = performance.now();
-  const result = solve(grid, { progressIntervalMs: 500, onProgress: (p) => {
-    console.log(`Visited ${p.visited}, queued ${p.queued}, depth ${p.depth}/${p.maxDepth}, elapsed ${p.elapsedMs.toFixed(0)} ms`);
-  }});
+  const result = solve(grid, {
+    progressIntervalMs: 500,
+    onProgress: (p) => {
+      console.log(
+        `Visited ${p.visited}, queued ${p.queued}, depth ${p.depth}/${p.maxDepth}, elapsed ${p.elapsedMs.toFixed(0)} ms`
+      );
+    }
+  });
   const elapsed = performance.now() - start;
-  const elapsedStr = elapsed < 1000 ? `${elapsed.toFixed(0)} ms` : `${(elapsed / 1000).toFixed(2)} s`;
+  const elapsedStr =
+    elapsed < 1000 ? `${elapsed.toFixed(0)} ms` : `${(elapsed / 1000).toFixed(2)} s`;
 
   if (result === null) {
     console.log(`No solution. (${elapsedStr})`);

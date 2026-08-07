@@ -31,11 +31,13 @@ export type SolveOptions = {
 };
 
 function isWon(grid: Grid): boolean {
-  return grid.cells.flatMap(x => x).every((cell) => cell === null || cell.col !== 'W');
+  return grid.cells.flatMap((x) => x).every((cell) => cell === null || cell.col !== 'W');
 }
 
 function countWhite(grid: Grid): number {
-  return grid.cells.flatMap(x => x).reduce((count, cell) => count + (cell !== null && cell.col === 'W' ? 1 : 0), 0);    
+  return grid.cells
+    .flatMap((x) => x)
+    .reduce((count, cell) => count + (cell !== null && cell.col === 'W' ? 1 : 0), 0);
 }
 
 /*
@@ -61,7 +63,7 @@ export function solve(grid: Grid, options: SolveOptions = {}): SolveResult {
       queued,
       depth,
       maxDepth,
-      elapsedMs: performance.now() - startTime,
+      elapsedMs: performance.now() - startTime
     });
   };
 

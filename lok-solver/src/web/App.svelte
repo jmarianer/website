@@ -121,7 +121,7 @@ TLAOTX
         solving = false;
         solveProgress = null;
         solveError = msg;
-      },
+      }
     });
   }
 
@@ -175,9 +175,7 @@ TLAOTX
     return g;
   });
 
-  const currentMove = $derived(
-    solution && step > 0 ? solution.moves[step - 1] : null,
-  );
+  const currentMove = $derived(solution && step > 0 ? solution.moves[step - 1] : null);
 
   function describeMove(m: Move): string {
     switch (m.word) {
@@ -203,15 +201,15 @@ TLAOTX
   }
 
   // Pixel geometry — must match the CSS for .grid / .cell / .label.
-  const CELL_SIZE = 32;        // 2rem
+  const CELL_SIZE = 32; // 2rem
   const CELL_GAP = 1;
-  const LABEL_SIZE = 24;       // 1.5rem
-  const GRID_INSET = 2 + 1;    // border (2px) + padding (1px)
+  const LABEL_SIZE = 24; // 1.5rem
+  const GRID_INSET = 2 + 1; // border (2px) + padding (1px)
 
   function cellCenter(r: number, c: number): { x: number; y: number } {
     return {
       x: GRID_INSET + LABEL_SIZE + CELL_GAP + c * (CELL_SIZE + CELL_GAP) + CELL_SIZE / 2,
-      y: GRID_INSET + LABEL_SIZE + CELL_GAP + r * (CELL_SIZE + CELL_GAP) + CELL_SIZE / 2,
+      y: GRID_INSET + LABEL_SIZE + CELL_GAP + r * (CELL_SIZE + CELL_GAP) + CELL_SIZE / 2
     };
   }
 
@@ -231,7 +229,7 @@ TLAOTX
       const next = cellCenter(route[completed + 1]!.r, route[completed + 1]!.c);
       pts.push({
         x: a.x + (next.x - a.x) * partial,
-        y: a.y + (next.y - a.y) * partial,
+        y: a.y + (next.y - a.y) * partial
       });
     }
     if (pts.length === 0) return '';
@@ -248,7 +246,9 @@ TLAOTX
   <h1>LOK Solver</h1>
 
   <section class="input">
-    <label for="puzzle">Puzzle (uppercase = letter, <code>*</code> = empty block, space = blank):</label>
+    <label for="puzzle"
+      >Puzzle (uppercase = letter, <code>*</code> = empty block, space = blank):</label
+    >
     <textarea id="puzzle" bind:value={input} rows="12" spellcheck="false"></textarea>
     <button onclick={handleSolve} disabled={solving}>Solve</button>
     {#if solving}
@@ -278,7 +278,9 @@ TLAOTX
         <button onclick={reset} disabled={step === 0 && !playing}>⏮ Reset</button>
         <button onclick={goBack} disabled={step === 0 || playing}>|◀ Prev</button>
         <span class="counter">Move {step} / {solution.moves.length}</span>
-        <button onclick={advance} disabled={step === solution.moves.length || playing}>Next ▶|</button>
+        <button onclick={advance} disabled={step === solution.moves.length || playing}
+          >Next ▶|</button
+        >
         <button onclick={togglePlay}>
           {playing ? '⏸ Pause' : step >= solution.moves.length ? '↻ Replay' : '▶ Play'}
         </button>
@@ -293,12 +295,12 @@ TLAOTX
       <div class="grid-wrap">
         <div class="grid" style="--cols: {currentGrid.cols}; --rows: {currentGrid.rows}">
           <div class="label corner" style="grid-row: 1; grid-column: 1"></div>
-          {#each Array.from({ length: currentGrid.cols }) as _, c}
+          {#each Array.from({ length: currentGrid.cols }) as _, c (c)}
             <div class="label col-label" style="grid-row: 1; grid-column: {c + 2}">{c}</div>
           {/each}
-          {#each currentGrid.cells as row, r}
+          {#each currentGrid.cells as row, r (r)}
             <div class="label row-label" style="grid-row: {r + 2}; grid-column: 1">{r}</div>
-            {#each row as cell, c}
+            {#each row as cell, c (c)}
               {#if cell !== null}
                 <div
                   class="cell"
@@ -361,7 +363,7 @@ TLAOTX
   textarea {
     width: 100%;
     box-sizing: border-box;
-    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    font-family: ui-monospace, 'SF Mono', Menlo, monospace;
     font-size: 0.95rem;
     border: 1px solid #ccc;
     border-radius: 4px;
@@ -423,7 +425,7 @@ TLAOTX
   }
 
   .move-desc {
-    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    font-family: ui-monospace, 'SF Mono', Menlo, monospace;
     color: #444;
     margin: 0.5rem 0 1rem;
   }
@@ -464,7 +466,7 @@ TLAOTX
     align-items: center;
     justify-content: center;
     background: white;
-    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    font-family: ui-monospace, 'SF Mono', Menlo, monospace;
     font-weight: 600;
     font-size: 1rem;
     border: 1px solid #ccc;
@@ -475,7 +477,7 @@ TLAOTX
     align-items: center;
     justify-content: center;
     color: #888;
-    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    font-family: ui-monospace, 'SF Mono', Menlo, monospace;
     font-size: 0.7rem;
     font-weight: 400;
   }

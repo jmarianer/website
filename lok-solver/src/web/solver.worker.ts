@@ -16,7 +16,8 @@ self.addEventListener('message', (event: MessageEvent<SolveRequest>) => {
   const { grid } = event.data;
   try {
     const result = solve(grid, {
-      onProgress: (progress) => self.postMessage({ type: 'progress', progress } satisfies SolveResponse),
+      onProgress: (progress) =>
+        self.postMessage({ type: 'progress', progress } satisfies SolveResponse)
     });
     self.postMessage({ type: 'result', result } satisfies SolveResponse);
   } catch (err) {

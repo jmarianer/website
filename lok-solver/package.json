@@ -9,7 +9,8 @@
     "test:cli": "bats test/cli/",
     "cli": "tsx src/cli/main.ts",
     "start": "BROWSER=open vite dev --open",
-    "build": "vite build"
+    "build": "vite build",
+    "lint": "prettier --check . && eslint ."
   },
   "devDependencies": {
     "@eslint/compat": "^2.0.4",

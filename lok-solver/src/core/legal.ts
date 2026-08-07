@@ -1,18 +1,15 @@
 import { enumerateWordPaths } from './paths.js';
-import type {
-  Cell, CellSymbol, Coord, Direction, Grid, Letter, Move,
-} from './types.js';
+import type { Cell, CellSymbol, Coord, Direction, Grid, Letter, Move } from './types.js';
 
 const TLAK_DIRS: ReadonlyArray<'N' | 'E'> = ['N', 'E'];
 
-const WORD_LETTERS: ReadonlyArray<Letter> =
-  ['L', 'O', 'K', 'T', 'A', 'B', 'E', 'X'];
+const WORD_LETTERS: ReadonlyArray<Letter> = ['L', 'O', 'K', 'T', 'A', 'B', 'E', 'X'];
 
 const DIR_DELTAS: Record<Direction, { dr: number; dc: number }> = {
-  N: { dr: -1, dc:  0 },
-  S: { dr:  1, dc:  0 },
-  E: { dr:  0, dc:  1 },
-  W: { dr:  0, dc: -1 },
+  N: { dr: -1, dc: 0 },
+  S: { dr: 1, dc: 0 },
+  E: { dr: 0, dc: 1 },
+  W: { dr: 0, dc: -1 }
 };
 
 function isLetter(sym: CellSymbol): sym is Letter {
@@ -48,35 +45,35 @@ function blackenRouteLetters(grid: Grid, route: ReadonlyArray<Coord>): Grid {
 
 function whiteCellCoords(grid: Grid): Coord[] {
   return grid.cells.flatMap((row, r) =>
-    row.flatMap((cell, c) => (cell !== null && cell.col === 'W' ? [{ r, c }] : [])),
+    row.flatMap((cell, c) => (cell !== null && cell.col === 'W' ? [{ r, c }] : []))
   );
 }
 
 function whiteSymbols(grid: Grid): Set<CellSymbol> {
   return new Set(
     grid.cells.flatMap((row) =>
-      row.flatMap((cell) => (cell !== null && cell.col === 'W' ? [cell.sym] : [])),
-    ),
+      row.flatMap((cell) => (cell !== null && cell.col === 'W' ? [cell.sym] : []))
+    )
   );
 }
 
 function beLetterChoices(grid: Grid): Letter[] {
   const gridLetters = grid.cells.flatMap((row) =>
-    row.flatMap((cell) => (cell !== null && isLetter(cell.sym) ? [cell.sym] : [])),
+    row.flatMap((cell) => (cell !== null && isLetter(cell.sym) ? [cell.sym] : []))
   );
   return [...new Set<Letter>([...WORD_LETTERS, ...gridLetters])];
 }
 
 /*
-  * Returns an array of every move that's legal on the given grid.
-  *
-  * The implementation is straightforward but not optimized at all; it just
-  * brute-force enumerates every possible move and checks legality by simulating
-  * the route blackening. This is fast enough for now since the grids are small
-  * and the branching factor is limited by the words, but if we wanted to
-  * optimize we could probably do something more clever like integrating the
-  * move generation into the path search.
-  */
+ * Returns an array of every move that's legal on the given grid.
+ *
+ * The implementation is straightforward but not optimized at all; it just
+ * brute-force enumerates every possible move and checks legality by simulating
+ * the route blackening. This is fast enough for now since the grids are small
+ * and the branching factor is limited by the words, but if we wanted to
+ * optimize we could probably do something more clever like integrating the
+ * move generation into the path search.
+ */
 export function legalMoves(grid: Grid): Move[] {
   const moves: Move[] = [];
 

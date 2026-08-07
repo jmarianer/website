@@ -7,7 +7,11 @@ describe('enumerateWordPaths', () => {
     const grid = parseGrid('LOK');
     const paths = enumerateWordPaths(grid, 'LOK');
     expect(paths).toEqual([
-      [{ r: 0, c: 0 }, { r: 0, c: 1 }, { r: 0, c: 2 }],
+      [
+        { r: 0, c: 0 },
+        { r: 0, c: 1 },
+        { r: 0, c: 2 }
+      ]
     ]);
   });
 
@@ -15,7 +19,11 @@ describe('enumerateWordPaths', () => {
     const grid = parseGrid('KOL');
     const paths = enumerateWordPaths(grid, 'LOK');
     expect(paths).toEqual([
-      [{ r: 0, c: 2 }, { r: 0, c: 1 }, { r: 0, c: 0 }],
+      [
+        { r: 0, c: 2 },
+        { r: 0, c: 1 },
+        { r: 0, c: 0 }
+      ]
     ]);
   });
 
@@ -23,7 +31,11 @@ describe('enumerateWordPaths', () => {
     const grid = parseGrid('L\nO\nK');
     const paths = enumerateWordPaths(grid, 'LOK');
     expect(paths).toEqual([
-      [{ r: 0, c: 0 }, { r: 1, c: 0 }, { r: 2, c: 0 }],
+      [
+        { r: 0, c: 0 },
+        { r: 1, c: 0 },
+        { r: 2, c: 0 }
+      ]
     ]);
   });
 
@@ -42,7 +54,11 @@ describe('enumerateWordPaths', () => {
     const grid = parseGrid('L.O.K');
     const paths = enumerateWordPaths(grid, 'LOK');
     expect(paths).toEqual([
-      [{ r: 0, c: 0 }, { r: 0, c: 2 }, { r: 0, c: 4 }],
+      [
+        { r: 0, c: 0 },
+        { r: 0, c: 2 },
+        { r: 0, c: 4 }
+      ]
     ]);
   });
 
@@ -50,7 +66,11 @@ describe('enumerateWordPaths', () => {
     const grid = parseGrid('L O K');
     const paths = enumerateWordPaths(grid, 'LOK');
     expect(paths).toEqual([
-      [{ r: 0, c: 0 }, { r: 0, c: 2 }, { r: 0, c: 4 }],
+      [
+        { r: 0, c: 0 },
+        { r: 0, c: 2 },
+        { r: 0, c: 4 }
+      ]
     ]);
   });
 
@@ -58,7 +78,12 @@ describe('enumerateWordPaths', () => {
     const grid = parseGrid('LXOK');
     const paths = enumerateWordPaths(grid, 'LOK');
     expect(paths).toEqual([
-      [{ r: 0, c: 0 }, { r: 0, c: 1 }, { r: 0, c: 2 }, { r: 0, c: 3 }],
+      [
+        { r: 0, c: 0 },
+        { r: 0, c: 1 },
+        { r: 0, c: 2 },
+        { r: 0, c: 3 }
+      ]
     ]);
   });
 
@@ -68,7 +93,12 @@ describe('enumerateWordPaths', () => {
     const grid = parseGrid(['LX', 'MO', '.K'].join('\n'));
     const paths = enumerateWordPaths(grid, 'LOK');
     expect(paths).toEqual([
-      [{ r: 0, c: 0 }, { r: 0, c: 1 }, { r: 1, c: 1 }, { r: 2, c: 1 }],
+      [
+        { r: 0, c: 0 },
+        { r: 0, c: 1 },
+        { r: 1, c: 1 },
+        { r: 2, c: 1 }
+      ]
     ]);
   });
 
@@ -84,7 +114,12 @@ describe('enumerateWordPaths', () => {
     const grid = parseGrid('TLAK');
     const paths = enumerateWordPaths(grid, 'TLAK');
     expect(paths).toEqual([
-      [{ r: 0, c: 0 }, { r: 0, c: 1 }, { r: 0, c: 2 }, { r: 0, c: 3 }],
+      [
+        { r: 0, c: 0 },
+        { r: 0, c: 1 },
+        { r: 0, c: 2 },
+        { r: 0, c: 3 }
+      ]
     ]);
   });
 
@@ -92,7 +127,10 @@ describe('enumerateWordPaths', () => {
     const grid = parseGrid('TAK');
     const paths = enumerateWordPaths(grid, 'TA');
     expect(paths).toEqual([
-      [{ r: 0, c: 0 }, { r: 0, c: 1 }],
+      [
+        { r: 0, c: 0 },
+        { r: 0, c: 1 }
+      ]
     ]);
   });
 
@@ -110,7 +148,7 @@ describe('enumerateWordPaths', () => {
   it('finds multiple paths when several exist', () => {
     const grid = parseGrid(['LOK', 'LOK'].join('\n'));
     expect(enumerateWordPaths(grid, 'LOK')).toHaveLength(2);
-  })
+  });
 
   it('finds multiple paths when several exist (same starting position)', () => {
     const grid = parseGrid(['LOK', 'O', 'K'].join('\n'));

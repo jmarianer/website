@@ -1,14 +1,17 @@
 import type { Coord, Direction, Grid, Word } from './types.js';
 
 const DIRS: Record<Direction, { dr: number; dc: number }> = {
-  N: { dr: -1, dc:  0 },
-  S: { dr:  1, dc:  0 },
-  E: { dr:  0, dc:  1 },
-  W: { dr:  0, dc: -1 },
+  N: { dr: -1, dc: 0 },
+  S: { dr: 1, dc: 0 },
+  E: { dr: 0, dc: 1 },
+  W: { dr: 0, dc: -1 }
 };
 
 const REVERSE: Record<Direction, Direction> = {
-  N: 'S', S: 'N', E: 'W', W: 'E',
+  N: 'S',
+  S: 'N',
+  E: 'W',
+  W: 'E'
 };
 
 const ALL_DIRS: ReadonlyArray<Direction> = ['N', 'S', 'E', 'W'];
@@ -22,7 +25,7 @@ function nonReverseDirs(dir: Direction): Direction[] {
  */
 function stepUntilCell(grid: Grid, from: Coord, dir: Direction): Coord | null {
   const { dr, dc } = DIRS[dir];
-  let {r, c} = from;
+  let { r, c } = from;
   while (true) {
     r += dr;
     c += dc;
@@ -55,7 +58,7 @@ function search(
   collected: number,
   route: Coord[],
   xVisited: Set<string>,
-  out: Coord[][],
+  out: Coord[][]
 ): void {
   const next = stepUntilCell(grid, pos, dir);
   if (next === null) return;

@@ -62,7 +62,7 @@ describe('solve', () => {
     const updates: SolveProgress[] = [];
     solve(grid, {
       onProgress: (p) => updates.push(p),
-      progressIntervalMs: 0,
+      progressIntervalMs: 0
     });
     expect(updates.length).toBeGreaterThan(0);
     expect(updates[0]!.maxDepth).toBe(3);
@@ -70,19 +70,21 @@ describe('solve', () => {
   });
 
   it('returns null and stops early when the abort signal fires', () => {
-    const grid = parseGrid([
-      '  A    ',
-      '  K    ',
-      '  E    ',
-      '  *L   ',
-      '  XXR  ',
-      ' *KAV  ',
-      'UKXXLTB',
-      'TLAOTX ',
-      '  LK A ',
-      '  X* K ',
-      '  T    ',
-    ].join('\n'));
+    const grid = parseGrid(
+      [
+        '  A    ',
+        '  K    ',
+        '  E    ',
+        '  *L   ',
+        '  XXR  ',
+        ' *KAV  ',
+        'UKXXLTB',
+        'TLAOTX ',
+        '  LK A ',
+        '  X* K ',
+        '  T    '
+      ].join('\n')
+    );
     const controller = new AbortController();
     let aborted = false;
     const result = solve(grid, {
@@ -95,7 +97,7 @@ describe('solve', () => {
           aborted = true;
           controller.abort();
         }
-      },
+      }
     });
     expect(aborted).toBe(true);
     expect(result).toBeNull();

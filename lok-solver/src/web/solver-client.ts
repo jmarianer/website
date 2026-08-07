@@ -13,10 +13,7 @@ export class SolverClient {
 
   solve(grid: Grid, handlers: SolveHandlers): void {
     this.cancel();
-    this.worker = new Worker(
-      new URL('./solver.worker.ts', import.meta.url),
-      { type: 'module' }
-    );
+    this.worker = new Worker(new URL('./solver.worker.ts', import.meta.url), { type: 'module' });
     this.worker.addEventListener('message', (event: MessageEvent<SolveResponse>) => {
       const msg = event.data;
       switch (msg.type) {
