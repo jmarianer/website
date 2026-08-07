@@ -20,6 +20,12 @@ importers:
       globals:
         specifier: ^16.4.0
         version: 16.5.0
+      prettier:
+        specifier: ^3.8.1
+        version: 3.9.6
+      prettier-plugin-svelte:
+        specifier: ^3.5.1
+        version: 3.5.2(prettier@3.9.6)(svelte@5.56.8(@typescript-eslint/types@8.66.0))
       typescript-eslint:
         specifier: ^8.45.0
         version: 8.66.0(eslint@9.39.5(supports-color@7.2.0))(supports-color@7.2.0)(typescript@6.0.3)
@@ -224,9 +230,6 @@ importers:
       prettier:
         specifier: ^3.8.1
         version: 3.9.6
-      prettier-plugin-svelte:
-        specifier: ^3.5.1
-        version: 3.5.2(prettier@3.9.6)(svelte@5.56.8(@typescript-eslint/types@8.66.0))
       sass:
         specifier: ^1.99.0
         version: 1.102.0
@@ -414,9 +417,6 @@ importers:
       prettier:
         specifier: ^3.8.1
         version: 3.9.6
-      prettier-plugin-svelte:
-        specifier: ^3.5.1
-        version: 3.5.2(prettier@3.9.6)(svelte@5.56.8(@typescript-eslint/types@8.66.0))
       sass:
         specifier: ^1.99.0
         version: 1.102.0

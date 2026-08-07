@@ -15,10 +15,11 @@
     SOLVER....
     REVLOS....
   `.replace(/^\s+/gm, '');
-  const DEFAULT_WORDS = 'svelte, vite, puzzle, word, blue, jagged, grid, match, solver, missing, typescript';
+  const DEFAULT_WORDS =
+    'svelte, vite, puzzle, word, blue, jagged, grid, match, solver, missing, typescript';
 
-  const storedGrid = browser ? (localStorage.getItem('grid') || DEFAULT_GRID) : DEFAULT_GRID;
-  const storedWords = browser ? (localStorage.getItem('words') || DEFAULT_WORDS) : DEFAULT_WORDS;
+  const storedGrid = browser ? localStorage.getItem('grid') || DEFAULT_GRID : DEFAULT_GRID;
+  const storedWords = browser ? localStorage.getItem('words') || DEFAULT_WORDS : DEFAULT_WORDS;
 
   let grid = $state(storedGrid);
   let words = $state(storedWords);
@@ -34,10 +35,10 @@
 <div class="page">
   <h1>Word Search Solver</h1>
   <div>
-    <InputColumn bind:grid={grid} bind:words={words} />
+    <InputColumn bind:grid bind:words />
   </div>
   <div>
-    <OutputColumn grid={grid} words={words} />
+    <OutputColumn {grid} {words} />
   </div>
 </div>
 
@@ -51,7 +52,7 @@
     background-color: var(--card);
     border-radius: var(--radius-lg);
     box-shadow: var(--shadow-card);
-  
+
     h1 {
       grid-column: 1 / 3;
       border-bottom: 1px solid var(--line);

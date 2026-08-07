@@ -5,12 +5,12 @@
 <div class="main">
   <div class="input-container">
     <span class="input-label">Grid</span>
-    <span class="input-hint">{grid.split('\n').filter(r => r.trim()).length} rows</span>
+    <span class="input-hint">{grid.split('\n').filter((r) => r.trim()).length} rows</span>
     <textarea bind:value={grid} placeholder="Enter your grid here..."></textarea>
   </div>
   <div class="input-container">
     <span class="input-label">Words</span>
-    <span class="input-hint">{words.split('\n').filter(w => w.trim()).length} words</span>
+    <span class="input-hint">{words.split('\n').filter((w) => w.trim()).length} words</span>
     <textarea bind:value={words}></textarea>
   </div>
 </div>

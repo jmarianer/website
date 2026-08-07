@@ -30,12 +30,12 @@ export const GENERATION_MIN_BATCH_SIZE = 500;
 export const GENERATION_TARGET_BATCH_COUNT = 50;
 
 export const COLOR_PALETTE = [
-	'#1a1a1a', // black
-	'#c0392b', // red
-	'#2d6cdf', // blue
-	'#1f8a5b', // green
-	'#c9962c', // gold
-	'#8e44ad', // purple
-	'#17a2a2', // teal
-	'#d9720c' // orange
+  '#1a1a1a', // black
+  '#c0392b', // red
+  '#2d6cdf', // blue
+  '#1f8a5b', // green
+  '#c9962c', // gold
+  '#8e44ad', // purple
+  '#17a2a2', // teal
+  '#d9720c' // orange
 ];

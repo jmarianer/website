@@ -11,18 +11,18 @@ export type GenerateResponse = { type: 'batch'; placements: PlacedPiece[] } | { 
 declare const self: DedicatedWorkerGlobalScope;
 
 self.addEventListener('message', (event: MessageEvent<GenerateRequest>) => {
-	const { offsetsByColor, pieceCount } = event.data;
-	const batchSize = Math.max(
-		GENERATION_MIN_BATCH_SIZE,
-		Math.ceil(pieceCount / GENERATION_TARGET_BATCH_COUNT)
-	);
+  const { offsetsByColor, pieceCount } = event.data;
+  const batchSize = Math.max(
+    GENERATION_MIN_BATCH_SIZE,
+    Math.ceil(pieceCount / GENERATION_TARGET_BATCH_COUNT)
+  );
 
-	generatePlacements(
-		offsetsByColor,
-		pieceCount,
-		(batch) => self.postMessage({ type: 'batch', placements: batch } satisfies GenerateResponse),
-		batchSize
-	);
+  generatePlacements(
+    offsetsByColor,
+    pieceCount,
+    (batch) => self.postMessage({ type: 'batch', placements: batch } satisfies GenerateResponse),
+    batchSize
+  );
 
-	self.postMessage({ type: 'done' } satisfies GenerateResponse);
+  self.postMessage({ type: 'done' } satisfies GenerateResponse);
 });

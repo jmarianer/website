@@ -2,10 +2,10 @@ import { SpiralCache } from './spiral';
 import { leaperAttackOffsets, type Offset } from './leaper';
 
 export interface PlacedPiece {
-	index: number;
-	x: number;
-	y: number;
-	color: number;
+  index: number;
+  x: number;
+  y: number;
+  color: number;
 }
 
 /**
@@ -25,7 +25,7 @@ const SAFETY_INDEX_LIMIT = 10_000_000;
  */
 const KEY_COORD_OFFSET = 1_000_000;
 function cellKey(x: number, y: number): number {
-	return (x + KEY_COORD_OFFSET) * (2 * KEY_COORD_OFFSET) + (y + KEY_COORD_OFFSET);
+  return (x + KEY_COORD_OFFSET) * (2 * KEY_COORD_OFFSET) + (y + KEY_COORD_OFFSET);
 }
 
 /**
@@ -52,60 +52,60 @@ function cellKey(x: number, y: number): number {
  * returned at the end — lets a caller (e.g. a worker) stream progress.
  */
 export function generatePlacements(
-	offsetsByColor: Offset[],
-	pieceCount: number,
-	onBatch?: (batch: PlacedPiece[]) => void,
-	batchSize = 500
+  offsetsByColor: Offset[],
+  pieceCount: number,
+  onBatch?: (batch: PlacedPiece[]) => void,
+  batchSize = 500
 ): PlacedPiece[] {
-	const colorCount = offsetsByColor.length;
-	const spiral = new SpiralCache();
-	const attackVectorsByColor = offsetsByColor.map(leaperAttackOffsets);
+  const colorCount = offsetsByColor.length;
+  const spiral = new SpiralCache();
+  const attackVectorsByColor = offsetsByColor.map(leaperAttackOffsets);
 
-	const occupied = new Set<number>();
-	const attackMask = new Map<number, number>(); // bitmask of colors attacking each cell
-	const nextIndexByColor: number[] = new Array(colorCount).fill(0);
+  const occupied = new Set<number>();
+  const attackMask = new Map<number, number>(); // bitmask of colors attacking each cell
+  const nextIndexByColor: number[] = new Array(colorCount).fill(0);
 
-	const placements: PlacedPiece[] = [];
-	let pendingBatch: PlacedPiece[] = [];
+  const placements: PlacedPiece[] = [];
+  let pendingBatch: PlacedPiece[] = [];
 
-	for (let i = 0; i < pieceCount; i++) {
-		const color = i % colorCount;
-		const colorBit = 1 << color;
+  for (let i = 0; i < pieceCount; i++) {
+    const color = i % colorCount;
+    const colorBit = 1 << color;
 
-		let idx = nextIndexByColor[color];
-		let cell = spiral.at(idx);
-		let key = cellKey(cell.x, cell.y);
-		while (occupied.has(key) || ((attackMask.get(key) ?? 0) & ~colorBit) !== 0) {
-			if (idx > SAFETY_INDEX_LIMIT) {
-				throw new Error(
-					`No legal cell found for color ${color} within ${SAFETY_INDEX_LIMIT} cells`
-				);
-			}
-			idx++;
-			cell = spiral.at(idx);
-			key = cellKey(cell.x, cell.y);
-		}
+    let idx = nextIndexByColor[color];
+    let cell = spiral.at(idx);
+    let key = cellKey(cell.x, cell.y);
+    while (occupied.has(key) || ((attackMask.get(key) ?? 0) & ~colorBit) !== 0) {
+      if (idx > SAFETY_INDEX_LIMIT) {
+        throw new Error(
+          `No legal cell found for color ${color} within ${SAFETY_INDEX_LIMIT} cells`
+        );
+      }
+      idx++;
+      cell = spiral.at(idx);
+      key = cellKey(cell.x, cell.y);
+    }
 
-		occupied.add(key);
-		for (const { a, b } of attackVectorsByColor[color]) {
-			const attackedKey = cellKey(cell.x + a, cell.y + b);
-			attackMask.set(attackedKey, (attackMask.get(attackedKey) ?? 0) | colorBit);
-		}
-		nextIndexByColor[color] = idx + 1;
+    occupied.add(key);
+    for (const { a, b } of attackVectorsByColor[color]) {
+      const attackedKey = cellKey(cell.x + a, cell.y + b);
+      attackMask.set(attackedKey, (attackMask.get(attackedKey) ?? 0) | colorBit);
+    }
+    nextIndexByColor[color] = idx + 1;
 
-		const piece: PlacedPiece = { index: idx, x: cell.x, y: cell.y, color };
-		placements.push(piece);
+    const piece: PlacedPiece = { index: idx, x: cell.x, y: cell.y, color };
+    placements.push(piece);
 
-		if (onBatch) {
-			pendingBatch.push(piece);
-			if (pendingBatch.length >= batchSize) {
-				onBatch(pendingBatch);
-				pendingBatch = [];
-			}
-		}
-	}
+    if (onBatch) {
+      pendingBatch.push(piece);
+      if (pendingBatch.length >= batchSize) {
+        onBatch(pendingBatch);
+        pendingBatch = [];
+      }
+    }
+  }
 
-	if (onBatch && pendingBatch.length > 0) onBatch(pendingBatch);
+  if (onBatch && pendingBatch.length > 0) onBatch(pendingBatch);
 
-	return placements;
+  return placements;
 }

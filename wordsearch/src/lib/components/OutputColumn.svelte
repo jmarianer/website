@@ -6,16 +6,31 @@
     iEnd: number;
     jEnd: number;
     direction: number;
-  }
+  };
 
   let { grid, words }: { grid: string; words: string } = $props();
 
-  let gridCells = $derived(grid.trim().split('\n').map(row => row.replaceAll(/\s/g, '').split('').map(c => c.toUpperCase())));
-  let wordList = $derived(words.trim().split(/,?\s/).map(w => w.trim().toUpperCase()));
+  let gridCells = $derived(
+    grid
+      .trim()
+      .split('\n')
+      .map((row) =>
+        row
+          .replaceAll(/\s/g, '')
+          .split('')
+          .map((c) => c.toUpperCase())
+      )
+  );
+  let wordList = $derived(
+    words
+      .trim()
+      .split(/,?\s/)
+      .map((w) => w.trim().toUpperCase())
+  );
 
   let tableEl = $state<Element>();
   let cellEls = $state<Record<string, Element>>({});
-  let lines = $state<Array<{ x1: number, y1: number, x2: number, y2: number}>>([]);
+  let lines = $state<Array<{ x1: number; y1: number; x2: number; y2: number }>>([]);
 
   let tableRect = $derived(tableEl?.getBoundingClientRect());
 
@@ -32,12 +47,27 @@
 
   function tryToFind(word: string, i: number, j: number, wordIndex: number): Array<Answer> {
     return DIRECTIONS.flatMap(({ di, dj }, direction) => {
-      if (word.split('').every((char, k) => {
-        const ni = i + k * di;
-        const nj = j + k * dj;
-        return ni >= 0 && ni < gridCells.length && nj >= 0 && nj < gridCells[0].length && gridCells[ni][nj] === char;
-      })) {
-        return { wordIndex, iStart: i, jStart: j, iEnd: i + (word.length - 1) * di, jEnd: j + (word.length - 1) * dj, direction };
+      if (
+        word.split('').every((char, k) => {
+          const ni = i + k * di;
+          const nj = j + k * dj;
+          return (
+            ni >= 0 &&
+            ni < gridCells.length &&
+            nj >= 0 &&
+            nj < gridCells[0].length &&
+            gridCells[ni][nj] === char
+          );
+        })
+      ) {
+        return {
+          wordIndex,
+          iStart: i,
+          jStart: j,
+          iEnd: i + (word.length - 1) * di,
+          jEnd: j + (word.length - 1) * dj,
+          direction
+        };
       }
       return [];
     });
@@ -46,10 +76,8 @@
   function getAllVectors(): Array<[string, Array<Answer>]> {
     return wordList.map((word, wordIndex) => [
       word,
-      gridCells.flatMap((row, i) =>
-        row.flatMap((_, j) => tryToFind(word, i, j, wordIndex))
-      )
-    ])
+      gridCells.flatMap((row, i) => row.flatMap((_, j) => tryToFind(word, i, j, wordIndex)))
+    ]);
   }
 
   const allVectors = $derived(getAllVectors());
@@ -64,17 +92,18 @@
     if (!tableRect) {
       return;
     }
-    lines = allVectors.flatMap(([_, answers]) => answers).map(({ iStart, jStart, iEnd, jEnd }) => {
-      const a = cellEls[`r${iStart}c${jStart}`].getBoundingClientRect();
-      const b = cellEls[`r${iEnd}c${jEnd}`].getBoundingClientRect();
-      return {
-        x1: a.left + a.width / 2 - tableRect.left,
-        y1: a.top + a.height / 2 - tableRect.top,
-        x2: b.left + b.width / 2 - tableRect.left,
-        y2: b.top + b.height / 2 - tableRect.top
-      };
-
-    });
+    lines = allVectors
+      .flatMap(([_, answers]) => answers)
+      .map(({ iStart, jStart, iEnd, jEnd }) => {
+        const a = cellEls[`r${iStart}c${jStart}`].getBoundingClientRect();
+        const b = cellEls[`r${iEnd}c${jEnd}`].getBoundingClientRect();
+        return {
+          x1: a.left + a.width / 2 - tableRect.left,
+          y1: a.top + a.height / 2 - tableRect.top,
+          x2: b.left + b.width / 2 - tableRect.left,
+          y2: b.top + b.height / 2 - tableRect.top
+        };
+      });
   }
 
   $effect(() => {
@@ -83,7 +112,6 @@
     if (tableEl) ro.observe(tableEl);
     return () => ro.disconnect();
   });
-
 </script>
 
 <div class="main">
@@ -99,15 +127,15 @@
     </tbody>
   </table>
   <svg>
-    {#each lines as {x1, y1, x2, y2}, i (i)}
-      <line x1={x1} y1={y1} x2={x2} y2={y2} />
+    {#each lines as { x1, y1, x2, y2 }, i (i)}
+      <line {x1} {y1} {x2} {y2} />
     {/each}
   </svg>
   <details>
     <summary>Found cleanly</summary>
     <table class="clean-vectors">
       <tbody>
-        {#each cleanVectors as [word, [ answer ]], i (i)}
+        {#each cleanVectors as [word, [answer]], i (i)}
           <tr>
             <td class="word">{word}</td>
             <td>{answerString(answer)}</td>
@@ -126,10 +154,12 @@
             {#if answers.length === 0}
               <td class="missing"><span class="chip">✗</span> <span class="word">{word}</span></td>
             {:else}
-              <td class="dup"><span class="chip">{answers.length}×</span> <span class="word">{word}</span></td>
+              <td class="dup"
+                ><span class="chip">{answers.length}×</span> <span class="word">{word}</span></td
+              >
             {/if}
             <td>
-              {answers.map(answer => answerString(answer)).join(', ')}
+              {answers.map((answer) => answerString(answer)).join(', ')}
             </td>
           </tr>
         {/each}
@@ -189,7 +219,8 @@
       letter-spacing: 0.05em;
     }
 
-    table.clean-vectors, table.problem-vectors {
+    table.clean-vectors,
+    table.problem-vectors {
       width: 100%;
       margin: 1rem;
       border-collapse: collapse;
