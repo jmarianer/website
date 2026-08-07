@@ -11,13 +11,22 @@ export type Solution = { initialGrid: Grid; moves: Move[] };
  * While animating move N, callers pass `step = N + 1` and a non-null
  * `animProgress`: we replay the first N moves, then blacken the first
  * `animProgress + 1` cells of move N's route to show the cursor sweeping it.
+ * Once the target burst passes its midpoint, callers set `targetApplied` and
+ * the move's target effect lands on top of the swept route.
  */
-export function replayTo(solution: Solution, step: number, animProgress: number | null): Grid {
+export function replayTo(
+  solution: Solution,
+  step: number,
+  animProgress: number | null,
+  targetApplied = false
+): Grid {
   const baseStep = animProgress !== null ? step - 1 : step;
   let g = solution.initialGrid;
   for (let i = 0; i < baseStep; i++) g = applyMove(g, solution.moves[i]!);
 
   if (animProgress !== null) {
+    // The route is fully swept by burst time, so the full move is equivalent.
+    if (targetApplied) return applyMove(g, solution.moves[step - 1]!);
     const move = solution.moves[step - 1]!;
     const newCells = g.cells.map((row) => [...row]);
     for (let i = 0; i <= animProgress; i++) {
@@ -30,6 +39,31 @@ export function replayTo(solution: Solution, step: number, animProgress: number 
   }
 
   return g;
+}
+
+/**
+ * The cells a move changes beyond its route — where the target burst plays.
+ * `grid` must be the pre-effect state (route already swept), since TA's
+ * matches are whichever cells with the symbol are still white at that point.
+ */
+export function effectCells(grid: Grid, move: Move): Coord[] {
+  switch (move.word) {
+    case 'LOK':
+      return [move.target];
+    case 'TLAK':
+      return [move.first, move.second];
+    case 'TA': {
+      const coords: Coord[] = [];
+      grid.cells.forEach((row, r) =>
+        row.forEach((cell, c) => {
+          if (cell !== null && cell.col === 'W' && cell.sym === move.symbol) coords.push({ r, c });
+        })
+      );
+      return coords;
+    }
+    case 'BE':
+      return [move.star];
+  }
 }
 
 /** Human-readable one-line summary of a move. */
@@ -92,4 +126,32 @@ export function routePoints(route: Coord[], lineFraction: number): string {
     return `${p.x},${p.y} ${p.x},${p.y}`;
   }
   return pts.map((p) => `${p.x},${p.y}`).join(' ');
+}
+
+export type Segment = { x1: number; y1: number; x2: number; y2: number };
+
+const BURST_SPOKES = 8;
+
+/**
+ * Line segments radiating out from a cell center for the target burst.
+ * As `fraction` runs 0..1 the spokes travel from just inside the cell edge
+ * to past it, staying short so they read as sparks jumping outward.
+ */
+export function burstSegments(center: { x: number; y: number }, fraction: number): Segment[] {
+  const inner = 6 + fraction * 22;
+  const outer = 12 + fraction * 26;
+  const segs: Segment[] = [];
+  for (let i = 0; i < BURST_SPOKES; i++) {
+    // Offset by half a spoke so no spoke overlaps the route line's grid axes.
+    const angle = ((i + 0.5) / BURST_SPOKES) * 2 * Math.PI;
+    const dx = Math.cos(angle);
+    const dy = Math.sin(angle);
+    segs.push({
+      x1: center.x + dx * inner,
+      y1: center.y + dy * inner,
+      x2: center.x + dx * outer,
+      y2: center.y + dy * outer
+    });
+  }
+  return segs;
 }

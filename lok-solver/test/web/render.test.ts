@@ -3,8 +3,10 @@ import { parseGrid, formatGrid } from '../../src/core/grid.js';
 import { solve } from '../../src/core/solver.js';
 import type { Move } from '../../src/core/types.js';
 import {
+  burstSegments,
   cellCenter,
   describeMove,
+  effectCells,
   replayTo,
   routePoints,
   type Solution
@@ -36,6 +38,62 @@ describe('replayTo', () => {
     const afterFirstCell = formatGrid(replayTo(sol, 1, 0));
     expect(afterFirstCell).not.toBe(formatGrid(sol.initialGrid));
     expect(afterFirstCell.match(/[a-z]/g)?.length ?? 0).toBe(1);
+  });
+
+  it('lands the target effect mid-animation when targetApplied is set', () => {
+    const sol = solutionFor('LOK*');
+    const routeEnd = sol.moves[0]!.route.length - 1;
+    // Route fully swept but target not yet applied: the * is still white.
+    expect(formatGrid(replayTo(sol, 1, routeEnd))).not.toBe(formatGrid(replayTo(sol, 1, null)));
+    // With targetApplied the grid matches the settled post-move state.
+    expect(formatGrid(replayTo(sol, 1, routeEnd, true))).toBe(formatGrid(replayTo(sol, 1, null)));
+  });
+});
+
+describe('effectCells', () => {
+  const grid = parseGrid('TA\nAA');
+
+  it('returns the target(s) for LOK and TLAK and the star for BE', () => {
+    expect(effectCells(grid, { word: 'LOK', route: [], target: { r: 0, c: 1 } })).toEqual([
+      { r: 0, c: 1 }
+    ]);
+    expect(
+      effectCells(grid, {
+        word: 'TLAK',
+        route: [],
+        first: { r: 0, c: 0 },
+        direction: 'E',
+        second: { r: 0, c: 1 }
+      })
+    ).toEqual([
+      { r: 0, c: 0 },
+      { r: 0, c: 1 }
+    ]);
+    expect(
+      effectCells(grid, { word: 'BE', route: [], star: { r: 1, c: 0 }, newLetter: 'Q' })
+    ).toEqual([{ r: 1, c: 0 }]);
+  });
+
+  it('returns every still-white cell matching the symbol for TA', () => {
+    expect(effectCells(grid, { word: 'TA', route: [], symbol: 'A' })).toEqual([
+      { r: 0, c: 1 },
+      { r: 1, c: 0 },
+      { r: 1, c: 1 }
+    ]);
+  });
+});
+
+describe('burstSegments', () => {
+  it('radiates spokes outward from the center as the fraction grows', () => {
+    const center = { x: 100, y: 100 };
+    const early = burstSegments(center, 0);
+    const late = burstSegments(center, 1);
+    expect(early).toHaveLength(8);
+    const dist = (p: { x1: number; y1: number }): number =>
+      Math.hypot(p.x1 - center.x, p.y1 - center.y);
+    for (let i = 0; i < early.length; i++) {
+      expect(dist(late[i]!)).toBeGreaterThan(dist(early[i]!));
+    }
   });
 });
 

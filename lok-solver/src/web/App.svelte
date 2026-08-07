@@ -3,7 +3,16 @@
   import type { SolveProgress } from '../core/solver.js';
   import type { Grid } from '../core/types.js';
   import { Playback } from './playback.svelte.js';
-  import { describeMove, replayTo, routePoints, type Solution } from './render.js';
+  import {
+    burstSegments,
+    cellCenter,
+    describeMove,
+    effectCells,
+    replayTo,
+    routePoints,
+    type Segment,
+    type Solution
+  } from './render.js';
   import { SolverClient } from './solver-client.js';
 
   let input = $state(`  A
@@ -59,13 +68,32 @@ TLAOTX
     solveProgress = null;
   }
 
+  // The target effect lands mid-burst: sparks fly over the old state, the
+  // cells flip, then the sparks fade out over the new one.
+  const targetApplied = $derived(
+    playback.targetFraction !== null && playback.targetFraction >= 0.5
+  );
+
   const currentGrid = $derived.by((): Grid | null =>
-    solution ? replayTo(solution, playback.step, playback.animProgress) : null
+    solution ? replayTo(solution, playback.step, playback.animProgress, targetApplied) : null
   );
 
   const routeLine = $derived(
     playback.currentMove ? routePoints(playback.currentMove.route, playback.lineFraction) : ''
   );
+
+  const burst = $derived.by((): { segments: Segment[]; opacity: number } | null => {
+    const t = playback.targetFraction;
+    const move = playback.currentMove;
+    if (t === null || !move || !solution) return null;
+    const preEffectGrid = replayTo(solution, playback.step, playback.animProgress);
+    return {
+      segments: effectCells(preEffectGrid, move).flatMap((coord) =>
+        burstSegments(cellCenter(coord.r, coord.c), t)
+      ),
+      opacity: t < 0.5 ? 1 : 1 - (t - 0.5) * 2
+    };
+  });
 
   function isOnRoute(r: number, c: number): boolean {
     const move = playback.currentMove;
@@ -162,9 +190,18 @@ TLAOTX
             {/each}
           {/each}
         </div>
-        {#if routeLine}
+        {#if routeLine || burst}
           <svg class="route-line" aria-hidden="true">
-            <polyline points={routeLine} />
+            {#if routeLine}
+              <polyline points={routeLine} />
+            {/if}
+            {#if burst}
+              <g class="burst" style="opacity: {burst.opacity}">
+                {#each burst.segments as seg, i (i)}
+                  <line x1={seg.x1} y1={seg.y1} x2={seg.x2} y2={seg.y2} />
+                {/each}
+              </g>
+            {/if}
           </svg>
         {/if}
       </div>
@@ -296,6 +333,11 @@ TLAOTX
     stroke-linecap: round;
     stroke-linejoin: round;
     opacity: 0.85;
+  }
+  .route-line .burst line {
+    stroke: #f59e0b;
+    stroke-width: 2.5;
+    stroke-linecap: round;
   }
 
   .grid {

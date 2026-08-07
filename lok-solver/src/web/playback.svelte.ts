@@ -2,6 +2,8 @@ import type { Move } from '../core/types.js';
 import type { Solution } from './render.js';
 
 const ANIM_MS = 250;
+/** Duration of the target-burst phase, in ANIM_MS units. */
+const TARGET_UNITS = 2;
 
 /**
  * Drives stepping through a solution's moves with an animation clock.
@@ -54,6 +56,15 @@ export class Playback {
     return Math.min(Math.floor(frac), this.#animMoveLength - 1);
   }
 
+  // Progress through the target-burst phase that follows the route sweep,
+  // 0..1. null when settled or still sweeping the route.
+  get targetFraction(): number | null {
+    if (this.animElapsed === null) return null;
+    const frac = this.animElapsed / ANIM_MS - 1 - this.#animMoveLength;
+    if (frac < 0) return null;
+    return Math.min(frac / TARGET_UNITS, 1);
+  }
+
   // Continuous progress for line growth; see routePoints() for the semantics.
   // When settled, returns route.length - 1 so the full line stays drawn.
   get lineFraction(): number {
@@ -80,8 +91,9 @@ export class Playback {
     this.step++;
     this.#animMoveLength = move.route.length;
     this.animElapsed = 0;
-    // Total duration: one unit of pre-roll wait + one unit per cell visited.
-    const totalDuration = (move.route.length + 1) * ANIM_MS;
+    // Total duration: one unit of pre-roll wait + one unit per cell visited
+    // + the target-burst phase.
+    const totalDuration = (move.route.length + 1 + TARGET_UNITS) * ANIM_MS;
     const startTime = performance.now();
     const frame = (now: number): void => {
       const elapsed = now - startTime;
